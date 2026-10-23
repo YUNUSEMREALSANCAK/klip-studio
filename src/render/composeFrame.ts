@@ -8,6 +8,7 @@ export interface VisualSource {
   source: TexImageSource;
   width: number;
   height: number;
+  blend?: { source: TexImageSource; weight: number }; // akıcı yavaş çekim için sonraki kare
 }
 
 export interface FrameInputs {
@@ -112,6 +113,25 @@ function drawMedia(
     },
     target,
   );
+
+  // Kare harmanlama: sonraki kare, iki kare arasındaki konuma göre saydamlıkla üstüne çizilir.
+  if (visual.blend && visual.blend.weight > 0.01) {
+    compositor.drawLayer(
+      {
+        ...visual,
+        source: visual.blend.source,
+        filter: clip.filter,
+        transform: state.transform,
+        opacity: state.opacity * visual.blend.weight,
+        mode,
+        focusX,
+        shape: clip.mask,
+        chroma: clip.chroma,
+        lut: lutFor(project, clip.filter.lutId),
+      },
+      target,
+    );
+  }
 }
 
 export function composeFrame(

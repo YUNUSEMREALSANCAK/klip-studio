@@ -57,12 +57,14 @@ Amaç: CapCut'ın günlük kullanılan kurgu araçları.
 
 Amaç: CapCut'ın yerelde yaptıklarına yetişmek, bulut gerektirmeden.
 
-- [ ] **Videoda nesne silme** (L): SAM 2 ile nesne takibi + zamansal doldurma (LaMa ONNX)
-- [ ] **Genel nesne matting** (M): Robust Video Matting ile titremesiz arka plan kaldırma
-- [ ] **Altyazı çevirisi** (M): NLLB / opus-mt (transformers.js)
-- [ ] **Seslendirme (TTS)** (M): Kokoro veya Piper (WebGPU/WASM)
-- [ ] **Ağır AI işleri worker'da** (M): dışa aktarmada arka plan kaldırma OffscreenCanvas ile
-- [ ] **Akıcı yavaş çekim** (L): RIFE ile kare ara değerleme
+- [x] **Videoda nesne silme** (L): SlimSAM ile kare kare nesne takibi + çok ölçekli doldurma (deneysel; LaMa ile kalite artışı sonraki adım)
+- [x] **Genel nesne ayırma** (M): BiRefNet (yeterli GPU'da) / MODNet ile görsel ve karelerde tek tıkla ön plan seçimi
+- [ ] **Videoda genel nesne matting** (M): Robust Video Matting ile titremesiz, insan dışı nesneler için
+- [x] **Altyazı çevirisi** (M): opus-mt, diğer diller için NLLB; iki dilli altyazı
+- [x] **Seslendirme (TTS)** (M): MMS-TTS ile 11 dil (Türkçe model henüz yok)
+- [ ] **Ağır AI işleri worker'da** (M): dışa aktarmada arka plan kaldırma şu an ana iş parçacığında
+- [x] **Akıcı yavaş çekim** (M): kare harmanlama (dışa aktarmada)
+- [ ] **Yapay zeka ile ara kare** (L): RIFE ile optik akış tabanlı yavaş çekim
 
 ### Faz 4: Ajanlar için → v0.5 (beta)
 
@@ -82,5 +84,7 @@ Amaç: PhotoCraft ve CapCut'ın yeni ajan yaklaşımı gibi, her işlem programl
 
 ## Bilinen sorunlar
 
-- Nesne silme videoda yalnızca tek kareyi temizliyor; büyük nesnelerde sonuç bulanık (Faz 3).
-- Arka plan kaldırma yalnızca insanlarda çalışıyor (Faz 3).
+- Videoda nesne silme deneysel: hızlı hareket eden nesnelerde takip kayabilir, büyük nesnelerde doldurma bulanık.
+- Videoda gerçek zamanlı arka plan kaldırma yalnızca insanlarda çalışıyor.
+- Türkçe seslendirme modeli yok.
+- BiRefNet zayıf GPU'larda çalışmaz; o zaman MODNet devreye girer.

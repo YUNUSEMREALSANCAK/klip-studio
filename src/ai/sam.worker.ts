@@ -6,7 +6,8 @@ const MODEL_ID = 'Xenova/slimsam-77-uniform';
 
 export type SamRequest =
   | { type: 'embed'; image: ImageData }
-  | { type: 'decode'; points: { x: number; y: number; positive: boolean }[] };
+  | { type: 'decode'; points: { x: number; y: number; positive: boolean }[] }
+  | { type: 'segment'; image: ImageData; points: { x: number; y: number; positive: boolean }[] };
 
 export type SamMessage =
   | { type: 'progress'; message: string; progress: number }
@@ -44,14 +45,14 @@ function loadModel() {
   return model;
 }
 
-async function embed(image: ImageData) {
+async function embed(image: ImageData, announce = true) {
   const { model: sam, processor } = await loadModel();
-  post({ type: 'progress', message: 'Görsel analiz ediliyor', progress: -1 });
+  if (announce) post({ type: 'progress', message: 'Görsel analiz ediliyor', progress: -1 });
   const raw = new RawImage(new Uint8ClampedArray(image.data), image.width, image.height, 4);
   const inputs = (await processor(raw)) as ModelInputs;
   const embeddings = (await sam.get_image_embeddings(inputs as never)) as unknown as Record<string, Tensor>;
   current = { inputs, embeddings };
-  post({ type: 'embedded' });
+  if (announce) post({ type: 'embedded' });
 }
 
 async function decode(points: { x: number; y: number; positive: boolean }[]) {
@@ -83,7 +84,12 @@ async function decode(points: { x: number; y: number; positive: boolean }[]) {
 self.onmessage = async ({ data }: MessageEvent<SamRequest>) => {
   try {
     if (data.type === 'embed') await embed(data.image);
-    else await decode(data.points);
+    else if (data.type === 'decode') await decode(data.points);
+    else {
+      // Video takibi: her kare için gömme + maske tek istekte.
+      await embed(data.image, false);
+      await decode(data.points);
+    }
   } catch (error) {
     post({ type: 'error', message: error instanceof Error ? error.message : String(error) });
   }

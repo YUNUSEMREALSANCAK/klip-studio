@@ -44,6 +44,9 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
               </button>
             ))}
           </div>
+          {clip.speed < 1 && isVideo && (
+            <Toggle label="Akıcı yavaş çekim (dışa aktarmada)" on={clip.smoothSlowMo} onChange={(smoothSlowMo) => update({ smoothSlowMo }, true)} />
+          )}
           <Slider label="Özel hız" value={clip.speed} min={0.25} max={4} step={0.05} format={(v) => `${v.toFixed(2)}×`} onCommit={() => {}} onChange={(v) => setSpeed(clip, v)} />
           {isVideo && (
             <div className="row">

@@ -37,6 +37,12 @@ export class SamClient {
     return { data: result.mask, width: result.width, height: result.height };
   }
 
+  // Gömme ve maske çıkarmayı tek istekte yapar (video takibinde her kare için).
+  async segment(image: ImageData, points: SamPoint[]): Promise<BinaryMask> {
+    const result = await this.request({ type: 'segment', image, points }, 'mask');
+    return { data: result.mask, width: result.width, height: result.height };
+  }
+
   dispose() {
     this.worker.terminate();
   }
@@ -177,6 +183,13 @@ export async function cutout(image: ImageData, mask: BinaryMask, invert = false)
   const cropped = new OffscreenCanvas(maxX - minX + 1, maxY - minY + 1);
   cropped.getContext('2d')!.drawImage(canvas, -minX, -minY);
   return cropped.convertToBlob({ type: 'image/png' });
+}
+
+// Maskenin dışını saydam yapar; görsel boyutu korunur (kırpmadan).
+export function applyAlpha(image: ImageData, mask: BinaryMask): ImageData {
+  const out = new ImageData(new Uint8ClampedArray(image.data), image.width, image.height);
+  for (let i = 0; i < mask.data.length; i++) if (!mask.data[i]) out.data[i * 4 + 3] = 0;
+  return out;
 }
 
 export async function imageDataToBlob(image: ImageData): Promise<Blob> {

@@ -7,6 +7,8 @@ export default defineConfig({
   timeout: 120_000,
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
+  // @models etiketli testler yüzlerce MB model indirir; CI'da atlanır.
+  grepInvert: process.env.CI ? /@models/ : undefined,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,

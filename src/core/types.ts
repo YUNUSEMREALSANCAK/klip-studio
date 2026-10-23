@@ -115,6 +115,7 @@ export interface MediaClip {
   fadeIn: number; // sn
   fadeOut: number; // sn
   duck: boolean; // konuşma olduğunda sesi kıs
+  smoothSlowMo: boolean; // yavaşlatmada kare harmanlama (dışa aktarmada)
 }
 
 export type TextStylePreset = 'classic' | 'box' | 'karaoke' | 'neon' | 'title';

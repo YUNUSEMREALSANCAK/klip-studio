@@ -23,5 +23,6 @@ function normalizeClip(clip: Clip): Clip {
     fadeIn: clip.fadeIn ?? 0,
     fadeOut: clip.fadeOut ?? 0,
     duck: clip.duck ?? false,
+    smoothSlowMo: clip.smoothSlowMo ?? false,
   };
 }

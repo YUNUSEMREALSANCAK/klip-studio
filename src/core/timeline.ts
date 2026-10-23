@@ -74,6 +74,7 @@ export function createMediaClip(asset: Asset, track: MediaClip['track'], start: 
     fadeIn: 0,
     fadeOut: 0,
     duck: false,
+    smoothSlowMo: false,
   };
 }
 

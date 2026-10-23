@@ -1,9 +1,11 @@
 import { denoiseClip, detectBeats, detectSilences, fillerRanges, FILLER_WORDS } from '../ai/audioTools';
+import { synthesize, translateTexts } from '../ai/models';
 import { toSrt, transcribeTimeline } from '../ai/transcribe';
 import { autoEnhance, computeReframe, detectScenes } from '../ai/videoTools';
 import { useEditor } from '../core/store';
-import { buildCaptions, createMediaClip, rippleDeleteRanges, sortedTrack, splitClip } from '../core/timeline';
+import { buildCaptions, createMediaClip, rippleDeleteRanges, sortedTrack, splitClip, uid } from '../core/timeline';
 import type { Clip, MediaClip, TextClip, Word } from '../core/types';
+import { encodeWav } from '../media/audio';
 import { createAsset } from '../media/importMedia';
 
 type Report = (message: string, progress: number) => void;
@@ -127,4 +129,46 @@ export function downloadSrt() {
   link.href = URL.createObjectURL(blob);
   link.download = 'altyazi.srt';
   link.click();
+}
+
+// Metin izindeki altyazıları çevirir. İki dilli modda çeviri, orijinalin üstüne ikinci satır olarak eklenir.
+export function translateCaptions(src: string, tgt: string, bilingual: boolean) {
+  return runTask('Altyazı çevirisi', async (report) => {
+    const captions = sortedTrack<TextClip>(editor().project.clips, 'text');
+    if (!captions.length) throw new Error('Çevrilecek metin yok; önce altyazı oluşturun');
+    if (src === tgt) throw new Error('Kaynak ve hedef dil aynı');
+    const translated = await translateTexts(captions.map((c) => c.text), src, tgt, report);
+    const byId = new Map(captions.map((c, i) => [c.id, translated[i]]));
+    editor().mutate((clips) => {
+      if (!bilingual) {
+        return clips.map((c) =>
+          c.type === 'text' && byId.has(c.id)
+            ? { ...c, text: byId.get(c.id)!, words: undefined, preset: c.preset === 'karaoke' ? 'classic' : c.preset }
+            : c,
+        );
+      }
+      const copies = captions.map((c) => ({
+        ...c,
+        id: uid(),
+        text: byId.get(c.id)!,
+        words: undefined,
+        preset: 'box' as const,
+        fontSize: c.fontSize * 0.75,
+        y: Math.max(0.05, c.y - c.fontSize * 1.6),
+      }));
+      return [...clips, ...copies];
+    });
+  });
+}
+
+// Metni yerel bir TTS modeliyle seslendirir ve oynatma çizgisine ses klibi olarak ekler.
+export function generateSpeech(text: string, voice: string) {
+  return runTask('Seslendirme', async (report) => {
+    if (!text.trim()) throw new Error('Seslendirilecek metni yazın');
+    const { audio, sampleRate } = await synthesize(text, voice, report);
+    const asset = await createAsset(encodeWav(audio, sampleRate), `Seslendirme: ${text.slice(0, 24)}.wav`);
+    editor().addAsset(asset);
+    const clip = createMediaClip(asset, 'audio', editor().time);
+    editor().mutate((clips) => [...clips, clip]);
+  });
 }

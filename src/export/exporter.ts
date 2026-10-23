@@ -49,6 +49,14 @@ class FrameReader {
     return this.current;
   }
 
+  // Bekleyen (sonraki) kare ve iki kare arasındaki konum; kare harmanlama için.
+  blendAt(time: number) {
+    if (!this.current || !this.pending) return null;
+    const span = this.pending.timestamp - this.current.timestamp;
+    if (span <= 0) return null;
+    return { source: this.pending.canvas, weight: Math.min(1, Math.max(0, (time - this.current.timestamp) / span)) };
+  }
+
   async close() {
     await this.iterator?.return(undefined);
   }
@@ -110,9 +118,12 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
       if (!track) return undefined;
       readers.set(clip.id, new FrameReader(new CanvasSink(track)));
     }
-    const frame = await readers.get(clip.id)!.frameAt(clipSourceTime(clip, t, assets));
+    const reader = readers.get(clip.id)!;
+    const time = clipSourceTime(clip, t, assets);
+    const frame = await reader.frameAt(time);
     if (!frame) return undefined;
-    return { source: frame.canvas, width: frame.canvas.width, height: frame.canvas.height };
+    const blend = clip.smoothSlowMo && clip.speed < 1 ? reader.blendAt(time) : null;
+    return { source: frame.canvas, width: frame.canvas.width, height: frame.canvas.height, blend: blend ?? undefined };
   };
 
   const totalFrames = Math.ceil(duration * fps);

@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react';
+import { TRANSLATION_LANGUAGES, translationModel, TTS_VOICES } from '../ai/models';
 import { LANGUAGES, WHISPER_MODELS } from '../ai/transcribe';
 import { selectedClip, useEditor } from '../core/store';
 import type { MediaClip } from '../core/types';
-import { autoCaptions, beatMarkers, denoise, downloadSrt, enhance, removeFillers, removeSilences, smartReframe, splitScenes } from './aiActions';
+import { autoCaptions, beatMarkers, denoise, downloadSrt, enhance, generateSpeech, removeFillers, removeSilences, smartReframe, splitScenes, translateCaptions } from './aiActions';
 import { useUi } from './uiStore';
 
 function Card({ title, model, children }: { title: string; model: string; children: ReactNode }) {
@@ -31,6 +32,11 @@ export function AiPanel() {
   const [threshold, setThreshold] = useState(-40);
   const [minSilence, setMinSilence] = useState(0.6);
   const [extraFillers, setExtraFillers] = useState('');
+  const [srcLang, setSrcLang] = useState('tr');
+  const [tgtLang, setTgtLang] = useState('en');
+  const [bilingual, setBilingual] = useState(true);
+  const [ttsText, setTtsText] = useState('');
+  const [voice, setVoice] = useState('eng');
 
   const needClip = (kind: 'video' | 'visual' | 'audio') => {
     if (!media || !asset) return 'Önce zaman çizelgesinden bir klip seçin';
@@ -84,6 +90,51 @@ export function AiPanel() {
         </button>
       </Card>
 
+      <Card title="Altyazı çevirisi" model={translationModel(srcLang, tgtLang).model.includes('nllb') ? 'NLLB' : 'opus-mt'}>
+        <p>Altyazıları başka dile çevirir. Model boyutu: {translationModel(srcLang, tgtLang).size}.</p>
+        <div className="row">
+          <select value={srcLang} onChange={(e) => setSrcLang(e.target.value)} aria-label="Kaynak dil">
+            {TRANSLATION_LANGUAGES.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+          <span style={{ flex: 'none' }}>→</span>
+          <select value={tgtLang} onChange={(e) => setTgtLang(e.target.value)} aria-label="Hedef dil">
+            {TRANSLATION_LANGUAGES.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <label className="row" style={{ cursor: 'pointer' }}>
+          <input type="checkbox" checked={bilingual} onChange={(e) => setBilingual(e.target.checked)} style={{ flex: 'none' }} />
+          <span>İki dilli (orijinali koru)</span>
+        </label>
+        <button className="btn block" disabled={!hasCaptions || busy} onClick={() => void translateCaptions(srcLang, tgtLang, bilingual)}>
+          Çevir
+        </button>
+      </Card>
+
+      <Card title="Seslendirme" model="MMS-TTS">
+        <p>Yazdığınız metni seslendirip oynatma çizgisine ses klibi olarak ekler. Türkçe ses modeli henüz yok.</p>
+        <textarea rows={3} placeholder="Seslendirilecek metin" value={ttsText} onChange={(e) => setTtsText(e.target.value)} />
+        <div className="row">
+          <select value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Ses dili">
+            {TTS_VOICES.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.label}
+              </option>
+            ))}
+          </select>
+          <button className="btn primary" disabled={!ttsText.trim() || busy} onClick={() => void generateSpeech(ttsText, voice)}>
+            Seslendir
+          </button>
+        </div>
+      </Card>
+
       <Card title="Akıllı kesim" model="RMS + Whisper">
         <p>Sessiz bölümleri ve "eee, şey, um" gibi dolgu kelimelerini otomatik keser.</p>
         <div className="field">
@@ -117,7 +168,7 @@ export function AiPanel() {
         {clipButton(media?.removeBackground ? 'Arka planı geri getir' : 'Arka planı kaldır', 'visual', (clip) => useEditor.getState().updateClip(clip.id, { removeBackground: !clip.removeBackground } as Partial<MediaClip>))}
       </Card>
 
-      <Card title="Nesne seç ve sil" model="SlimSAM">
+      <Card title="Nesne seç ve sil" model="SlimSAM + BiRefNet">
         <p>Görsele veya video karesine tıklayarak nesne seçin; silin (görsel temizleme) ya da çıkartma olarak kesin.</p>
         {clipButton('Nesne düzenleyiciyi aç', 'visual', (clip) => useUi.getState().openObjectEditor(clip.id))}
       </Card>

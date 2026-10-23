@@ -65,7 +65,9 @@ async function speak({ id, model, text }: Extract<ModelRequest, { type: 'tts' }>
 // BiRefNet bir shader'da 11 depolama tamponu kullanır; GPU bunu desteklemiyorsa doğrudan işlemcide çalıştır.
 const gpuFitsMatting = (async () => {
   if (!hasWebGpu) return false;
-  const adapter = await (navigator as unknown as { gpu: { requestAdapter(): Promise<{ limits: { maxStorageBuffersPerShaderStage: number } } | null> } }).gpu.requestAdapter();
+  const adapter = await (
+    navigator as unknown as { gpu: { requestAdapter(): Promise<{ limits: { maxStorageBuffersPerShaderStage: number } } | null> } }
+  ).gpu.requestAdapter();
   return (adapter?.limits.maxStorageBuffersPerShaderStage ?? 0) >= 11;
 })();
 let mattingOnCpu: boolean | null = null;

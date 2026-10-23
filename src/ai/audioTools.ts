@@ -67,9 +67,7 @@ export const FILLER_WORDS = ['ııı', 'ıı', 'ee', 'eee', 'hmm', 'şey', 'yani
 // Dolgu kelimelerini (eee, şey, um…) transkriptten bulur.
 export function fillerRanges(words: Word[], fillers: string[]): [number, number][] {
   const set = new Set(fillers.map((f) => f.toLocaleLowerCase('tr')));
-  return words
-    .filter((w) => set.has(w.text.toLocaleLowerCase('tr').replace(/[.,!?…]/g, '')))
-    .map((w) => [w.start, w.end]);
+  return words.filter((w) => set.has(w.text.toLocaleLowerCase('tr').replace(/[.,!?…]/g, ''))).map((w) => [w.start, w.end]);
 }
 
 // Basit vuruş (beat) tespiti: enerji akışındaki ani artışları bulur.

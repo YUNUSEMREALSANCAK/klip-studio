@@ -48,6 +48,19 @@ test.describe('yerel yapay zeka modelleri @models', () => {
     await expect(page.locator('.inspector h3')).toContainText('arka plansız');
   });
 
+  test('arka planı kaldırılmış klip worker ile dışa aktarılır (MediaPipe)', async ({ page }) => {
+    await importMedia(page, 'speech.webm');
+    await addToMain(page, 0);
+    await page.locator('.inspector .toggle', { hasText: 'Arka planı kaldır' }).locator('.switch').click();
+    const errors: string[] = [];
+    page.on('console', (m) => /worker'da başlatılamadı/.test(m.text()) && errors.push(m.text()));
+    await page.locator('.topbar .btn.primary').click();
+    await page.locator('.modal select').first().selectOption({ label: '480p (hızlı)' });
+    await page.locator('.modal button', { hasText: 'Dışa aktarmayı başlat' }).click();
+    await expect(page.locator('.modal video')).toBeVisible({ timeout: 120_000 });
+    expect(errors).toEqual([]);
+  });
+
   test('LaMa ile fırçayla işaretlenen bölge doldurulur', async ({ page }) => {
     await importMedia(page, 'square.png');
     await addToMain(page, 0);

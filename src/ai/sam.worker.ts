@@ -59,8 +59,16 @@ async function decode(points: { x: number; y: number; positive: boolean }[]) {
   if (!current) throw new Error('Önce görsel yüklenmeli');
   const { model: sam, processor } = await loadModel();
   const [height, width] = current.inputs.reshaped_input_sizes[0];
-  const input_points = new Tensor('float32', points.flatMap((p) => [p.x * width, p.y * height]), [1, 1, points.length, 2]);
-  const input_labels = new Tensor('int64', points.map((p) => BigInt(p.positive ? 1 : 0)), [1, 1, points.length]);
+  const input_points = new Tensor(
+    'float32',
+    points.flatMap((p) => [p.x * width, p.y * height]),
+    [1, 1, points.length, 2],
+  );
+  const input_labels = new Tensor(
+    'int64',
+    points.map((p) => BigInt(p.positive ? 1 : 0)),
+    [1, 1, points.length],
+  );
   const outputs = (await sam({ ...current.embeddings, input_points, input_labels })) as {
     pred_masks: Tensor;
     iou_scores: Tensor;

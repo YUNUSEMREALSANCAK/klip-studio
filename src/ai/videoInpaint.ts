@@ -56,9 +56,7 @@ function promptPoints(mask: BinaryMask): SamPoint[] {
   if (!n) return [];
   const cy = Math.round(sy / n);
   const candidates = [sx / n, minX + (maxX - minX) * 0.25, minX + (maxX - minX) * 0.75].map(Math.round);
-  return candidates
-    .filter((x) => data[cy * width + x])
-    .map((x) => ({ x: x / width, y: cy / height, positive: true }));
+  return candidates.filter((x) => data[cy * width + x]).map((x) => ({ x: x / width, y: cy / height, positive: true }));
 }
 
 async function frameImage(sink: CanvasSink, time: number, width: number, height: number): Promise<ImageData> {

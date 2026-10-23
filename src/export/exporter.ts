@@ -14,7 +14,7 @@ import {
   type InputVideoTrack,
   type WrappedCanvas,
 } from 'mediabunny';
-import { BackgroundRemover } from '../ai/vision';
+import { WorkerBackgroundRemover } from '../ai/matteClient';
 import { clipEnd, projectDuration } from '../core/timeline';
 import type { Asset, MediaClip, Project, TextClip } from '../core/types';
 import { ensureFonts } from '../render/fonts';
@@ -96,7 +96,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   const tracks = new Map<string, Promise<InputVideoTrack | null>>();
   const readers = new Map<string, FrameReader>();
   const images = new Map<string, Promise<ImageBitmap>>();
-  const remover = project.clips.some((c) => c.type === 'media' && c.removeBackground) ? new BackgroundRemover() : null;
+  const remover = project.clips.some((c) => c.type === 'media' && c.removeBackground) ? new WorkerBackgroundRemover() : null;
 
   const videoTrack = (asset: Asset) => {
     if (!tracks.has(asset.id)) {
@@ -163,6 +163,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
     await audioSource.add(mix);
   }
   await output.finalize();
+  remover?.dispose();
   options.onProgress(1);
   return new Blob([target.buffer!], { type: 'video/mp4' });
 }

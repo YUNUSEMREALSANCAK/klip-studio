@@ -34,7 +34,15 @@ function request(message: Distribute<ModelRequest>, report: Report, transfer: Tr
 // Doğrudan çevirmen modeli olan dil çiftleri (Helsinki-NLP opus-mt); diğerleri NLLB ile.
 const OPUS_PAIRS = new Set(['tr-en', 'en-de', 'en-es', 'en-fr', 'de-en', 'es-en', 'fr-en']);
 const NLLB_CODES: Record<string, string> = {
-  tr: 'tur_Latn', en: 'eng_Latn', de: 'deu_Latn', fr: 'fra_Latn', es: 'spa_Latn', ar: 'arb_Arab', ru: 'rus_Cyrl', it: 'ita_Latn', pt: 'por_Latn',
+  tr: 'tur_Latn',
+  en: 'eng_Latn',
+  de: 'deu_Latn',
+  fr: 'fra_Latn',
+  es: 'spa_Latn',
+  ar: 'arb_Arab',
+  ru: 'rus_Cyrl',
+  it: 'ita_Latn',
+  pt: 'por_Latn',
 };
 export const TRANSLATION_LANGUAGES = [
   { id: 'tr', label: 'Türkçe' },

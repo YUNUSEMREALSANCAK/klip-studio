@@ -60,7 +60,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 - [x] **Altyazı çevirisi** (M): opus-mt, diğer diller için NLLB; iki dilli altyazı
 - [x] **Seslendirme (TTS)** (M): MMS-TTS ile 11 dil
 - [ ] **Türkçe seslendirme** (M): tarayıcıda çalışan Türkçe bir TTS modeli bulunduğunda
-- [ ] **Ağır AI işleri worker'da** (M): dışa aktarmada arka plan kaldırma şu an ana iş parçacığında
+- [x] **Ağır AI işleri worker'da** (M): dışa aktarmada kişi ayırma ayrı worker'da (kurulamazsa ana iş parçacığına düşer)
 - [x] **Akıcı yavaş çekim** (M): kare harmanlama (dışa aktarmada)
 - [ ] **Yapay zeka ile ara kare** (L): RIFE ile optik akış tabanlı yavaş çekim
 

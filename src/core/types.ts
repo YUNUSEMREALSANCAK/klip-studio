@@ -115,7 +115,7 @@ export interface MediaClip {
   fadeIn: number; // sn
   fadeOut: number; // sn
   duck: boolean; // konuşma olduğunda sesi kıs
-  smoothSlowMo: boolean; // yavaşlatmada kare harmanlama (dışa aktarmada)
+  slowMotion?: 'blend' | 'ai'; // yavaşlatmada akıcılık: kare harmanlama veya RIFE ara kare (dışa aktarmada)
   speedCurve?: SpeedCurve; // varsa speed, eğrinin ortalamasıdır
 }
 

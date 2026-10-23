@@ -114,3 +114,27 @@ test.describe('video nesne ayırma @models', () => {
     await expect(page.locator('.inspector details', { hasText: 'Yeşil perde' }).locator('.switch.on')).toHaveCount(1);
   });
 });
+
+test.describe('yapay zeka ile ara kare @models', () => {
+  test.setTimeout(600_000);
+
+  test('0.5× klip RIFE ile dışa aktarılır', async ({ page }) => {
+    await openEditor(page);
+    await importMedia(page, 'gradient.webm');
+    await addToMain(page, 0);
+    await page.locator('.inspector details', { hasText: 'Hız' }).locator('.chip', { hasText: '0.5×' }).click();
+    await page.locator('.inspector .chip', { hasText: 'Yapay zeka (RIFE)' }).click();
+    const workers: string[] = [];
+    page.on('worker', (w) => workers.push(w.url()));
+    await page.locator('.topbar .btn.primary').click();
+    await page.locator('.modal select').first().selectOption({ label: '480p (hızlı)' });
+    await page.locator('.modal button', { hasText: 'Dışa aktarmayı başlat' }).click();
+    const video = page.locator('.modal video');
+    await expect(video).toBeVisible({ timeout: 500_000 });
+    const duration = await video.evaluate(
+      (v: HTMLVideoElement) => new Promise<number>((r) => (v.readyState >= 1 ? r(v.duration) : (v.onloadedmetadata = () => r(v.duration)))),
+    );
+    expect(duration).toBeGreaterThan(7.5);
+    expect(workers.some((url) => url.includes('rife'))).toBe(true);
+  });
+});

@@ -9,22 +9,22 @@
 | | Değer | Not |
 | --- | --- | --- |
 | Temel kurgu akışı | ✅ | içe aktar → kes/böl → anahtar kare → geçiş → metin → dışa aktar |
-| Yerel yapay zeka | 13 özellik | altyazı, çeviri, seslendirme, akıllı kesim, arka plan, ön plan seçimi, nesne silme (görsel + video), gürültü, sahne, çerçeveleme, iyileştirme, ritim |
-| Otomatik test | ✅ | 20 birim + 21 uçtan uca test her push'ta CI'da; 4 model testi yerelde (`--grep @models`) |
+| Yerel yapay zeka | 16 özellik | altyazı, çeviri, seslendirme, akıllı kesim, arka plan, ön plan seçimi, nesne silme (görsel + video, LaMa), videoda nesne ayırma, ara kare (RIFE), gürültü, sahne, çerçeveleme, iyileştirme, ritim |
+| Otomatik test | ✅ | 24 birim + 22 uçtan uca test her push'ta CI'da; 8 model testi yerelde (`--grep @models`) |
 | Proje kaydetme | ✅ | IndexedDB otomatik kayıt + `.klip` dosyası |
 | Performans (Apple M5, `npm run perf`) | ✅ | önizleme 60 fps (bütçe ≥ 30) · 1 dk 1080p dışa aktarma 9,4 sn (bütçe < 60 sn) |
-| CapCut temel özellik kapsamı | ~%65 | aşağıdaki tabloya göre ağırlıklı tahmin |
+| CapCut temel özellik kapsamı | ~%70 | aşağıdaki tabloya göre ağırlıklı tahmin |
 
 ### Alanlara göre kapsam (CapCut'a göre, tahmini)
 
 | Alan | Kapsam | Eksik olanlar |
 | --- | ---: | --- |
-| Zaman çizelgesi | ~%75 | hız eğrileri, grup seçimi, izler arası sürükleme, iç içe dizi |
+| Zaman çizelgesi | ~%80 | grup seçimi, izler arası sürükleme, iç içe dizi |
 | Görüntü düzenleme | ~%75 | kırpma aracı, karışım modları, sabitleme (stabilization) |
 | Metin ve altyazı | ~%70 | kelime düzeyinde stil düzenleme, metin efektleri kütüphanesi |
 | Geçiş ve efekt | ~%45 | video efektleri ve sticker kütüphanesi |
 | Ses | ~%60 | ses efektleri kütüphanesi, ses değiştirici, Türkçe seslendirme |
-| Yapay zeka | ~%65 | videoda genel nesne matting, yapay zekalı ara kare, öne çıkan anlar |
+| Yapay zeka | ~%75 | öne çıkan anları bulma, gerçek zamanlı genel nesne ayırma, Türkçe seslendirme |
 | Proje ve dağıtım | ~%70 | şablon paylaşımı, bulut eşitleme (bilinçli olarak yok: yerel öncelikli) |
 
 ## Plan
@@ -62,7 +62,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 - [ ] **Türkçe seslendirme** (M): `facebook/mms-tts-tur` ONNX'e dönüştürülüp barındırılırsa eklenebilir (Piper sesleri GPL espeak-ng gerektiriyor)
 - [x] **Ağır AI işleri worker'da** (M): dışa aktarmada kişi ayırma ayrı worker'da (kurulamazsa ana iş parçacığına düşer)
 - [x] **Akıcı yavaş çekim** (M): kare harmanlama (dışa aktarmada)
-- [ ] **Yapay zeka ile ara kare** (L): RIFE ile optik akış tabanlı yavaş çekim
+- [x] **Yapay zeka ile ara kare** (L): RIFE 4.22 lite ile optik akış tabanlı yavaş çekim (dışa aktarmada)
 
 ### Faz 4: Ajanlar için → v0.5 ✅
 

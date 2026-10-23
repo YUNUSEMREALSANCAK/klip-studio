@@ -133,7 +133,7 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
   const allowed =
     clip.type === 'text'
       ? ['start', 'duration', 'text', 'preset', 'animation', 'color', 'highlight', 'fontSize', 'y', 'font']
-      : ['start', 'duration', 'volume', 'muted', 'speed', 'opacity', 'fadeIn', 'fadeOut', 'duck', 'removeBackground', 'transform', 'filter'];
+      : ['start', 'duration', 'volume', 'muted', 'speed', 'opacity', 'fadeIn', 'fadeOut', 'duck', 'removeBackground', 'transform', 'filter', 'slowMotion'];
   const patch: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(changes)) {
     if (!allowed.includes(key)) throw new Error(`Değiştirilemeyen alan: ${key}`);

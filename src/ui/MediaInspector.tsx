@@ -46,7 +46,9 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
               </button>
             ))}
           </div>
-          <div className="field-label" style={{ marginBottom: 6 }}>{tr('Hız eğrisi')}</div>
+          <div className="field-label" style={{ marginBottom: 6 }}>
+            {tr('Hız eğrisi')}
+          </div>
           <div className="chips" style={{ marginBottom: 10 }}>
             <button className={`chip ${!clip.speedCurve ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, null)}>
               {tr('Yok')}
@@ -58,7 +60,24 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             ))}
           </div>
           {clip.speed < 1 && isVideo && (
-            <Toggle label={tr('Akıcı yavaş çekim (dışa aktarmada)')} on={clip.smoothSlowMo} onChange={(smoothSlowMo) => update({ smoothSlowMo }, true)} />
+            <>
+              <div className="field-label" style={{ marginBottom: 6 }}>
+                {tr('Akıcı yavaş çekim (dışa aktarmada)')}
+              </div>
+              <div className="chips" style={{ marginBottom: 10 }}>
+                {(
+                  [
+                    [undefined, 'Kapalı'],
+                    ['blend', 'Kare harmanlama'],
+                    ['ai', 'Yapay zeka (RIFE)'],
+                  ] as const
+                ).map(([mode, label]) => (
+                  <button key={label} className={`chip ${clip.slowMotion === mode ? 'active' : ''}`} onClick={() => update({ slowMotion: mode }, true)}>
+                    {tr(label)}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
           <Slider
             label={tr('Özel hız')}

@@ -90,3 +90,16 @@ describe('hız eğrisi', () => {
     expect(right.duration * right.speed).toBeCloseTo(6.25);
   });
 });
+
+describe('migrasyon', () => {
+  it('eski smoothSlowMo alanını slowMotion\'a taşır ve eksik alanları doldurur', async () => {
+    const { normalizeProject } = await import('../../src/core/migrate');
+    const old = { ...clip({ speed: 0.5 }), smoothSlowMo: true } as MediaClip & { smoothSlowMo: boolean };
+    delete (old as Partial<MediaClip>).keyframes;
+    const project = normalizeProject({ aspect: '16:9', fps: 30, background: '#000', clips: [old] } as never);
+    const migrated = project.clips[0] as MediaClip;
+    expect(migrated.slowMotion).toBe('blend');
+    expect(migrated.keyframes).toEqual([]);
+    expect(project.luts).toEqual({});
+  });
+});

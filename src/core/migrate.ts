@@ -23,6 +23,7 @@ function normalizeClip(clip: Clip): Clip {
     fadeIn: clip.fadeIn ?? 0,
     fadeOut: clip.fadeOut ?? 0,
     duck: clip.duck ?? false,
-    smoothSlowMo: clip.smoothSlowMo ?? false,
+    // v0.4'teki smoothSlowMo açık/kapalı alanı → slowMotion
+    slowMotion: clip.slowMotion ?? ((clip as { smoothSlowMo?: boolean }).smoothSlowMo ? 'blend' : undefined),
   };
 }

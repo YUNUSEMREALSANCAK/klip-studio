@@ -15,6 +15,7 @@ import {
   type WrappedCanvas,
 } from 'mediabunny';
 import { WorkerBackgroundRemover } from '../ai/matteClient';
+import { FrameInterpolator } from '../ai/rife';
 import { clipEnd, projectDuration } from '../core/timeline';
 import type { Asset, MediaClip, Project, TextClip } from '../core/types';
 import { ensureFonts } from '../render/fonts';
@@ -96,6 +97,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   const tracks = new Map<string, Promise<InputVideoTrack | null>>();
   const readers = new Map<string, FrameReader>();
   const images = new Map<string, Promise<ImageBitmap>>();
+  const interpolation: { client?: FrameInterpolator } = {}; // ilk RIFE karesinde kurulur
   const remover = project.clips.some((c) => c.type === 'media' && c.removeBackground) ? new WorkerBackgroundRemover() : null;
 
   const videoTrack = (asset: Asset) => {
@@ -122,8 +124,17 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
     const time = clipSourceTime(clip, t, assets);
     const frame = await reader.frameAt(time);
     if (!frame) return undefined;
-    const blend = clip.smoothSlowMo && clip.speed < 1 ? reader.blendAt(time) : null;
-    return { source: frame.canvas, width: frame.canvas.width, height: frame.canvas.height, blend: blend ?? undefined };
+    const { width, height } = frame.canvas;
+    const next = clip.slowMotion && clip.speed < 1 ? reader.blendAt(time) : null;
+    if (next && clip.slowMotion === 'ai' && next.weight > 0.01) {
+      // RIFE ile gerçek ara kare; özgün boyuta geri ölçeklenir.
+      interpolation.client ??= new FrameInterpolator();
+      const middle = await interpolation.client.interpolate(frame.canvas, next.source, width, height, next.weight);
+      const canvas = new OffscreenCanvas(width, height);
+      canvas.getContext('2d')!.drawImage(middle, 0, 0, width, height);
+      return { source: canvas, width, height };
+    }
+    return { source: frame.canvas, width, height, blend: next ?? undefined };
   };
 
   const totalFrames = Math.ceil(duration * fps);
@@ -164,6 +175,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   }
   await output.finalize();
   remover?.dispose();
+  interpolation.client?.dispose();
   options.onProgress(1);
   return new Blob([target.buffer!], { type: 'video/mp4' });
 }

@@ -1,9 +1,9 @@
 /// <reference lib="webworker" />
 import * as ort from 'onnxruntime-web';
+import { cachedModel } from './modelCache';
 
 // LaMa (big-lama, Apache-2.0) ile doldurma: 512×512 görsel + maske → doldurulmuş görsel.
 const MODEL_URL = 'https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx';
-const CACHE = 'klip-models';
 export const LAMA_SIZE = 512;
 
 export type LamaRequest = { id: number; image: Uint8ClampedArray; mask: Uint8Array }; // RGBA 512² · 0/1 512²
@@ -14,35 +14,12 @@ export type LamaMessage =
 
 const post = (message: LamaMessage, transfer: Transferable[] = []) => self.postMessage(message, { transfer });
 
-// Modeli bir kez indirip tarayıcı önbelleğinde saklar.
-async function modelBytes(id: number): Promise<ArrayBuffer> {
-  const cache = await caches.open(CACHE);
-  const hit = await cache.match(MODEL_URL);
-  if (hit) return hit.arrayBuffer();
-  const response = await fetch(MODEL_URL);
-  if (!response.ok || !response.body) throw new Error('LaMa modeli indirilemedi');
-  const total = Number(response.headers.get('content-length')) || 208e6;
-  const reader = response.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let loaded = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    loaded += value.length;
-    post({ id, type: 'progress', message: 'LaMa modeli indiriliyor', progress: loaded / total });
-  }
-  const blob = new Blob(chunks as BlobPart[]);
-  await cache.put(MODEL_URL, new Response(blob));
-  return blob.arrayBuffer();
-}
-
 let session: Promise<ort.InferenceSession> | null = null;
 let cpuOnly = false;
 
 function getSession(id: number) {
-  session ??= modelBytes(id).then((bytes) =>
-    ort.InferenceSession.create(new Uint8Array(bytes), { executionProviders: cpuOnly ? ['wasm'] : ['webgpu', 'wasm'] }),
+  session ??= cachedModel(MODEL_URL, (progress) => post({ id, type: 'progress', message: 'LaMa modeli indiriliyor', progress })).then((bytes) =>
+    ort.InferenceSession.create(bytes, { executionProviders: cpuOnly ? ['wasm'] : ['webgpu', 'wasm'] }),
   );
   return session;
 }

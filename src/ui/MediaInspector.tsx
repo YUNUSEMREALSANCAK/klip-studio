@@ -1,11 +1,12 @@
 import { tr } from '../i18n';
 import { useRef } from 'react';
 import { useEditor } from '../core/store';
+import { SPEED_CURVES } from '../core/speed';
 import { formatTime } from '../core/timeline';
 import { DEFAULT_FILTER, DEFAULT_TRANSFORM, type FilterSettings, type MaskSettings, type MediaClip, type TransitionType } from '../core/types';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { KeySlider, Section, Slider, Toggle } from './controls';
-import { freezeFrame, importLut, reverse, setSpeed } from './editActions';
+import { freezeFrame, importLut, reverse, setSpeed, setSpeedCurve } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 import { useUi } from './uiStore';
@@ -33,7 +34,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
       <h3>{asset.name}</h3>
       <div className="sub">
         {clip.track === 'main' ? tr('Ana iz') : clip.track === 'overlay' ? tr('Üst katman') : tr('Ses izi')} · {formatTime(clip.duration)}
-        {clip.speed !== 1 && ` · ${clip.speed}×`}
+        {clip.speed !== 1 && ` · ${Number(clip.speed.toFixed(2))}×`}
       </div>
 
       {asset.kind !== 'image' && (
@@ -42,6 +43,17 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             {SPEEDS.map((v) => (
               <button key={v} className={`chip ${clip.speed === v ? 'active' : ''}`} onClick={() => setSpeed(clip, v)}>
                 {v}×
+              </button>
+            ))}
+          </div>
+          <div className="field-label" style={{ marginBottom: 6 }}>{tr('Hız eğrisi')}</div>
+          <div className="chips" style={{ marginBottom: 10 }}>
+            <button className={`chip ${!clip.speedCurve ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, null)}>
+              {tr('Yok')}
+            </button>
+            {SPEED_CURVES.map((curve) => (
+              <button key={curve.name} className={`chip ${clip.speedCurve?.name === curve.name ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, curve)}>
+                {tr(curve.name)}
               </button>
             ))}
           </div>

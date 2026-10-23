@@ -117,3 +117,21 @@ test('hızlandırılmış ve fade uygulanmış klip dışa aktarılır', async (
   expect(duration).toBeGreaterThan(2.7);
   expect(duration).toBeLessThan(3.4);
 });
+
+test('hız eğrisi süreyi ortalama hıza göre değiştirir ve dışa aktarılır', async ({ page }) => {
+  await importMedia(page, 'speech.webm');
+  await addToMain(page, 0);
+  // "Kahraman anı" eğrisinin ortalaması 1.2×: 6 sn → 5 sn
+  await section(page, 'Hız').locator('.chip', { hasText: 'Kahraman anı' }).click();
+  await expect.poll(() => timecode(page)).toContain('00:05.00');
+  await page.locator('.topbar .btn.primary').click();
+  await page.locator('.modal select').first().selectOption({ label: '480p (hızlı)' });
+  await page.locator('.modal button', { hasText: 'Dışa aktarmayı başlat' }).click();
+  const video = page.locator('.modal video');
+  await expect(video).toBeVisible({ timeout: 90_000 });
+  const duration = await video.evaluate(
+    (v: HTMLVideoElement) => new Promise<number>((r) => (v.readyState >= 1 ? r(v.duration) : (v.onloadedmetadata = () => r(v.duration)))),
+  );
+  expect(duration).toBeGreaterThan(4.6);
+  expect(duration).toBeLessThan(5.4);
+});

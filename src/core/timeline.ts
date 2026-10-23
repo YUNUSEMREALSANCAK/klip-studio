@@ -1,3 +1,4 @@
+import { sourceOffset } from './speed';
 import { DEFAULT_FILTER, DEFAULT_TRANSFORM, type Asset, type Clip, type MediaClip, type TextClip, type TrackId, type Word } from './types';
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
@@ -103,8 +104,14 @@ export function splitClip(clip: Clip, t: number): [Clip, Clip] | null {
   const right = { ...clip, id: uid(), start: t, duration: clip.duration - offset } as Clip;
   if (right.type === 'media') {
     const media = clip as MediaClip;
-    right.in = media.in + offset * media.speed;
+    right.in = media.in + sourceOffset(media, offset);
     right.transition = undefined;
+    // Eğri bölünemez: iki parça da kendi ortalama hızıyla sabit hıza döner.
+    if (media.speedCurve) {
+      (left as MediaClip).speed = sourceOffset(media, offset) / offset;
+      right.speed = (sourceSpan(media) - sourceOffset(media, offset)) / right.duration;
+      (left as MediaClip).speedCurve = right.speedCurve = undefined;
+    }
     right.keyframes = shiftKeyframes(media, offset);
     right.fadeIn = 0;
     (left as MediaClip).fadeOut = 0;
@@ -147,6 +154,10 @@ export function rippleDelete(clips: Clip[], start: number, end: number): Clip[] 
     } else {
       if (s < start) {
         const left = { ...clip, duration: start - s } as Clip;
+        if (left.type === 'media' && left.speedCurve) {
+          left.speed = sourceOffset(clip as MediaClip, start - s) / (start - s);
+          left.speedCurve = undefined;
+        }
         if (left.type === 'text' && left.words) {
           left.words = left.words.filter((w) => w.end <= start + 0.01);
           syncTextFromWords(left);
@@ -157,7 +168,11 @@ export function rippleDelete(clips: Clip[], start: number, end: number): Clip[] 
         let right = { ...clip, id: s < start ? uid() : clip.id, start: end, duration: e - end } as Clip;
         if (right.type === 'media') {
           const media = clip as MediaClip;
-          right.in = media.in + (end - s) * media.speed;
+          right.in = media.in + sourceOffset(media, end - s);
+          if (media.speedCurve) {
+            right.speed = (sourceSpan(media) - sourceOffset(media, end - s)) / (e - end);
+            right.speedCurve = undefined;
+          }
           right.keyframes = shiftKeyframes(media, end - s);
           if (s < start) right.transition = undefined;
         }
@@ -213,7 +228,7 @@ export function transitionAt(clips: Clip[], t: number): TransitionState | null {
 
 // Klibin kaynak zamanı; geçiş taşmalarında kaynak sınırlarına sıkıştırılır.
 export function sourceTime(clip: MediaClip, t: number, assetDuration: number) {
-  const time = clip.in + (t - clip.start) * clip.speed;
+  const time = clip.in + sourceOffset(clip, t - clip.start);
   return Math.min(Math.max(time, 0), Math.max(assetDuration - 0.04, 0));
 }
 

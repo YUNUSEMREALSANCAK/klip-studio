@@ -1,6 +1,7 @@
 import { ALL_FORMATS, AudioBufferSink, BlobSource, Input } from 'mediabunny';
 import { clipEnd, projectDuration } from '../core/timeline';
 import { fadeGain, valueAt } from '../core/animation';
+import { sourceOffset } from '../core/speed';
 import type { Asset, Clip, MediaClip } from '../core/types';
 import { timeStretch } from './timeStretch';
 
@@ -59,6 +60,27 @@ function slice(buffer: AudioBuffer, from: number, length: number): AudioBuffer {
   return out;
 }
 
+const CURVE_CHUNK = 0.25; // sn; eğri bu aralıklarla sabit hız parçalarına bölünür
+
+// Hız eğrili klibin sesini kısa parçalar hâlinde, her parçayı kendi ortalama hızıyla esneterek üretir.
+function stretchCurve(decoded: AudioBuffer, clip: MediaClip, skip: number, length: number): AudioBuffer {
+  const parts: AudioBuffer[] = [];
+  for (let local = skip; local < skip + length - 1e-6; local += CURVE_CHUNK) {
+    const end = Math.min(local + CURVE_CHUNK, skip + length);
+    const from = clip.in + sourceOffset(clip, local);
+    const span = sourceOffset(clip, end) - sourceOffset(clip, local);
+    parts.push(timeStretch(slice(decoded, from, span), span / (end - local)));
+  }
+  const total = parts.reduce((sum, p) => sum + p.length, 0);
+  const out = new AudioBuffer({ length: Math.max(1, total), sampleRate: decoded.sampleRate, numberOfChannels: decoded.numberOfChannels });
+  let offset = 0;
+  for (const part of parts) {
+    for (let ch = 0; ch < out.numberOfChannels; ch++) out.copyToChannel(part.getChannelData(ch), ch, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
 // Zaman çizelgesindeki tüm sesleri tek bir AudioBuffer'a karıştırır.
 // Hız (perde korunarak), ses düzeyi anahtar kareleri, fade ve müzik kısma uygulanır.
 export async function mixTimelineAudio(
@@ -80,7 +102,9 @@ export async function mixTimelineAudio(
     const decoded = await decodeAssetAudio(assets[clip.assetId]);
     const skip = Math.max(0, from - clip.start);
     const playLength = Math.min(clip.duration - skip, to - Math.max(clip.start, from));
-    const segment = timeStretch(slice(decoded, clip.in + skip * clip.speed, playLength * clip.speed), clip.speed);
+    const segment = clip.speedCurve
+      ? stretchCurve(decoded, clip, skip, playLength)
+      : timeStretch(slice(decoded, clip.in + skip * clip.speed, playLength * clip.speed), clip.speed);
     const source = context.createBufferSource();
     source.buffer = segment;
 

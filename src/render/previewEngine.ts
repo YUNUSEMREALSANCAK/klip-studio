@@ -1,5 +1,6 @@
 import { BackgroundRemover } from '../ai/vision';
 import { fadeGain, valueAt } from '../core/animation';
+import { speedAt } from '../core/speed';
 import { isActiveAt } from '../core/timeline';
 import { envelopeAt, previewDuckEnvelope } from '../media/ducking';
 import type { Asset, MediaClip, Project } from '../core/types';
@@ -83,7 +84,7 @@ export class PreviewEngine {
         this.assigned.set(clip.id, element);
         used.add(element);
         const volume = valueAt(clip, 'volume', t) * fadeGain(clip, t) * (clip.duck ? envelopeAt(duck, t) : 1);
-        syncElement(element, clip, clipSourceTime(clip, t, assets), playing, volume);
+        syncElement(element, clip, t, clipSourceTime(clip, t, assets), playing, volume);
       });
     }
 
@@ -150,11 +151,12 @@ function disposeVideo(video: HTMLVideoElement) {
   video.load();
 }
 
-function syncElement(element: HTMLVideoElement, clip: MediaClip, expected: number, playing: boolean, volume: number) {
+function syncElement(element: HTMLVideoElement, clip: MediaClip, t: number, expected: number, playing: boolean, volume: number) {
   element.muted = clip.muted;
   element.volume = Math.min(Math.max(volume, 0), 1);
   element.preservesPitch = true;
-  if (element.playbackRate !== clip.speed) element.playbackRate = clip.speed;
+  const rate = Math.min(Math.max(speedAt(clip, t - clip.start), 0.0625), 16);
+  if (Math.abs(element.playbackRate - rate) > 0.01) element.playbackRate = rate;
   const drift = Math.abs(element.currentTime - expected);
   if (playing) {
     if (element.paused) {

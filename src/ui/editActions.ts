@@ -1,6 +1,7 @@
 import { useEditor } from '../core/store';
 import { sourceSpan, splitClip, uid } from '../core/timeline';
-import type { Clip, MediaClip } from '../core/types';
+import { averageSpeed } from '../core/speed';
+import type { Clip, MediaClip, SpeedCurve } from '../core/types';
 import { captureFrame, reverseClip } from '../media/clipOps';
 import { parseCube } from '../media/lut';
 import { clipSourceTime } from '../render/composeFrame';
@@ -28,6 +29,26 @@ export function setSpeed(clip: MediaClip, speed: number) {
   editor().updateClip(clip.id, {
     speed,
     duration,
+    speedCurve: undefined,
+    keyframes: clip.keyframes.map((k) => ({ ...k, time: k.time * scale })),
+  } as Partial<MediaClip>);
+}
+
+// Hız eğrisi uygular (null = kaldır). Kaynak aralığı sabit kalır; süre eğrinin ortalamasına göre değişir.
+export function setSpeedCurve(clip: MediaClip, curve: SpeedCurve | null) {
+  if (!curve) {
+    editor().updateClip(clip.id, { speedCurve: undefined } as Partial<MediaClip>);
+    return;
+  }
+  const average = averageSpeed(curve);
+  const asset = editor().assets[clip.assetId];
+  const span = Math.min(sourceSpan(clip), asset.duration - clip.in);
+  const duration = span / average;
+  const scale = duration / clip.duration;
+  editor().updateClip(clip.id, {
+    speed: average,
+    duration,
+    speedCurve: curve,
     keyframes: clip.keyframes.map((k) => ({ ...k, time: k.time * scale })),
   } as Partial<MediaClip>);
 }

@@ -335,6 +335,14 @@ export const EN: Record<string, string> = {
   'Ritim tespiti': 'Beat detection',
   'Sahne tespiti': 'Scene detection',
 
+  'Hız eğrisi': 'Speed curve',
+  Montaj: 'Montage',
+  'Kahraman anı': 'Hero moment',
+  'Mermi zamanı': 'Bullet time',
+  'Yavaş gir': 'Ease in',
+  'Yavaş çık': 'Ease out',
+  'Hız yalnız medya kliplerinde değişir': 'Speed only applies to media clips',
+
   // Görev, ilerleme ve hata mesajları
   '1D LUT desteklenmiyor; 3D .cube dosyası seçin': '1D LUTs are not supported; choose a 3D .cube file',
   'Akıllı çerçeveleme video klipte çalışır': 'Smart reframe works on video clips',

@@ -63,3 +63,30 @@ describe('.cube LUT', () => {
     expect(() => parseCube('LUT_3D_SIZE 2\n0 0 0', 'x')).toThrow();
   });
 });
+
+describe('hız eğrisi', () => {
+  const curve = { name: 'test', points: [{ u: 0, speed: 1 }, { u: 1, speed: 3 }] };
+
+  it('ortalama hız eğrinin altındaki alandır', async () => {
+    const { averageSpeed, curveArea } = await import('../../src/core/speed');
+    expect(averageSpeed(curve)).toBeCloseTo(2);
+    expect(curveArea(curve, 0.5)).toBeCloseTo(0.75);
+  });
+
+  it('kaynak zamanı eğrinin integraliyle ilerler', async () => {
+    const { sourceOffset } = await import('../../src/core/speed');
+    const c = clip({ speed: 2, duration: 5, speedCurve: curve });
+    expect(sourceOffset(c, 0)).toBe(0);
+    expect(sourceOffset(c, 2.5)).toBeCloseTo(3.75);
+    expect(sourceOffset(c, 5)).toBeCloseTo(10);
+  });
+
+  it('eğrili klip bölününce parçalar kaynağı kesintisiz paylaşır', () => {
+    const c = clip({ speed: 2, duration: 5, in: 0, speedCurve: curve });
+    const [left, right] = splitClip(c, 2.5)! as [MediaClip, MediaClip];
+    expect(left.speedCurve).toBeUndefined();
+    expect(left.duration * left.speed).toBeCloseTo(3.75);
+    expect(right.in).toBeCloseTo(3.75);
+    expect(right.duration * right.speed).toBeCloseTo(6.25);
+  });
+});

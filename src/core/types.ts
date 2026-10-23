@@ -116,6 +116,13 @@ export interface MediaClip {
   fadeOut: number; // sn
   duck: boolean; // konuşma olduğunda sesi kıs
   smoothSlowMo: boolean; // yavaşlatmada kare harmanlama (dışa aktarmada)
+  speedCurve?: SpeedCurve; // varsa speed, eğrinin ortalamasıdır
+}
+
+// Klip içinde değişen hız: u = klip süresine göre konum (0..1), speed = o andaki hız.
+export interface SpeedCurve {
+  name: string;
+  points: { u: number; speed: number }[];
 }
 
 export type TextStylePreset = 'classic' | 'box' | 'karaoke' | 'neon' | 'title';

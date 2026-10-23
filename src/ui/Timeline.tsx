@@ -106,6 +106,8 @@ export function Timeline() {
       const end = snap(clipEnd(original) + delta, original.id);
       patch.duration = Math.min(Math.max(end - original.start, 0.1), (maxSource - sourceIn) / speed);
     }
+    // Eğri klibin süresine göre ölçeklendiği için kırpılan klip ortalama sabit hıza döner.
+    if (mode !== 'move' && original.type === 'media' && original.speedCurve) (patch as Partial<MediaClip>).speedCurve = undefined;
     s.updateClip(original.id, patch, false);
   };
 

@@ -43,7 +43,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 ### Faz 2: Kurgu derinliği → v0.3 ✅
 
 - [x] **Hız** (M): 0.25×–4×, perde korunarak (önizlemede tarayıcı, dışa aktarmada WSOLA); kareyi dondur, ters çevir
-- [ ] **Hız eğrileri** (M): klip içinde değişen hız (CapCut "eğri hız")
+- [x] **Hız eğrileri** (M): Montaj, Kahraman anı, Mermi zamanı, Yavaş gir/çık; perde korunarak
 - [x] **Anahtar kare animasyonu** (L): konum, boyut, döndürme, opaklık, ses düzeyi
 - [x] **Bulanık tuval arka planı** (S)
 - [x] **Maske ve chroma key** (M): dikdörtgen, elips, doğrusal maske; yeşil perde

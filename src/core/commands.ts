@@ -1,3 +1,4 @@
+import { SPEED_CURVES } from './speed';
 import { useEditor } from './store';
 import { clipEnd, createMediaClip, createTextClip, formatTime, projectDuration, rippleDelete, sortedTrack, splitClip } from './timeline';
 import type { AspectRatio, Clip, MediaClip, TextClip, TransitionType } from './types';
@@ -15,6 +16,7 @@ export type Command =
   | { name: 'split'; time: number; clipId?: string }
   | { name: 'delete_range'; start: number; end: number }
   | { name: 'set_transition'; toClipId: string; type: TransitionType | null; duration?: number }
+  | { name: 'set_speed'; clipId: string; speed?: number; curve?: string | null }
   | { name: 'set_aspect'; aspect: AspectRatio }
   | { name: 'set_background_blur'; enabled: boolean }
   | { name: 'seek'; time: number }
@@ -77,6 +79,12 @@ export const COMMAND_SPECS: CommandSpec[] = [
     description: 'Ana izde toClipId klibinin başındaki kesime geçiş koyar (type null = kaldır).',
     parameters: { toClipId: { type: 'string' }, type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] }, duration: { type: 'number' } },
     required: ['toClipId', 'type'],
+  },
+  {
+    name: 'set_speed',
+    description: `Klibin hızını (0.25–4) veya hız eğrisini değiştirir. Eğriler: ${SPEED_CURVES.map((c) => c.name).join(', ')}; null eğriyi kaldırır.`,
+    parameters: { clipId: { type: 'string' }, speed: { type: 'number' }, curve: { type: ['string', 'null'] } },
+    required: ['clipId'],
   },
   { name: 'set_aspect', description: 'Proje oranını değiştirir.', parameters: { aspect: { type: 'string', enum: ['16:9', '9:16', '1:1', '4:5'] } }, required: ['aspect'] },
   { name: 'set_background_blur', description: 'Boşlukları videonun bulanık hâliyle doldurmayı açar/kapatır.', parameters: { enabled: { type: 'boolean' } }, required: ['enabled'] },
@@ -189,6 +197,19 @@ export async function execute(command: Command): Promise<unknown> {
       if (index < 1) throw new Error('Geçiş yalnız ana izde, ilk klip dışındaki kliplere konur');
       const duration = Math.min(command.duration ?? 0.8, main[index - 1].duration, clip.duration);
       s.updateClip(clip.id, { transition: command.type ? { type: command.type, duration } : undefined } as Partial<MediaClip>);
+      return { ok: true };
+    }
+    case 'set_speed': {
+      const clip = requireClip(command.clipId);
+      if (clip.type !== 'media') throw new Error('Hız yalnız medya kliplerinde değişir');
+      const { setSpeed, setSpeedCurve } = await import('../ui/editActions');
+      if (command.curve !== undefined) {
+        const curve = command.curve === null ? null : SPEED_CURVES.find((c) => c.name === command.curve);
+        if (curve === undefined) throw new Error(`Bilinmeyen hız eğrisi: ${command.curve}`);
+        setSpeedCurve(clip, curve);
+      } else if (command.speed) {
+        setSpeed(clip, Math.min(Math.max(command.speed, 0.25), 4));
+      }
       return { ok: true };
     }
     case 'set_aspect':

@@ -2,7 +2,7 @@
   "name": "klip-studio",
   "private": true,
   "version": "0.1.0",
-  "description": "Tarayıcıda çalışan, yapay zekalı, açık kaynak video editörü. Tüm AI özellikleri yerelde çalışır.",
+  "description": "Open-source, AI-powered video editor that runs entirely in the browser. All AI runs locally.",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",

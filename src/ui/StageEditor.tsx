@@ -6,7 +6,7 @@ import { animatedState, setValue, valueAt } from '../core/animation';
 import { clipSourceTime, focusAt } from '../render/composeFrame';
 import { fitRect, overlayRect, textRect, type Rect } from '../render/layout';
 
-const SNAP = 0.015; // merkeze yapışma eşiği (tuval oranı)
+const SNAP = 0.015; // snap-to-center threshold (fraction of canvas)
 const HANDLES = ['nw', 'ne', 'sw', 'se'] as const;
 
 type Editable = MediaClip | TextClip;
@@ -23,7 +23,7 @@ interface Drag {
 const isEditable = (clip: Clip, assets: Record<string, Asset>): clip is Editable =>
   clip.type === 'text' || (clip.track !== 'audio' && assets[clip.assetId]?.kind !== 'audio');
 
-// Seçimde öncelik: metin, üst katman, ana video.
+// Selection priority: text, overlay, main video.
 const LAYER_ORDER = { text: 0, overlay: 1, main: 2 } as const;
 
 function rectFor(clip: Editable, assets: Record<string, Asset>, W: number, H: number, time: number): Rect | null {
@@ -44,7 +44,7 @@ const snap = (v: number, active: (on: boolean) => void) => {
   return on ? 0.5 : v;
 };
 
-// Önizleme üstündeki seçim kutusu: üst katman ve metinleri sürükleme ve köşelerden boyutlandırma.
+// Selection box over the preview: drag overlays and text, resize from the corners.
 export function StageEditor({ width, height }: { width: number; height: number }) {
   const clips = useEditor((s) => s.project.clips);
   const assets = useEditor((s) => s.assets);
@@ -58,7 +58,7 @@ export function StageEditor({ width, height }: { width: number; height: number }
   const { width: W, height: H } = ASPECT_SIZES[aspect];
   const scale = width / W; // CSS pikseli / tuval pikseli
 
-  // Üstte çizilen önce gelir: metinler, üst katmanlar (sondan başa), en son ana video.
+  // Topmost first: text, overlays (last to first), main video last.
   const targets = clips.filter((c): c is Editable => isEditable(c, assets) && isActiveAt(c, time));
   targets.sort(
     (a, b) => LAYER_ORDER[a.track as keyof typeof LAYER_ORDER] - LAYER_ORDER[b.track as keyof typeof LAYER_ORDER] || clips.indexOf(b) - clips.indexOf(a),
@@ -89,7 +89,7 @@ export function StageEditor({ width, height }: { width: number; height: number }
       return;
     }
 
-    // Tutulan nokta ile merkez arasındaki fark korunur; öğe imlece zıplamaz.
+    // Keeps the offset between the grab point and the center, so the item doesn't jump to the cursor.
     const dx = (p.x - state.startX) / W;
     const dy = (p.y - state.startY) / H;
     let vertical = false;
@@ -98,7 +98,7 @@ export function StageEditor({ width, height }: { width: number; height: number }
       const y = snap(clamp(clip.y + dy, 0.05, 0.95), (on) => (horizontal = on));
       s.updateClip(clip.id, { y }, false);
     } else {
-      // Anahtar kare varsa oynatma çizgisindeki kare güncellenir, yoksa temel konum.
+      // With keyframes, the keyframe at the playhead is updated; otherwise the base position.
       const x = snap(clamp(valueAt(clip, 'x', s.time) + dx, 0, 1), (on) => (vertical = on));
       const y = snap(clamp(valueAt(clip, 'y', s.time) + dy, 0, 1), (on) => (horizontal = on));
       const withX = { ...clip, ...setValue(clip, 'x', x, s.time) } as MediaClip;
@@ -130,7 +130,7 @@ export function StageEditor({ width, height }: { width: number; height: number }
     window.addEventListener('pointerup', onUp);
   };
 
-  // Boş alana tıklama hiçbir şeyi taşımaz; yalnızca altında öğe varsa onu seçip sürükler.
+  // Clicking empty space moves nothing; only an item under the pointer is selected and dragged.
   const onStagePointerDown = (event: ReactPointerEvent) => {
     const p = toCanvas(event);
     const hit = targets.find((c) => {

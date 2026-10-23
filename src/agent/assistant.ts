@@ -2,16 +2,16 @@ import Anthropic from '@anthropic-ai/sdk';
 import { COMMAND_SPECS, execute, type Command } from '../core/commands';
 import { screenshot } from './bridge';
 
-// Doğal dille kurgu: Claude, komut katmanını araç olarak kullanarak editörü sürer.
-// Yalnız proje özeti ve önizleme kareleri gönderilir; medya dosyalarının kendisi gönderilmez.
+// Natural-language editing: Claude drives the editor using the command layer as tools.
+// Only a project summary and preview frames are sent; media files themselves never are.
 
 const MODEL = 'claude-opus-5-5';
 const MAX_STEPS = 30;
 
-const SYSTEM = `Sen Klip Stüdyo adlı tarayıcı tabanlı video editöründe çalışan bir kurgu asistanısın.
-Kullanıcının isteğini editör araçlarıyla gerçekleştir. Klip ve varlık kimliklerini önce get_state ile öğren; kimlik uydurma.
-Zamanlar saniye cinsindendir. Görsel bir değişiklik yaptıysan sonucu screenshot ile kontrol edebilirsin.
-Yapamayacağın bir şey istenirse bunu kısaca söyle. Yanıtlarını Türkçe ve kısa yaz.`;
+const SYSTEM = `You are an editing assistant inside Klip Studio, a browser-based video editor.
+Carry out the user's request with the editor tools. Look up clip and asset IDs with get_state first; never invent IDs.
+Times are in seconds. After a visual change you can check the result with screenshot.
+If something can't be done, say so briefly. Reply concisely, in the language the user writes in.`;
 
 export type Message = Anthropic.Beta.BetaMessageParam;
 
@@ -28,7 +28,7 @@ const tools: Anthropic.Beta.BetaTool[] = [
   })),
   {
     name: 'screenshot',
-    description: 'Önizlemenin o anki karesini görüntü olarak döndürür.',
+    description: 'Returns the current preview frame as an image.',
     input_schema: { type: 'object' as const, properties: {} },
   },
 ];
@@ -51,8 +51,8 @@ const describeCall = (block: Anthropic.Beta.BetaToolUseBlock) => {
   return `${block.name}${input === '{}' ? '' : ` ${input.length > 80 ? `${input.slice(0, 80)}…` : input}`}`;
 };
 
-// Konuşmaya yeni kullanıcı mesajını ekler ve Claude işini bitirene kadar araç döngüsünü çalıştırır.
-// Geçmiş yalnızca sona eklenerek büyür (yanıt içerikleri olduğu gibi geri gönderilir).
+// Appends the user's message and runs the tool loop until Claude is done.
+// History only grows by appending (response content is sent back unchanged).
 export async function runAssistant(apiKey: string, history: Message[], onEvent: (event: AssistantEvent) => void): Promise<Message[]> {
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
   const messages = [...history];
@@ -64,17 +64,17 @@ export async function runAssistant(apiKey: string, history: Message[], onEvent: 
         model: MODEL,
         max_tokens: 16000,
         betas: ['server-side-fallback-2026-07-01'],
-        fallbacks: 'default', // güvenlik sınıflandırıcısı reddederse istek uygun modelde sürer
+        fallbacks: 'default', // if the safety classifier declines, the request continues on a fallback model
         output_config: { effort: 'medium' },
         system: SYSTEM,
         tools,
         messages,
       });
     } catch (error) {
-      if (error instanceof Anthropic.AuthenticationError) onEvent({ kind: 'error', text: 'API anahtarı geçersiz.' });
-      else if (error instanceof Anthropic.RateLimitError) onEvent({ kind: 'error', text: 'Hız sınırına takıldı; biraz sonra tekrar deneyin.' });
-      else if (error instanceof Anthropic.APIError) onEvent({ kind: 'error', text: `API hatası (${error.status}): ${error.message}` });
-      else onEvent({ kind: 'error', text: `Bağlantı hatası: ${(error as Error).message}` });
+      if (error instanceof Anthropic.AuthenticationError) onEvent({ kind: 'error', text: 'Invalid API key.' });
+      else if (error instanceof Anthropic.RateLimitError) onEvent({ kind: 'error', text: 'Rate limited; try again shortly.' });
+      else if (error instanceof Anthropic.APIError) onEvent({ kind: 'error', text: `API error (${error.status}): ${error.message}` });
+      else onEvent({ kind: 'error', text: `Connection error: ${(error as Error).message}` });
       return messages;
     }
 
@@ -84,11 +84,11 @@ export async function runAssistant(apiKey: string, history: Message[], onEvent: 
     }
 
     if (response.stop_reason === 'refusal') {
-      onEvent({ kind: 'error', text: 'İstek güvenlik nedeniyle yanıtlanmadı.' });
+      onEvent({ kind: 'error', text: 'The request was declined for safety reasons.' });
       return messages;
     }
     if (response.stop_reason === 'max_tokens') {
-      onEvent({ kind: 'error', text: 'Yanıt yarıda kesildi; isteği daha küçük adımlara bölün.' });
+      onEvent({ kind: 'error', text: 'The response was cut off; split the request into smaller steps.' });
       return messages;
     }
     const calls = response.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === 'tool_use');
@@ -101,6 +101,6 @@ export async function runAssistant(apiKey: string, history: Message[], onEvent: 
     }
     messages.push({ role: 'user', content: results });
   }
-  onEvent({ kind: 'error', text: 'Adım sınırına ulaşıldı.' });
+  onEvent({ kind: 'error', text: 'Step limit reached.' });
   return messages;
 }

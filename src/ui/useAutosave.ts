@@ -6,7 +6,7 @@ export type SaveStatus = 'loading' | 'saved' | 'saving' | 'error';
 
 const DEBOUNCE_MS = 700;
 
-// Açılışta son oturumu geri yükler, sonra her değişikliği IndexedDB'ye kaydeder.
+// Restores the last session on startup, then saves every change to IndexedDB.
 export function useAutosave(): SaveStatus {
   const [status, setStatus] = useState<SaveStatus>('loading');
 
@@ -34,7 +34,7 @@ export function useAutosave(): SaveStatus {
       }
     };
 
-    // Store doluysa (ör. dil değişince arayüz yeniden kurulduysa) oturumu yeniden yükleme.
+    // If the store is already populated (e.g. UI remounted after a language change), don't reload the session.
     const current = useEditor.getState();
     const alreadyOpen = current.project.clips.length > 0 || Object.keys(current.assets).length > 0;
     if (alreadyOpen) Object.keys(current.assets).forEach((id) => savedAssets.add(id));
@@ -52,7 +52,7 @@ export function useAutosave(): SaveStatus {
         setStatus('saved');
         unsubscribe = useEditor.subscribe((state, previous) => {
           if (state.project === previous.project && state.assets === previous.assets) return;
-          // Yeni proje veya .klip yüklemesi varlık listesini değiştirir; kayıt kümesini sıfırla.
+          // A new project or a loaded .klip replaces the asset list; reset the saved set.
           if (Object.keys(state.assets).length < savedAssets.size) savedAssets.clear();
           window.clearTimeout(timer);
           dirty = true;
@@ -63,7 +63,7 @@ export function useAutosave(): SaveStatus {
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
-      if (dirty) void persist(); // bekleyen değişikliği kaybetme
+      if (dirty) void persist(); // don't lose a pending change
       unsubscribe();
     };
   }, []);

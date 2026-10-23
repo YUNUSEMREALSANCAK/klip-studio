@@ -5,7 +5,7 @@ import { getFaceDetector } from './vision';
 
 type FrameCallback = (canvas: HTMLCanvasElement | OffscreenCanvas, time: number) => void | Promise<void>;
 
-// Klibin kaynak aralığındaki kareleri belirli aralıklarla küçük boyutta dolaşır.
+// Walks small frames across the clip's source range at a fixed interval.
 async function sampleFrames(
   asset: Asset,
   clip: MediaClip,
@@ -16,7 +16,7 @@ async function sampleFrames(
 ) {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
   const track = await input.getPrimaryVideoTrack();
-  if (!track) throw new Error('Video izi bulunamadı');
+  if (!track) throw new Error('No video track found');
   const sink = new CanvasSink(track, { ...size, fit: 'fill', poolSize: 1 });
   let next = clip.in;
   const span = sourceSpan(clip);
@@ -34,7 +34,7 @@ function pixels(canvas: HTMLCanvasElement | OffscreenCanvas) {
   return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 }
 
-// Sahne kesimlerini ardışık kareler arasındaki renk farkıyla bulur. Zaman çizelgesi saniyesi döner.
+// Finds scene cuts from the color difference between consecutive frames. Returns timeline seconds.
 export async function detectScenes(asset: Asset, clip: MediaClip, onProgress: (p: number) => void): Promise<number[]> {
   const cuts: number[] = [];
   const history: number[] = [];
@@ -66,7 +66,7 @@ export async function detectScenes(asset: Asset, clip: MediaClip, onProgress: (p
   return cuts.filter((t) => t > clip.start + 0.3 && t < clip.start + clip.duration - 0.3);
 }
 
-// Yüzleri takip ederek dikey (9:16) kırpma için yatay odak noktası üretir.
+// Tracks faces to produce a horizontal focus point for a vertical (9:16) crop.
 export async function computeReframe(asset: Asset, clip: MediaClip, onProgress: (p: number) => void): Promise<ReframeTrack> {
   const detector = await getFaceDetector();
   const width = 320;
@@ -91,7 +91,7 @@ export async function computeReframe(asset: Asset, clip: MediaClip, onProgress: 
     },
     onProgress,
   );
-  // Kamera titremesin diye hareketli ortalama ile yumuşat.
+  // Smooth with a moving average so the virtual camera doesn't shake.
   const centers = raw.map((_, i) => {
     const window = raw.slice(Math.max(0, i - 3), i + 4);
     return window.reduce((a, b) => a + b, 0) / window.length;
@@ -99,7 +99,7 @@ export async function computeReframe(asset: Asset, clip: MediaClip, onProgress: 
   return { times, centers };
 }
 
-// Ortadaki kareye bakarak parlaklık, kontrast ve doygunluğu dengeler.
+// Balances brightness, contrast and saturation from the middle frame.
 export async function autoEnhance(asset: Asset, clip: MediaClip): Promise<Partial<FilterSettings>> {
   let stats = { mean: 0.5, std: 0.22, saturation: 0.35 };
   const capture = (data: Uint8ClampedArray) => {

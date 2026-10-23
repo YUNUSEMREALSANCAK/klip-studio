@@ -2,7 +2,7 @@
 import * as ort from 'onnxruntime-web';
 import { cachedModel } from './modelCache';
 
-// RIFE 4.22 lite: iki kare arasında, verilen zamanda optik akışla yeni bir kare üretir.
+// RIFE 4.22 lite: generates a new frame between two frames at a given time using optical flow.
 const MODEL_URL = 'https://huggingface.co/square-zero-labs/rife-onnx/resolve/main/rife422lite_fp32.onnx';
 
 export type RifeRequest = { id: number; a: Uint8ClampedArray; b: Uint8ClampedArray; width: number; height: number; t: number };
@@ -22,7 +22,7 @@ const getSession = (id: number) =>
     ort.InferenceSession.create(bytes, { executionProviders: cpuOnly ? ['wasm'] : ['webgpu', 'wasm'] }),
   ));
 
-// Modelin beklediği yardımcı tensörler: normalleştirilmiş örnekleme ızgarası ve akış bölenleri.
+// Helper tensors the model expects: a normalized sampling grid and flow divisors.
 function gridFor(width: number, height: number) {
   const key = `${width}x${height}`;
   if (grid?.key !== key) {
@@ -66,7 +66,7 @@ async function interpolate(data: RifeRequest) {
   try {
     return await (await getSession(data.id)).run(feeds);
   } catch (error) {
-    // Bazı işlemler WebGPU'da çalışmayabilir; oturumu işlemcide yeniden kur.
+    // Some ops may fail on WebGPU; rebuild the session on the CPU.
     if (cpuOnly) throw error;
     cpuOnly = true;
     session = null;

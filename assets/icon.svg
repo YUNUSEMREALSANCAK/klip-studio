@@ -1,22 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0e7490"/>
-      <stop offset="1" stop-color="#0f172a"/>
-    </linearGradient>
-  </defs>
-  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
-  <!-- film şeridi kenarları -->
-  <g fill="#22d3ee" opacity=".35">
-    <rect x="36" y="40" width="20" height="14" rx="3"/>
-    <rect x="36" y="74" width="20" height="14" rx="3"/>
-    <rect x="36" y="108" width="20" height="14" rx="3"/>
-    <rect x="36" y="142" width="20" height="14" rx="3"/>
-    <rect x="36" y="176" width="20" height="14" rx="3"/>
-    <rect x="36" y="210" width="20" height="8" rx="3"/>
+  <rect width="256" height="256" rx="56" fill="#18181b"/>
+  <rect x="1.5" y="1.5" width="253" height="253" rx="54.5" fill="none" stroke="#2e2e33" stroke-width="3"/>
+  <!-- film strip edge -->
+  <g fill="#3f3f46">
+    <rect x="40" y="58" width="16" height="12" rx="2"/>
+    <rect x="40" y="86" width="16" height="12" rx="2"/>
+    <rect x="40" y="114" width="16" height="12" rx="2"/>
+    <rect x="40" y="142" width="16" height="12" rx="2"/>
+    <rect x="40" y="170" width="16" height="12" rx="2"/>
+    <rect x="40" y="198" width="16" height="12" rx="2"/>
   </g>
-  <!-- oynat üçgeni -->
-  <path d="M100 74v108l86-54z" fill="#22d3ee"/>
-  <!-- yapay zeka kıvılcımı -->
-  <path d="M194 46l7 17 17 7-17 7-7 17-7-17-17-7 17-7z" fill="#fff"/>
+  <!-- play -->
+  <path d="M100 78v100l82-50z" fill="#e4e4e7"/>
 </svg>

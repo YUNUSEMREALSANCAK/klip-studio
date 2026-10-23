@@ -7,7 +7,7 @@ import { PreviewEngine } from '../render/previewEngine';
 import { Icon } from './icons';
 import { StageEditor } from './StageEditor';
 
-const PREVIEW_MAX = 1280; // önizleme çözünürlüğü; dışa aktarma tam çözünürlükte yapılır
+const PREVIEW_MAX = 1280; // preview resolution; export runs at full resolution
 
 function usePlaybackLoop(engineRef: React.RefObject<PreviewEngine | null>) {
   useEffect(() => {
@@ -36,7 +36,7 @@ function usePlaybackLoop(engineRef: React.RefObject<PreviewEngine | null>) {
   }, [engineRef]);
 }
 
-// Sahneyi kutuya sığdırır. Ölçüm ilk boyamadan önce yapılır, böylece oran değişince tek kare bile bozulmaz.
+// Fits the stage into its box. Measured before first paint, so not a single frame is distorted when the aspect ratio changes.
 function useFitSize(aspect: number) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -99,18 +99,18 @@ export function Preview() {
           </div>
           {!clips.length && (
             <div className="empty">
-              {tr('Soldaki Medya sekmesinden video, ses veya görsel ekleyin.')}
+              {tr('Add video, audio or images from the Media tab on the left.')}
               <br />
-              {tr('Tüm yapay zeka özellikleri tarayıcınızda, yerel olarak çalışır.')}
+              {tr('All AI features run locally in your browser.')}
             </div>
           )}
         </div>
       </div>
       <div className="controls">
-        <button className="btn ghost icon" title={tr('Başa dön')} onClick={() => useEditor.getState().setTime(0)}>
+        <button className="btn ghost icon" title={tr('Go to start')} onClick={() => useEditor.getState().setTime(0)}>
           ⏮
         </button>
-        <button className="btn primary icon" title={tr('Oynat / Duraklat (Boşluk)')} onClick={() => useEditor.getState().setPlaying(!playing)}>
+        <button className="btn primary icon" title={tr('Play / Pause (Space)')} onClick={() => useEditor.getState().setPlaying(!playing)}>
           <Icon name={playing ? 'pause' : 'play'} size={16} />
         </button>
         <div className="timecode">

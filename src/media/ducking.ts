@@ -1,15 +1,15 @@
 import type { Asset, Clip } from '../core/types';
 import { mixTimelineAudio } from './audio';
 
-// Müzik kısma (ducking): konuşma olan anlarda "duck" işaretli kliplerin sesi düşürülür.
+// Ducking: clips marked "duck" are lowered while someone speaks.
 
-export const DUCK_RATE = 20; // zarf örnek/sn
+export const DUCK_RATE = 20; // envelope samples/s
 const DUCK_LEVEL = 0.25;
-const THRESHOLD = 0.02; // konuşma sayılan RMS
+const THRESHOLD = 0.02; // RMS counted as speech
 const ATTACK = 0.15; // sn
 const RELEASE = 0.5;
 
-// Duck işaretli olmayan seslerden konuşma zarfını çıkarır: 1 = tam ses, DUCK_LEVEL = kısık.
+// Builds a speech envelope from audio not marked duck: 1 = full volume, DUCK_LEVEL = ducked.
 export async function computeDuckEnvelope(clips: Clip[], assets: Record<string, Asset>): Promise<Float32Array> {
   const voices = clips.filter((c) => !(c.type === 'media' && c.duck));
   const mix = await mixTimelineAudio(voices, assets, 8000, 1);
@@ -28,10 +28,9 @@ export async function computeDuckEnvelope(clips: Clip[], assets: Record<string, 
   return envelope;
 }
 
-export const envelopeAt = (envelope: Float32Array | null, t: number) =>
-  envelope ? (envelope[Math.floor(t * DUCK_RATE)] ?? 1) : 1;
+export const envelopeAt = (envelope: Float32Array | null, t: number) => (envelope ? (envelope[Math.floor(t * DUCK_RATE)] ?? 1) : 1);
 
-// Önizleme için önbellekli zarf: girdi değişince arka planda yeniden hesaplanır.
+// Cached envelope for the preview: recomputed in the background when inputs change.
 let cache: { key: string; envelope: Float32Array | null } = { key: '', envelope: null };
 
 export function previewDuckEnvelope(clips: Clip[], assets: Record<string, Asset>): Float32Array | null {

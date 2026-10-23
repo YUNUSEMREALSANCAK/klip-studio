@@ -3,7 +3,7 @@ import { FilesetResolver, ImageSegmenter } from '@mediapipe/tasks-vision';
 type WasmFileset = Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>;
 import type { Mask } from '../render/compositor';
 
-// Kişi ayırma (MediaPipe Selfie Segmenter); ana iş parçacığı ve worker ortak kullanır.
+// Person segmentation (MediaPipe Selfie Segmenter); shared by the main thread and the worker.
 export const SELFIE_MODEL = 'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite';
 export const MASK_WIDTH = 256;
 
@@ -27,7 +27,7 @@ export function createSelfieSegmenter(files: WasmFileset, canvas?: OffscreenCanv
   );
 }
 
-// Kareyi küçültüp ayırır; MediaPipe artan zaman damgası (ms) ister.
+// Downscales and segments a frame; MediaPipe needs increasing timestamps (ms).
 export function segmentFrame(
   segmenter: ImageSegmenter,
   work: OffscreenCanvas,

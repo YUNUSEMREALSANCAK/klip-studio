@@ -1,6 +1,6 @@
 import type { TextClip } from '../core/types';
 
-// Metin klipleri için Google Fonts aileleri; ilk kullanımda yüklenir.
+// Google Fonts families for text clips; loaded on first use.
 export const FONTS = ['Inter', 'Bebas Neue', 'Montserrat', 'Poppins', 'Oswald', 'Anton', 'Playfair Display', 'Lobster', 'Pacifico', 'Roboto Mono'];
 
 const loaded = new Map<string, Promise<void>>();
@@ -24,5 +24,5 @@ export function ensureFont(family: string): Promise<void> {
 
 export const familyOf = (clip: TextClip) => clip.font ?? (clip.preset === 'title' ? 'Bebas Neue' : 'Inter');
 
-// Dışa aktarmadan önce projedeki tüm yazı tiplerinin hazır olmasını bekler.
+// Waits until every font in the project is ready before export.
 export const ensureFonts = (clips: TextClip[]) => Promise.all([...new Set(clips.map(familyOf))].map(ensureFont));

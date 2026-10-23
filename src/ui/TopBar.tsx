@@ -10,15 +10,15 @@ import { useUi } from './uiStore';
 const ASPECTS: { id: AspectRatio; label: string }[] = [
   { id: '16:9', label: '16:9 YouTube' },
   { id: '9:16', label: '9:16 Reels / TikTok' },
-  { id: '1:1', label: '1:1 Kare' },
-  { id: '4:5', label: '4:5 Gönderi' },
+  { id: '1:1', label: '1:1 Square' },
+  { id: '4:5', label: '4:5 Post' },
 ];
 
 const STATUS_TEXT: Record<SaveStatus, string> = {
-  loading: 'Yükleniyor…',
-  saving: 'Kaydediliyor…',
-  saved: 'Kaydedildi',
-  error: 'Kaydedilemedi',
+  loading: 'Loading…',
+  saving: 'Saving…',
+  saved: 'Saved',
+  error: 'Could not save',
 };
 
 function download(blob: Blob, name: string) {
@@ -31,9 +31,9 @@ function download(blob: Blob, name: string) {
 
 async function saveKlip() {
   const { project, assets, startTask, endTask } = useEditor.getState();
-  const task = startTask('Proje dosyası hazırlanıyor');
+  const task = startTask('Preparing project file');
   try {
-    download(await exportKlip(project, assets), 'proje.klip');
+    download(await exportKlip(project, assets), 'project.klip');
   } finally {
     endTask(task);
   }
@@ -46,14 +46,14 @@ async function openKlip(file: File) {
     await clearSession();
     s.loadProject(project, assets);
   } catch (error) {
-    const task = s.startTask('Proje açılamadı');
+    const task = s.startTask('Could not open project');
     s.updateTask(task, { error: (error as Error).message });
     setTimeout(() => s.endTask(task), 6000);
   }
 }
 
 async function newProject() {
-  if (useEditor.getState().project.clips.length && !confirm('Mevcut proje silinsin mi? Önce .klip olarak kaydetmek isteyebilirsiniz.')) return;
+  if (useEditor.getState().project.clips.length && !confirm(tr('Discard the current project? You may want to save it as a .klip file first.'))) return;
   await clearSession();
   useEditor.getState().newProject();
 }
@@ -70,25 +70,22 @@ export function TopBar({ saveStatus }: { saveStatus: SaveStatus }) {
 
   return (
     <header className="topbar">
-      <div className="brand">
-        <span className="brand-dot" />
-        {tr('Klip Stüdyo')}
-      </div>
-      <button className="btn ghost icon" title={tr('Geri al (⌘Z)')} disabled={!canUndo} onClick={() => useEditor.getState().undo()}>
+      <div className="brand">{tr('Klip Studio')}</div>
+      <button className="btn ghost icon" title={tr('Undo (⌘Z)')} disabled={!canUndo} onClick={() => useEditor.getState().undo()}>
         <Icon name="undo" />
       </button>
-      <button className="btn ghost icon" title={tr('Yinele (⇧⌘Z)')} disabled={!canRedo} onClick={() => useEditor.getState().redo()}>
+      <button className="btn ghost icon" title={tr('Redo (⇧⌘Z)')} disabled={!canRedo} onClick={() => useEditor.getState().redo()}>
         <Icon name="redo" />
       </button>
       <div className="divider" />
       <button className="btn ghost small" onClick={() => void newProject()}>
-        {tr('Yeni')}
+        {tr('New')}
       </button>
       <button className="btn ghost small" onClick={() => fileRef.current?.click()}>
-        {tr('Aç')}
+        {tr('Open')}
       </button>
-      <button className="btn ghost small" disabled={!hasClips} onClick={() => void saveKlip()} title={tr('.klip proje dosyası olarak indir')}>
-        {tr('Kaydet')}
+      <button className="btn ghost small" disabled={!hasClips} onClick={() => void saveKlip()} title={tr('Download as a .klip project file')}>
+        {tr('Save')}
       </button>
       <input
         ref={fileRef}
@@ -103,11 +100,11 @@ export function TopBar({ saveStatus }: { saveStatus: SaveStatus }) {
       />
       <span className={`save-status ${saveStatus}`}>{tr(STATUS_TEXT[saveStatus])}</span>
       <div className="spacer" />
-      <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} title="Dil / Language" style={{ width: 70 }}>
+      <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} title="Language" style={{ width: 70 }}>
         <option value="tr">TR</option>
         <option value="en">EN</option>
       </select>
-      <select value={aspect} onChange={(e) => setAspect(e.target.value as AspectRatio)} title={tr('En-boy oranı')}>
+      <select value={aspect} onChange={(e) => setAspect(e.target.value as AspectRatio)} title={tr('Aspect ratio')}>
         {ASPECTS.map((a) => (
           <option key={a.id} value={a.id}>
             {tr(a.label)}
@@ -115,7 +112,7 @@ export function TopBar({ saveStatus }: { saveStatus: SaveStatus }) {
         ))}
       </select>
       <button className="btn primary" disabled={!hasClips} onClick={() => setExportOpen(true)}>
-        <Icon name="export" size={16} /> {tr('Dışa aktar')}
+        <Icon name="export" size={16} /> {tr('Export')}
       </button>
     </header>
   );

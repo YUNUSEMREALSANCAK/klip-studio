@@ -23,22 +23,22 @@ const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 async function videoTrackOf(asset: Asset) {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
   const track = await input.getPrimaryVideoTrack();
-  if (!track) throw new Error('Video izi bulunamadı');
+  if (!track) throw new Error('No video track found');
   return track;
 }
 
-// Kaynaktaki bir kareyi PNG görsel varlığı olarak yakalar ("kareyi dondur").
+// Captures a source frame as a PNG image asset ("freeze frame").
 export async function captureFrame(asset: Asset, sourceTime: number): Promise<Asset> {
   const frame = await new CanvasSink(await videoTrackOf(asset)).getCanvas(sourceTime);
-  if (!frame) throw new Error('Kare okunamadı');
+  if (!frame) throw new Error('Could not read frame');
   const canvas = new OffscreenCanvas(frame.canvas.width, frame.canvas.height);
   canvas.getContext('2d')!.drawImage(frame.canvas, 0, 0);
   const blob = await canvas.convertToBlob({ type: 'image/png' });
-  return createAsset(blob, `${asset.name} (kare ${sourceTime.toFixed(1)} sn).png`);
+  return createAsset(blob, `${asset.name} (frame ${sourceTime.toFixed(1)} s).png`);
 }
 
-// Klibin kaynak aralığını tersten oynayan yeni bir video varlığı üretir.
-// Bellek taşmasın diye kareler 1 sn'lik parçalar hâlinde, sondan başa doğru çözülür.
+// Produces a new video asset that plays the clip's source range in reverse.
+// Frames are decoded in 1 s chunks from end to start to keep memory bounded.
 export async function reverseClip(clip: MediaClip, asset: Asset, onProgress: (p: number) => void): Promise<Asset> {
   const track = await videoTrackOf(asset);
   const width = even(track.displayWidth);
@@ -47,7 +47,7 @@ export async function reverseClip(clip: MediaClip, asset: Asset, onProgress: (p:
   const to = Math.min(asset.duration, clip.in + sourceSpan(clip));
 
   const videoCodec = await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width, height });
-  if (!videoCodec) throw new Error('Video kodlama desteklenmiyor');
+  if (!videoCodec) throw new Error('Video encoding is not supported');
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d')!;
   const target = new BufferTarget();
@@ -80,7 +80,7 @@ export async function reverseClip(clip: MediaClip, asset: Asset, onProgress: (p:
   }
   if (audio && audioSource) await audioSource.add(audio);
   await output.finalize();
-  return createAsset(new Blob([target.buffer!], { type: 'video/mp4' }), `${asset.name} (ters).mp4`);
+  return createAsset(new Blob([target.buffer!], { type: 'video/mp4' }), `${asset.name} (reversed).mp4`);
 }
 
 function reverseAudio(buffer: AudioBuffer, from: number, to: number): AudioBuffer {
@@ -88,7 +88,10 @@ function reverseAudio(buffer: AudioBuffer, from: number, to: number): AudioBuffe
   const length = Math.max(1, Math.floor((to - from) * buffer.sampleRate));
   const out = new AudioBuffer({ length, sampleRate: buffer.sampleRate, numberOfChannels: buffer.numberOfChannels });
   for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-    const data = buffer.getChannelData(ch).slice(start, start + length).reverse();
+    const data = buffer
+      .getChannelData(ch)
+      .slice(start, start + length)
+      .reverse();
     out.copyToChannel(data, ch);
   }
   return out;

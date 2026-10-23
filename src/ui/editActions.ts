@@ -20,7 +20,7 @@ async function withTask(label: string, work: (report: (p: number) => void) => Pr
   }
 }
 
-// Hızı değiştirir; klibin kaynakta kapladığı aralık sabit kalır, süre ve anahtar kareler ölçeklenir.
+// Changes speed; the clip's source range stays fixed, duration and keyframes are scaled.
 export function setSpeed(clip: MediaClip, speed: number) {
   const asset = editor().assets[clip.assetId];
   const maxDuration = asset.kind === 'image' ? Infinity : (asset.duration - clip.in) / speed;
@@ -34,7 +34,7 @@ export function setSpeed(clip: MediaClip, speed: number) {
   } as Partial<MediaClip>);
 }
 
-// Hız eğrisi uygular (null = kaldır). Kaynak aralığı sabit kalır; süre eğrinin ortalamasına göre değişir.
+// Applies a speed curve (null = remove). The source range stays fixed; duration follows the curve's average.
 export function setSpeedCurve(clip: MediaClip, curve: SpeedCurve | null) {
   if (!curve) {
     editor().updateClip(clip.id, { speedCurve: undefined } as Partial<MediaClip>);
@@ -53,27 +53,38 @@ export function setSpeedCurve(clip: MediaClip, curve: SpeedCurve | null) {
   } as Partial<MediaClip>);
 }
 
-// Oynatma çizgisindeki kareyi 2 sn'lik bir görsel olarak araya ekler.
+// Inserts the frame at the playhead as a 2 s still image.
 export function freezeFrame(clip: MediaClip) {
-  return withTask('Kare donduruluyor', async () => {
+  return withTask('Freezing frame', async () => {
     const { time, assets } = editor();
     const asset = assets[clip.assetId];
-    if (asset.kind !== 'video') throw new Error('Kare dondurma video klipte çalışır');
+    if (asset.kind !== 'video') throw new Error('Freeze frame works on video clips');
     const at = Math.min(Math.max(time, clip.start), clip.start + clip.duration - 0.05);
     const still = await captureFrame(asset, clipSourceTime(clip, at, assets));
     editor().addAsset(still);
     editor().mutate((clips) => {
       const pieces: Clip[] = splitClip(clip, at) ?? [clip];
-      const frozen: MediaClip = { ...clip, id: uid(), assetId: still.id, start: at - 1e-4, in: 0, duration: 2, speed: 1, keyframes: [], transition: undefined, reframe: undefined };
+      const frozen: MediaClip = {
+        ...clip,
+        id: uid(),
+        assetId: still.id,
+        start: at - 1e-4,
+        in: 0,
+        duration: 2,
+        speed: 1,
+        keyframes: [],
+        transition: undefined,
+        reframe: undefined,
+      };
       return [...clips.filter((c) => c.id !== clip.id), ...pieces, frozen];
     });
   });
 }
 
 export function reverse(clip: MediaClip) {
-  return withTask('Klip ters çevriliyor', async (report) => {
+  return withTask('Reversing clip', async (report) => {
     const asset = editor().assets[clip.assetId];
-    if (asset.kind !== 'video') throw new Error('Ters çevirme video klipte çalışır');
+    if (asset.kind !== 'video') throw new Error('Reverse works on video clips');
     const reversed = await reverseClip(clip, asset, report);
     editor().addAsset(reversed);
     editor().updateClip(clip.id, { assetId: reversed.id, in: 0, reframe: undefined } as Partial<MediaClip>);
@@ -88,7 +99,7 @@ export async function importLut(file: File, applyTo?: MediaClip) {
     useEditor.setState((state) => ({ project: { ...state.project, luts: { ...state.project.luts, [lut.id]: lut } } }));
     if (applyTo) s.updateClip(applyTo.id, { filter: { ...applyTo.filter, lutId: lut.id, lutIntensity: 1 } } as Partial<MediaClip>, false);
   } catch (error) {
-    const id = s.startTask('LUT içe aktarılamadı');
+    const id = s.startTask('Could not import LUT');
     s.updateTask(id, { error: (error as Error).message });
     setTimeout(() => s.endTask(id), 6000);
   }

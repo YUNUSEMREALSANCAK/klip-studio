@@ -7,14 +7,14 @@ export default defineConfig({
   timeout: 120_000,
   fullyParallel: false,
   retries: process.env.CI ? 1 : 0,
-  // @models etiketli testler yüzlerce MB model indirir; CI'da atlanır.
+  // @models tests download hundreds of MB of models; skipped on CI.
   grepInvert: process.env.CI ? /@models/ : undefined,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
     viewport: { width: 1440, height: 900 },
-    locale: 'tr-TR', // testler Türkçe arayüz metinleriyle yazıldı
-    // Yerelde kurulu Chrome, CI'da Playwright'ın Chromium'u kullanılır.
+    locale: 'en-US',
+    // Locally the installed Chrome is used; on CI, Playwright's Chromium.
     channel: process.env.CI ? undefined : 'chrome',
     launchOptions: { args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] },
     trace: 'retain-on-failure',

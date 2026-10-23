@@ -1,4 +1,4 @@
-// Büyük ONNX modellerini bir kez indirip tarayıcının Cache Storage'ında saklar.
+// Downloads large ONNX models once and keeps them in the browser's Cache Storage.
 const CACHE = 'klip-models';
 
 export async function cachedModel(url: string, onProgress: (progress: number) => void): Promise<Uint8Array> {

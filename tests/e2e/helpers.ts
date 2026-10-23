@@ -3,20 +3,23 @@ import path from 'node:path';
 
 export const fixture = (name: string) => path.resolve('tests/fixtures', name);
 
-// Temiz bir oturumla editörü açar (önceki otomatik kaydı siler).
+// Opens the editor with a clean session (clears the previous autosave).
 export async function openEditor(page: Page) {
   await page.goto('/');
-  await page.evaluate(() => new Promise((resolve) => {
-    const request = indexedDB.deleteDatabase('klip-studio');
-    request.onsuccess = request.onerror = request.onblocked = () => resolve(null);
-  }));
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const request = indexedDB.deleteDatabase('klip-studio');
+        request.onsuccess = request.onerror = request.onblocked = () => resolve(null);
+      }),
+  );
   await page.reload();
-  await expect(page.locator('.save-status')).toHaveText('Kaydedildi');
+  await expect(page.locator('.save-status')).toHaveText('Saved');
 }
 
 export async function importMedia(page: Page, ...names: string[]) {
   const before = await page.locator('.asset').count();
-  await page.locator('.side-tab', { hasText: 'Medya' }).click();
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
   await page.setInputFiles('.dropzone input[type=file]', names.map(fixture));
   await expect(page.locator('.asset')).toHaveCount(before + names.length, { timeout: 20_000 });
 }
@@ -25,7 +28,7 @@ export async function addToMain(page: Page, index: number) {
   await page.locator('.asset').nth(index).dblclick();
 }
 
-// Önizleme tuvalinde siyah olmayan piksel oranı (0..1)
+// Share of non-black pixels in the preview canvas (0..1)
 export function litRatio(page: Page) {
   return page.evaluate(() => {
     const gl = document.querySelector<HTMLCanvasElement>('.stage canvas')!;

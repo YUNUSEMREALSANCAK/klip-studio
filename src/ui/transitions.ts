@@ -5,14 +5,14 @@ import type { MediaClip, TransitionType } from '../core/types';
 export interface Cut {
   from: MediaClip;
   to: MediaClip;
-  index: number; // kaçıncı kesim (1'den başlar)
+  index: number; // cut number (1-based)
 }
 
 const DEFAULT_DURATION = 0.8;
 
 export const maxTransitionDuration = (cut: Cut) => Math.max(0.2, Math.min(2, cut.from.duration, cut.to.duration));
 
-// Geçişin uygulanacağı kesim: seçili ana klibin sonu (son klipse başı); seçim yoksa oynatma çizgisine en yakın kesim.
+// The cut a transition applies to: the end of the selected main clip (its start if it's the last); without a selection, the cut nearest the playhead.
 export function targetCut(): Cut | null {
   const s = useEditor.getState();
   const main = sortedTrack<MediaClip>(s.project.clips, 'main');
@@ -30,7 +30,7 @@ export function targetCut(): Cut | null {
   return cutAt(best);
 }
 
-// Geçişi uygular ve kesim çevresini kısaca oynatarak gösterir.
+// Applies the transition and briefly plays around the cut to preview it.
 export function applyTransition(cut: Cut, type: TransitionType | null, duration?: number) {
   const s = useEditor.getState();
   const length = Math.min(duration ?? cut.to.transition?.duration ?? DEFAULT_DURATION, maxTransitionDuration(cut));

@@ -3,14 +3,24 @@ import { useEditor } from './store';
 import { clipEnd, createMediaClip, createTextClip, formatTime, projectDuration, rippleDelete, sortedTrack, splitClip } from './timeline';
 import type { AspectRatio, Clip, MediaClip, TextClip, TransitionType } from './types';
 
-// Komut katmanı: her düzenleme tipli bir JSON komutudur. Arayüz dışından (tarayıcı API'si,
-// MCP sunucusu, doğal dil paneli) editörü sürmek için tek giriş noktası budur.
-// Her komut geri alınabilir; geçmişe yazılır.
+// Command layer: every edit is a typed JSON command. It is the single entry point for driving
+// the editor from outside the UI (browser API, MCP server, natural-language panel).
+// Every command is undoable; it is recorded in history.
 
 export type Command =
   | { name: 'get_state' }
   | { name: 'add_media'; assetId: string; track?: 'main' | 'overlay' | 'audio'; start?: number }
-  | { name: 'add_text'; text: string; start?: number; duration?: number; preset?: TextClip['preset']; animation?: TextClip['animation']; y?: number; font?: string; color?: string }
+  | {
+      name: 'add_text';
+      text: string;
+      start?: number;
+      duration?: number;
+      preset?: TextClip['preset'];
+      animation?: TextClip['animation'];
+      y?: number;
+      font?: string;
+      color?: string;
+    }
   | { name: 'update_clip'; clipId: string; changes: Record<string, unknown> }
   | { name: 'remove_clip'; clipId: string }
   | { name: 'split'; time: number; clipId?: string }
@@ -29,19 +39,23 @@ export type AiTool = 'captions' | 'remove_silences' | 'remove_fillers' | 'denois
 export interface CommandSpec {
   name: Command['name'];
   description: string;
-  parameters: Record<string, unknown>; // JSON Schema (yalnız özellikler)
+  parameters: Record<string, unknown>; // JSON Schema (properties only)
   required?: string[];
 }
 
 const TRANSITIONS = ['fade', 'fadeblack', 'slideleft', 'slideright', 'slideup', 'wipeleft', 'wiperight', 'circleopen', 'zoomin', 'pixelize', 'radial', 'blur'];
 
-// Ajanlara gösterilen komut kataloğu (Claude araçları ve MCP aynı tanımları kullanır).
+// Command catalog shown to agents (Claude tools and MCP share these definitions).
 export const COMMAND_SPECS: CommandSpec[] = [
-  { name: 'get_state', description: 'Projenin özetini döndürür: varlıklar, klipler (id, iz, başlangıç, süre), toplam süre, oran.', parameters: {} },
+  { name: 'get_state', description: 'Returns a project summary: assets, clips (id, track, start, duration), total duration, aspect ratio.', parameters: {} },
   {
     name: 'add_media',
-    description: 'Medya kütüphanesindeki bir varlığı zaman çizelgesine ekler. Ana izde sona eklenir; diğer izlerde verilen başlangıca.',
-    parameters: { assetId: { type: 'string' }, track: { type: 'string', enum: ['main', 'overlay', 'audio'] }, start: { type: 'number', description: 'saniye' } },
+    description: 'Adds a library asset to the timeline. On the main track it is appended; on other tracks it is placed at the given start.',
+    parameters: {
+      assetId: { type: 'string' },
+      track: { type: 'string', enum: ['main', 'overlay', 'audio'] },
+      start: { type: 'number', description: 'saniye' },
+    },
     required: ['assetId'],
   },
   {
@@ -53,7 +67,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
       duration: { type: 'number' },
       preset: { type: 'string', enum: ['classic', 'box', 'karaoke', 'neon', 'title'] },
       animation: { type: 'string', enum: ['none', 'fade', 'pop', 'typewriter', 'slideup'] },
-      y: { type: 'number', description: 'dikey konum 0 (üst) – 1 (alt)' },
+      y: { type: 'number', description: 'vertical position 0 (top) – 1 (bottom)' },
       font: { type: 'string' },
       color: { type: 'string', description: '#rrggbb' },
     },
@@ -62,41 +76,54 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'update_clip',
     description:
-      'Bir klibin alanlarını değiştirir. Medya: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground, transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}. Metin: text, preset, animation, color, fontSize, y, font. Ortak: start, duration.',
+      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground, slowMotion, transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}. Text: text, preset, animation, color, fontSize, y, font. Both: start, duration.',
     parameters: { clipId: { type: 'string' }, changes: { type: 'object' } },
     required: ['clipId', 'changes'],
   },
   { name: 'remove_clip', description: 'Klibi siler.', parameters: { clipId: { type: 'string' } }, required: ['clipId'] },
-  { name: 'split', description: 'Verilen saniyede klibi (verilmezse o andaki tüm klipleri) böler.', parameters: { time: { type: 'number' }, clipId: { type: 'string' } }, required: ['time'] },
+  {
+    name: 'split',
+    description: 'Splits the given clip (or every clip under the time) at the given second.',
+    parameters: { time: { type: 'number' }, clipId: { type: 'string' } },
+    required: ['time'],
+  },
   {
     name: 'delete_range',
-    description: '[start, end) aralığını tüm izlerden siler ve sonrasını sola kaydırır (ripple delete).',
+    description: 'Deletes [start, end) from every track and shifts everything after it left (ripple delete).',
     parameters: { start: { type: 'number' }, end: { type: 'number' } },
     required: ['start', 'end'],
   },
   {
     name: 'set_transition',
-    description: 'Ana izde toClipId klibinin başındaki kesime geçiş koyar (type null = kaldır).',
+    description: 'Sets the transition at the cut before main-track clip toClipId (type null removes it).',
     parameters: { toClipId: { type: 'string' }, type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] }, duration: { type: 'number' } },
     required: ['toClipId', 'type'],
   },
   {
     name: 'set_speed',
-    description: `Klibin hızını (0.25–4) veya hız eğrisini değiştirir. Eğriler: ${SPEED_CURVES.map((c) => c.name).join(', ')}; null eğriyi kaldırır.`,
+    description: `Changes a clip's speed (0.25–4) or speed curve. Curves: ${SPEED_CURVES.map((c) => c.name).join(', ')}; null removes the curve.`,
     parameters: { clipId: { type: 'string' }, speed: { type: 'number' }, curve: { type: ['string', 'null'] } },
     required: ['clipId'],
   },
-  { name: 'set_aspect', description: 'Proje oranını değiştirir.', parameters: { aspect: { type: 'string', enum: ['16:9', '9:16', '1:1', '4:5'] } }, required: ['aspect'] },
-  { name: 'set_background_blur', description: 'Boşlukları videonun bulanık hâliyle doldurmayı açar/kapatır.', parameters: { enabled: { type: 'boolean' } }, required: ['enabled'] },
-  { name: 'seek', description: 'Oynatma çizgisini taşır.', parameters: { time: { type: 'number' } }, required: ['time'] },
-  { name: 'undo', description: 'Son işlemi geri alır.', parameters: {} },
-  { name: 'redo', description: 'Geri alınanı yineler.', parameters: {} },
+  {
+    name: 'set_aspect',
+    description: 'Changes the project aspect ratio.',
+    parameters: { aspect: { type: 'string', enum: ['16:9', '9:16', '1:1', '4:5'] } },
+    required: ['aspect'],
+  },
+  { name: 'set_background_blur', description: 'Turns blurred-background fill on or off.', parameters: { enabled: { type: 'boolean' } }, required: ['enabled'] },
+  { name: 'seek', description: 'Moves the playhead.', parameters: { time: { type: 'number' } }, required: ['time'] },
+  { name: 'undo', description: 'Undoes the last change.', parameters: {} },
+  { name: 'redo', description: 'Redoes the last undone change.', parameters: {} },
   {
     name: 'run_ai',
     description:
-      'Yerel yapay zeka aracını çalıştırır ve bitmesini bekler. captions {language?, model?}; remove_silences {thresholdDb?, minDuration?}; remove_fillers; denoise {clipId}; split_scenes {clipId}; reframe {clipId}; enhance {clipId}; beats {clipId}; translate {src, tgt, bilingual?}; speech {text, voice?}.',
+      'Runs a local AI tool and waits for it to finish. captions {language?, model?}; remove_silences {thresholdDb?, minDuration?}; remove_fillers; denoise {clipId}; split_scenes {clipId}; reframe {clipId}; enhance {clipId}; beats {clipId}; translate {src, tgt, bilingual?}; speech {text, voice?}.',
     parameters: {
-      tool: { type: 'string', enum: ['captions', 'remove_silences', 'remove_fillers', 'denoise', 'split_scenes', 'reframe', 'enhance', 'beats', 'translate', 'speech'] },
+      tool: {
+        type: 'string',
+        enum: ['captions', 'remove_silences', 'remove_fillers', 'denoise', 'split_scenes', 'reframe', 'enhance', 'beats', 'translate', 'speech'],
+      },
       options: { type: 'object' },
     },
     required: ['tool'],
@@ -110,7 +137,15 @@ function summarize() {
   const describe = (c: Clip) =>
     c.type === 'text'
       ? { id: c.id, track: c.track, start: round(c.start), duration: round(c.duration), text: c.text }
-      : { id: c.id, track: c.track, start: round(c.start), duration: round(c.duration), asset: assets[c.assetId]?.name, speed: c.speed, transition: c.transition?.type };
+      : {
+          id: c.id,
+          track: c.track,
+          start: round(c.start),
+          duration: round(c.duration),
+          asset: assets[c.assetId]?.name,
+          speed: c.speed,
+          transition: c.transition?.type,
+        };
   return {
     aspect: project.aspect,
     duration: round(projectDuration(project.clips)),
@@ -124,11 +159,11 @@ const round = (n: number) => Math.round(n * 100) / 100;
 
 function requireClip(id: string): Clip {
   const clip = editor().project.clips.find((c) => c.id === id);
-  if (!clip) throw new Error(`Klip bulunamadı: ${id}`);
+  if (!clip) throw new Error(`Clip not found: ${id}`);
   return clip;
 }
 
-// İzin verilen alanları birleştirir; iç içe nesneler (transform, filter) kısmi güncellenir.
+// Merges allowed fields; nested objects (transform, filter) are partially updated.
 function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Clip> {
   const allowed =
     clip.type === 'text'
@@ -136,7 +171,7 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
       : ['start', 'duration', 'volume', 'muted', 'speed', 'opacity', 'fadeIn', 'fadeOut', 'duck', 'removeBackground', 'transform', 'filter', 'slowMotion'];
   const patch: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(changes)) {
-    if (!allowed.includes(key)) throw new Error(`Değiştirilemeyen alan: ${key}`);
+    if (!allowed.includes(key)) throw new Error(`Field cannot be changed: ${key}`);
     const current = (clip as unknown as Record<string, unknown>)[key];
     patch[key] = value && typeof value === 'object' && current && typeof current === 'object' ? { ...current, ...value } : value;
   }
@@ -144,7 +179,7 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
   return patch as Partial<Clip>;
 }
 
-// Bir komutu çalıştırır ve sonucunu döndürür. AI komutları bitene kadar bekler.
+// Runs a command and returns its result. Waits for AI commands to finish.
 export async function execute(command: Command): Promise<unknown> {
   const s = editor();
   switch (command.name) {
@@ -152,7 +187,7 @@ export async function execute(command: Command): Promise<unknown> {
       return summarize();
     case 'add_media': {
       const asset = s.assets[command.assetId];
-      if (!asset) throw new Error(`Varlık bulunamadı: ${command.assetId}`);
+      if (!asset) throw new Error(`Asset not found: ${command.assetId}`);
       const track = command.track ?? (asset.kind === 'audio' ? 'audio' : 'main');
       const start = track === 'main' ? sortedTrack(s.project.clips, 'main').reduce((end, c) => Math.max(end, clipEnd(c)), 0) : (command.start ?? s.time);
       const clip = createMediaClip(asset, track, start);
@@ -182,30 +217,30 @@ export async function execute(command: Command): Promise<unknown> {
       return { ok: true };
     case 'split': {
       const targets = s.project.clips.filter((c) => (command.clipId ? c.id === command.clipId : true) && command.time > c.start && command.time < clipEnd(c));
-      if (!targets.length) throw new Error(`${formatTime(command.time)} anında bölünecek klip yok`);
+      if (!targets.length) throw new Error(`No clip to split at ${formatTime(command.time)}`);
       s.mutate((clips) => clips.flatMap((c) => (targets.includes(c) ? (splitClip(c, command.time) ?? [c]) : [c])));
       return { splitClips: targets.length };
     }
     case 'delete_range':
-      if (command.end <= command.start) throw new Error('Bitiş başlangıçtan büyük olmalı');
+      if (command.end <= command.start) throw new Error('End must be after start');
       s.mutate((clips) => rippleDelete(clips, command.start, command.end));
       return { removedSeconds: round(command.end - command.start) };
     case 'set_transition': {
       const clip = requireClip(command.toClipId) as MediaClip;
       const main = sortedTrack<MediaClip>(s.project.clips, 'main');
       const index = main.findIndex((c) => c.id === clip.id);
-      if (index < 1) throw new Error('Geçiş yalnız ana izde, ilk klip dışındaki kliplere konur');
+      if (index < 1) throw new Error('Transitions go on main-track clips other than the first');
       const duration = Math.min(command.duration ?? 0.8, main[index - 1].duration, clip.duration);
       s.updateClip(clip.id, { transition: command.type ? { type: command.type, duration } : undefined } as Partial<MediaClip>);
       return { ok: true };
     }
     case 'set_speed': {
       const clip = requireClip(command.clipId);
-      if (clip.type !== 'media') throw new Error('Hız yalnız medya kliplerinde değişir');
+      if (clip.type !== 'media') throw new Error('Speed only applies to media clips');
       const { setSpeed, setSpeedCurve } = await import('../ui/editActions');
       if (command.curve !== undefined) {
         const curve = command.curve === null ? null : SPEED_CURVES.find((c) => c.name === command.curve);
-        if (curve === undefined) throw new Error(`Bilinmeyen hız eğrisi: ${command.curve}`);
+        if (curve === undefined) throw new Error(`Unknown speed curve: ${command.curve}`);
         setSpeedCurve(clip, curve);
       } else if (command.speed) {
         setSpeed(clip, Math.min(Math.max(command.speed, 0.25), 4));

@@ -35,23 +35,12 @@ export interface Transition {
 }
 
 export type TransitionType =
-  | 'fade'
-  | 'fadeblack'
-  | 'slideleft'
-  | 'slideright'
-  | 'slideup'
-  | 'wipeleft'
-  | 'wiperight'
-  | 'circleopen'
-  | 'zoomin'
-  | 'pixelize'
-  | 'radial'
-  | 'blur';
+  'fade' | 'fadeblack' | 'slideleft' | 'slideright' | 'slideup' | 'wipeleft' | 'wiperight' | 'circleopen' | 'zoomin' | 'pixelize' | 'radial' | 'blur';
 
 export interface Transform {
   x: number; // merkez, 0..1
   y: number; // merkez, 0..1
-  scale: number; // tuvale göre genişlik oranı
+  scale: number; // width as a fraction of the canvas
   rotation: number; // derece
 }
 
@@ -59,13 +48,13 @@ export type KeyframeProp = 'x' | 'y' | 'scale' | 'rotation' | 'opacity' | 'volum
 
 export interface Keyframe {
   prop: KeyframeProp;
-  time: number; // klibin başından itibaren saniye
+  time: number; // seconds from the clip start
   value: number;
 }
 
 export interface MaskSettings {
   shape: 'rect' | 'ellipse' | 'linear';
-  x: number; // katman içinde merkez, 0..1
+  x: number; // center within the layer, 0..1
   y: number;
   width: number; // katmana oran
   height: number;
@@ -86,7 +75,7 @@ export interface Lut {
   data: string; // base64, size³ × RGB bayt
 }
 
-// Otomatik çerçeveleme: zamana göre yatay odak noktası (kaynak saniyesi → 0..1)
+// Auto reframe: horizontal focus over time (source seconds → 0..1)
 export interface ReframeTrack {
   times: number[];
   centers: number[];
@@ -97,13 +86,13 @@ export interface MediaClip {
   type: 'media';
   track: 'main' | 'overlay' | 'audio';
   assetId: string;
-  start: number; // zaman çizelgesindeki başlangıç (sn)
-  in: number; // kaynaktaki başlangıç (sn)
+  start: number; // start on the timeline (s)
+  in: number; // start in the source (s)
   duration: number;
   volume: number; // 0..2
   muted: boolean;
   filter: FilterSettings;
-  transition?: Transition; // önceki klipten bu klibe geçiş (yalnız ana iz)
+  transition?: Transition; // transition from the previous clip into this one (main track only)
   removeBackground: boolean;
   transform: Transform;
   reframe?: ReframeTrack;
@@ -114,12 +103,12 @@ export interface MediaClip {
   chroma?: ChromaSettings;
   fadeIn: number; // sn
   fadeOut: number; // sn
-  duck: boolean; // konuşma olduğunda sesi kıs
-  slowMotion?: 'blend' | 'ai'; // yavaşlatmada akıcılık: kare harmanlama veya RIFE ara kare (dışa aktarmada)
-  speedCurve?: SpeedCurve; // varsa speed, eğrinin ortalamasıdır
+  duck: boolean; // lower the volume while someone speaks
+  slowMotion?: 'blend' | 'ai'; // smooth slow motion: frame blending or RIFE interpolation (on export)
+  speedCurve?: SpeedCurve; // when set, speed is the curve's average
 }
 
-// Klip içinde değişen hız: u = klip süresine göre konum (0..1), speed = o andaki hız.
+// Speed varying within a clip: u = position relative to clip duration (0..1), speed = speed at that point.
 export interface SpeedCurve {
   name: string;
   points: { u: number; speed: number }[];
@@ -130,7 +119,7 @@ export type TextAnimation = 'none' | 'fade' | 'pop' | 'typewriter' | 'slideup';
 
 export interface Word {
   text: string;
-  start: number; // zaman çizelgesi saniyesi
+  start: number; // timeline seconds
   end: number;
 }
 
@@ -145,7 +134,7 @@ export interface TextClip {
   animation: TextAnimation;
   color: string;
   highlight: string;
-  fontSize: number; // tuval yüksekliğine oran
+  fontSize: number; // fraction of canvas height
   font?: string; // Google Fonts ailesi
   y: number; // 0..1
   words?: Word[];
@@ -159,7 +148,7 @@ export interface Project {
   aspect: AspectRatio;
   fps: number;
   background: string;
-  backgroundBlur: boolean; // boşlukları videonun bulanık hâliyle doldur
+  backgroundBlur: boolean; // fill empty space with a blurred copy of the video
   clips: Clip[];
   markers: number[];
   luts: Record<string, Lut>;

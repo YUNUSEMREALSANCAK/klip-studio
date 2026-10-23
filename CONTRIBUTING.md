@@ -1,11 +1,11 @@
-# Katkıda bulunma
+# Contributing
 
-Katkılarınız memnuniyetle karşılanır.
+Contributions are welcome.
 
-1. Önce [AGENTS.md](AGENTS.md) ve [docs/architecture.md](docs/architecture.md) dosyalarını okuyun.
-2. Üzerinde çalışmak istediğiniz işi [ROADMAP.md](ROADMAP.md) içinden seçin veya bir issue açın.
-3. Bir dal açın, değişikliği küçük tutun.
-4. `npm run typecheck` ve `npm run build` temiz geçmeli.
-5. Pull request açıklamasında neyi, neden değiştirdiğinizi ve nasıl denediğinizi yazın; görsel değişiklikse ekran görüntüsü ekleyin.
+1. Read [AGENTS.md](AGENTS.md) and [docs/architecture.md](docs/architecture.md) first.
+2. Pick something from [ROADMAP.md](ROADMAP.md) or open an issue.
+3. Create a branch and keep the change small.
+4. `npm run typecheck`, `npm test` and `npm run build` must pass.
+5. In the pull request, describe what you changed, why, and how you tested it; add a screenshot for visual changes.
 
-Katkılar, projenin lisansıyla (MIT veya Apache-2.0) yayınlanır.
+Contributions are released under the project's license (MIT or Apache-2.0).

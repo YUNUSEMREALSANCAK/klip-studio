@@ -16,9 +16,9 @@ interface Entry extends AssistantEvent {
   role: 'user' | 'assistant';
 }
 
-const EXAMPLES = ['Sessizlikleri kes ve Türkçe altyazı ekle', 'Videoyu 9:16 yap ve boşlukları bulanık doldur', 'Başa "Hoş geldiniz" başlığı ekle'];
+const EXAMPLES = ['Cut the silences and add English captions', 'Make it 9:16 and fill the gaps with blur', 'Add a "Welcome" title at the start'];
 
-// Claude ile doğal dilde kurgu sohbeti.
+// Natural-language editing chat with Claude.
 export function AssistantPanel() {
   const [apiKey, setApiKey] = useState(readKey);
   const [input, setInput] = useState('');
@@ -28,7 +28,7 @@ export function AssistantPanel() {
   const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // scrollTo yeni tarayıcılarda Promise döndürür; effect'ten döndürülmemeli.
+    // scrollTo returns a Promise in newer browsers; it must not be returned from an effect.
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [entries]);
 
@@ -37,7 +37,7 @@ export function AssistantPanel() {
     try {
       localStorage.setItem(KEY_STORAGE, value);
     } catch {
-      // Depolama kapalıysa anahtar yalnız bu oturumda kalır.
+      // If storage is unavailable, the key lives only for this session.
     }
   };
 
@@ -55,13 +55,13 @@ export function AssistantPanel() {
 
   return (
     <div className="assistant">
-      <h3>{tr('Asistan')}</h3>
-      <p className="hint">{tr('İstediğinizi yazın; Claude editörün komutlarını kullanarak uygular. Her adım geri alınabilir (⌘Z).')}</p>
+      <h3>{tr('Assistant')}</h3>
+      <p className="hint">{tr('Describe what you want; Claude carries it out with the editor commands. Every step can be undone (⌘Z).')}</p>
       <div className="field">
-        <label>{tr('Anthropic API anahtarı')}</label>
+        <label>{tr('Anthropic API key')}</label>
         <input type="password" placeholder={tr('sk-ant-…')} value={apiKey} onChange={(e) => saveKey(e.target.value)} />
         <span className="hint">
-          {tr("Anahtar yalnız bu tarayıcıda saklanır. Claude'a proje özeti ve önizleme kareleri gönderilir, medya dosyalarınız gönderilmez.")}
+          {tr('The key is stored only in this browser. Claude receives a project summary and preview frames, never your media files.')}
         </span>
       </div>
       <div className="chat-log" ref={logRef}>
@@ -79,7 +79,7 @@ export function AssistantPanel() {
             {entry.kind === 'tool' ? `⚙ ${entry.text}` : entry.kind === 'error' ? trMessage(entry.text) : entry.text}
           </div>
         ))}
-        {busy && <div className="chat-entry assistant tool">{tr('Çalışıyor…')}</div>}
+        {busy && <div className="chat-entry assistant tool">{tr('Working…')}</div>}
       </div>
       <form
         className="row"
@@ -90,13 +90,13 @@ export function AssistantPanel() {
       >
         <input
           type="text"
-          placeholder={apiKey ? tr('Ne yapmak istersiniz?') : tr('Önce API anahtarını girin')}
+          placeholder={apiKey ? tr('What would you like to do?') : tr('Enter your API key first')}
           value={input}
           disabled={!apiKey || busy}
           onChange={(e) => setInput(e.target.value)}
         />
         <button className="btn primary" style={{ flex: 'none' }} disabled={!apiKey || busy || !input.trim()}>
-          {tr('Gönder')}
+          {tr('Send')}
         </button>
       </form>
       {entries.length > 0 && (
@@ -108,7 +108,7 @@ export function AssistantPanel() {
             setEntries([]);
           }}
         >
-          {tr('Yeni sohbet')}
+          {tr('New chat')}
         </button>
       )}
     </div>

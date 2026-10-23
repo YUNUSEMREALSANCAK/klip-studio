@@ -1,24 +1,22 @@
 import { create } from 'zustand';
-import { EN } from './en';
+import { TR } from './tr';
 
-// Arayüz dili. Anahtar Türkçe metnin kendisidir; çevirisi olmayan metin Türkçe görünür.
+// UI language. Source strings are English; the Turkish translation lives in ./tr.ts.
 
-export type Lang = 'tr' | 'en';
+export type Lang = 'en' | 'tr';
 
 const STORAGE_KEY = 'klip-lang';
 
 function initialLang(): Lang {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'tr' || saved === 'en') return saved;
+    return localStorage.getItem(STORAGE_KEY) === 'tr' ? 'tr' : 'en';
   } catch {
-    // Depolama kapalıysa tarayıcı diline bak.
+    return 'en';
   }
-  return navigator.language.toLowerCase().startsWith('tr') ? 'tr' : 'en';
 }
 
 const startLang = initialLang();
-// CSS büyük harf dönüşümü (ör. i → İ) sayfa diline göre yapılır.
+// CSS text-transform (e.g. uppercase i → İ) follows the document language.
 document.documentElement.lang = startLang;
 
 export const useLang = create<{ lang: Lang; setLang: (lang: Lang) => void }>((set) => ({
@@ -27,24 +25,24 @@ export const useLang = create<{ lang: Lang; setLang: (lang: Lang) => void }>((se
     try {
       localStorage.setItem(STORAGE_KEY, lang);
     } catch {
-      // Yalnız bu oturum için geçerli olur.
+      // Storage unavailable: the choice applies to this session only.
     }
     document.documentElement.lang = lang;
     set({ lang });
   },
 }));
 
-// translate: Türkçe metni seçili dile çevirir.
+// Translates an English UI string into the selected language.
 export function tr(text: string): string {
-  return useLang.getState().lang === 'en' ? (EN[text] ?? text) : text;
+  return useLang.getState().lang === 'tr' ? (TR[text] ?? text) : text;
 }
 
-// Önekli dinamik mesajları da çevirir: "Hata: …", "İçe aktarılıyor: dosya.mp4".
+// Also translates prefixed dynamic messages such as "Error: …" or "Importing: clip.mp4".
 export function trMessage(text: string): string {
-  if (useLang.getState().lang !== 'en' || EN[text]) return tr(text);
+  if (useLang.getState().lang !== 'tr' || TR[text]) return tr(text);
   const split = text.indexOf(': ');
   if (split < 0) return text;
   const head = text.slice(0, split);
-  const translatedHead = EN[head] ?? EN[`${head}:`]?.replace(/:$/, '') ?? head;
+  const translatedHead = TR[head] ?? TR[`${head}:`]?.replace(/:$/, '') ?? head;
   return `${translatedHead}: ${trMessage(text.slice(split + 2))}`;
 }

@@ -1,7 +1,7 @@
 import { strFromU8, strToU8, unzip, zip } from 'fflate';
 import type { Asset, Project } from './types';
 
-// Kalıcı kayıt: proje JSON'u ve medya dosyaları tarayıcının IndexedDB'sinde tutulur.
+// Persistence: the project JSON and media files are stored in the browser's IndexedDB.
 
 const DB_NAME = 'klip-studio';
 const PROJECT_KEY = 'current';
@@ -52,36 +52,32 @@ export async function clearSession() {
   await run('assets', 'readwrite', (s) => s.clear());
 }
 
-// .klip dosyası: proje JSON'u + varlık bilgileri + medya dosyalarından oluşan bir zip arşivi.
+// .klip file: a zip archive of the project JSON, asset metadata and media files.
 export async function exportKlip(project: Project, assets: Record<string, Asset>): Promise<Blob> {
   const files: Record<string, Uint8Array> = {};
   const meta = Object.values(assets).map(({ url: _url, file, ...rest }) => ({ ...rest, type: file.type }));
   files['project.json'] = strToU8(JSON.stringify({ version: FORMAT_VERSION, project, assets: meta }, null, 2));
   for (const asset of Object.values(assets)) files[`media/${asset.id}`] = new Uint8Array(await asset.file.arrayBuffer());
-  const data = await new Promise<Uint8Array>((resolve, reject) =>
-    zip(files, { level: 0 }, (error, out) => (error ? reject(error) : resolve(out))),
-  );
+  const data = await new Promise<Uint8Array>((resolve, reject) => zip(files, { level: 0 }, (error, out) => (error ? reject(error) : resolve(out))));
   return new Blob([data as BlobPart], { type: 'application/zip' });
 }
 
 export async function importKlip(file: Blob): Promise<{ project: Project; assets: Record<string, Asset> }> {
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const files = await new Promise<Record<string, Uint8Array>>((resolve, reject) =>
-    unzip(bytes, (error, out) => (error ? reject(error) : resolve(out))),
-  );
-  if (!files['project.json']) throw new Error('Geçersiz .klip dosyası');
+  const files = await new Promise<Record<string, Uint8Array>>((resolve, reject) => unzip(bytes, (error, out) => (error ? reject(error) : resolve(out))));
+  if (!files['project.json']) throw new Error('Invalid .klip file');
   const parsed = JSON.parse(strFromU8(files['project.json'])) as {
     version: number;
     project: Project;
     assets: (Omit<Asset, 'url' | 'file'> & { type: string })[];
   };
-  if (parsed.version > FORMAT_VERSION) throw new Error('Bu proje daha yeni bir sürümle kaydedilmiş');
+  if (parsed.version > FORMAT_VERSION) throw new Error('This project was saved by a newer version');
   const assets: Record<string, Asset> = {};
   for (const { type, ...meta } of parsed.assets) {
     const data = files[`media/${meta.id}`];
     if (!data) continue;
     const blob = new Blob([data as BlobPart], { type });
-    // JSON, görsellerin sonsuz süresini (Infinity) null yapar; geri çevir.
+    // JSON turns an image's infinite duration (Infinity) into null; restore it.
     const duration = meta.kind === 'image' ? Infinity : meta.duration;
     assets[meta.id] = { ...meta, duration, file: blob, url: URL.createObjectURL(blob) };
   }

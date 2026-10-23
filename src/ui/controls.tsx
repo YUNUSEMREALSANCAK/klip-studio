@@ -48,7 +48,7 @@ export function Toggle({ label, on, onChange }: { label: string; on: boolean; on
   );
 }
 
-// Açılır-kapanır bölüm; uzun özellik listesini derli toplu tutar.
+// Collapsible section; keeps long property lists tidy.
 export function Section({ title, children, open = true }: { title: string; children: ReactNode; open?: boolean }) {
   return (
     <details className="section" open={open}>
@@ -58,7 +58,7 @@ export function Section({ title, children, open = true }: { title: string; child
   );
 }
 
-// Anahtar kare destekli kaydırıcı: ◆ ile oynatma çizgisinde kare ekler/siler; değer o anki animasyondan okunur.
+// Keyframe-aware slider: ◆ adds/removes a keyframe at the playhead; the value is read from the current animation.
 export function KeySlider({
   clip,
   prop,
@@ -90,7 +90,7 @@ export function KeySlider({
       extra={
         <button
           className={`key-toggle ${active ? 'on' : animated ? 'animated' : ''}`}
-          title={tr(active ? 'Bu anahtar kareyi sil' : 'Oynatma çizgisine anahtar kare ekle')}
+          title={tr(active ? 'Delete this keyframe' : 'Add a keyframe at the playhead')}
           onClick={(e) => {
             e.preventDefault();
             s().updateClip(clip.id, toggleKeyframe(clip, prop, s().time) as Partial<MediaClip>);

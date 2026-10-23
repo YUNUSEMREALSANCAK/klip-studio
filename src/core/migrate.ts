@@ -1,6 +1,6 @@
 import { DEFAULT_FILTER, DEFAULT_TRANSFORM, type Clip, type Project } from './types';
 
-// Eski sürümlerle kaydedilmiş projelere yeni alanların varsayılan değerlerini ekler.
+// Adds default values for new fields to projects saved by older versions.
 export function normalizeProject(project: Project): Project {
   return {
     ...project,
@@ -23,7 +23,7 @@ function normalizeClip(clip: Clip): Clip {
     fadeIn: clip.fadeIn ?? 0,
     fadeOut: clip.fadeOut ?? 0,
     duck: clip.duck ?? false,
-    // v0.4'teki smoothSlowMo açık/kapalı alanı → slowMotion
+    // v0.4 smoothSlowMo on/off field → slowMotion
     slowMotion: clip.slowMotion ?? ((clip as { smoothSlowMo?: boolean }).smoothSlowMo ? 'blend' : undefined),
   };
 }

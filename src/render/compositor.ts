@@ -3,7 +3,7 @@ import { fitRect, overlayRect } from './layout';
 import { LAYER_FRAGMENT, QUAD_VERTEX, TRANSITION_FRAGMENT, TRANSITION_INDEX } from './shaders';
 
 export interface Mask {
-  data: Uint8Array; // satır sırası yukarıdan aşağı, tek kanal
+  data: Uint8Array; // rows top to bottom, single channel
   width: number;
   height: number;
 }
@@ -22,17 +22,17 @@ export interface Layer {
   transform: Transform;
   mode: 'contain' | 'cover' | 'overlay';
   focusX?: number; // cover modunda yatay odak (0..1)
-  matte?: Mask | null; // arka plan kaldırma maskesi
-  shape?: MaskSettings; // şekil maskesi
+  matte?: Mask | null; // background removal matte
+  shape?: MaskSettings; // shape mask
   chroma?: { color: string; similarity: number; smoothness: number };
   lut?: LutData | null;
-  blur?: number; // örnekleme aralığı (kaynak pikseli)
+  blur?: number; // sample spacing (source pixels)
   opacity?: number;
 }
 
 type Target = 'screen' | 'from' | 'to';
 
-// WebGL2 ile katmanları ve geçişleri çizen küçük bir derleyici.
+// A small WebGL2 compositor that draws layers and transitions.
 export class Compositor {
   readonly gl: WebGL2RenderingContext;
   width: number;
@@ -49,7 +49,7 @@ export class Compositor {
 
   constructor(canvas: HTMLCanvasElement | OffscreenCanvas, width: number, height: number) {
     const gl = canvas.getContext('webgl2', { alpha: false, premultipliedAlpha: false, preserveDrawingBuffer: true });
-    if (!gl) throw new Error('Tarayıcınız WebGL2 desteklemiyor');
+    if (!gl) throw new Error('Your browser does not support WebGL2');
     this.gl = gl as WebGL2RenderingContext;
     this.width = width;
     this.height = height;
@@ -95,8 +95,8 @@ export class Compositor {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, layer.source);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
-    // Birim 1'e her zaman maske dokusu bağlanır; aksi hâlde bir önceki geçişten kalan
-    // hedef dokusu bağlı kalır ve aynı dokuya çizim WebGL tarafından reddedilir (geri besleme döngüsü).
+    // Unit 1 always gets the mask texture; otherwise the target texture left over from a
+    // previous transition stays bound and WebGL rejects drawing into it (feedback loop).
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.maskTexture);
     if (layer.matte) {
@@ -118,7 +118,7 @@ export class Compositor {
     gl.uniform1f(u('uLutSize'), layer.lut?.size ?? 2);
     const shape = layer.shape;
     gl.uniform1i(u('uShape'), shape ? { rect: 1, ellipse: 2, linear: 3 }[shape.shape] : 0);
-    // Arayüzde y yukarıdan aşağı; doku koordinatında aşağıdan yukarı.
+    // UI y runs top to bottom; texture coordinates run bottom to top.
     if (shape) gl.uniform4f(u('uShapeRect'), shape.x, 1 - shape.y, shape.width, shape.height);
     gl.uniform1f(u('uFeather'), shape?.feather ?? 0);
     gl.uniform1i(u('uShapeInvert'), shape?.invert ? 1 : 0);
@@ -159,7 +159,7 @@ export class Compositor {
     this.drawQuad(this.transitionProgram, [0, 0, this.width, this.height]);
   }
 
-  // Katmanın tuval üzerindeki dikdörtgeni: [x, y, genişlik, yükseklik], piksel, sol üstten.
+  // The layer's rectangle on the canvas: [x, y, width, height] in pixels from the top left.
   private layerRect(layer: Layer): [number, number, number, number] {
     const { width: W, height: H } = this;
     const { width: w, height: h, transform } = layer;
@@ -171,10 +171,10 @@ export class Compositor {
     return [r.x, r.y, r.w, r.h];
   }
 
-  // Dikdörtgeni (sol üstten piksel) isteğe bağlı olarak merkezi etrafında döndürüp çizer.
+  // Draws the rectangle (pixels from the top left), optionally rotated around its center.
   private drawQuad(program: WebGLProgram, [x, y, w, h]: [number, number, number, number], rotation = 0) {
     const { gl } = this;
-    // Döndürme yoksa tam piksele yuvarla: alt piksel kaymaları kenarlarda titreme yapmasın.
+    // Without rotation, snap to whole pixels so subpixel shifts don't shimmer at the edges.
     const snap = rotation ? (v: number) => v : Math.round;
     const cx = x + w / 2;
     const cy = y + h / 2;
@@ -189,12 +189,7 @@ export class Compositor {
       return [(snap(rx) / this.width) * 2 - 1, 1 - (snap(ry) / this.height) * 2, u, v];
     };
     // konum (x, y) + uv (u, v); alt-sol uv (0,0)
-    const data = new Float32Array([
-      ...corner(x, y + h, 0, 0),
-      ...corner(x + w, y + h, 1, 0),
-      ...corner(x, y, 0, 1),
-      ...corner(x + w, y, 1, 1),
-    ]);
+    const data = new Float32Array([...corner(x, y + h, 0, 0), ...corner(x + w, y + h, 1, 0), ...corner(x, y, 0, 1), ...corner(x + w, y, 1, 1)]);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
     const position = gl.getAttribLocation(program, 'aPosition');

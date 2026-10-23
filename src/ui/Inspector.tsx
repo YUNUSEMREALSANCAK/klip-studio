@@ -25,54 +25,54 @@ function ProjectSettings() {
   const blur = useEditor((s) => s.project.backgroundBlur);
   return (
     <>
-      <h3>{tr('Proje')}</h3>
-      <div className="sub">{tr('Bir klip seçerek özelliklerini düzenleyin.')}</div>
+      <h3>{tr('Project')}</h3>
+      <div className="sub">{tr('Select a clip to edit its properties.')}</div>
       <div className="toggle">
-        <span>{tr('Arka plan rengi')}</span>
+        <span>{tr('Background color')}</span>
         <input type="color" value={background} onChange={(e) => useEditor.setState((s) => ({ project: { ...s.project, background: e.target.value } }))} />
       </div>
       <Toggle
-        label={tr('Boşlukları bulanık doldur')}
+        label={tr('Fill gaps with blur')}
         on={blur}
         onChange={(backgroundBlur) => {
           useEditor.getState().checkpoint();
           useEditor.setState((s) => ({ project: { ...s.project, backgroundBlur } }));
         }}
       />
-      <div className="hint">{tr('Dikey videoya yatay klip koyunca kenarlar videonun bulanık hâliyle dolar.')}</div>
+      <div className="hint">{tr('When a landscape clip is placed in a vertical project, the edges are filled with a blurred copy.')}</div>
       <AgentBridgeToggle />
       <div className="section-title" style={{ marginTop: 16 }}>
-        {tr('Kısayollar')}
+        {tr('Shortcuts')}
       </div>
       <div className="hint">
-        {tr('Boşluk — oynat / duraklat')}
+        {tr('Space — play / pause')}
         <br />
-        {tr('S veya ⌘B — böl')}
+        {tr('S or ⌘B — split')}
         <br />
-        {tr('Sil — klibi kaldır')}
+        {tr('Delete — remove clip')}
         <br />
-        {tr('⌘Z / ⇧⌘Z — geri al / yinele')}
+        {tr('⌘Z / ⇧⌘Z — undo / redo')}
         <br />
-        {tr('← → — kare kare ilerle (⇧ ile 1 sn)')}
+        {tr('← → — step one frame (⇧ for 1 s)')}
       </div>
     </>
   );
 }
 
 const PRESETS: { id: TextStylePreset; label: string }[] = [
-  { id: 'classic', label: 'Klasik' },
-  { id: 'box', label: 'Kutulu' },
+  { id: 'classic', label: 'Classic' },
+  { id: 'box', label: 'Boxed' },
   { id: 'karaoke', label: 'Karaoke' },
   { id: 'neon', label: 'Neon' },
-  { id: 'title', label: 'Başlık' },
+  { id: 'title', label: 'Title' },
 ];
 
 const ANIMATIONS: { id: TextAnimation; label: string }[] = [
-  { id: 'none', label: 'Yok' },
-  { id: 'fade', label: 'Belirme' },
-  { id: 'pop', label: 'Zıplama' },
-  { id: 'slideup', label: 'Yukarı kayma' },
-  { id: 'typewriter', label: 'Daktilo' },
+  { id: 'none', label: 'None' },
+  { id: 'fade', label: 'Fade' },
+  { id: 'pop', label: 'Pop' },
+  { id: 'slideup', label: 'Slide up' },
+  { id: 'typewriter', label: 'Typewriter' },
 ];
 
 function TextInspector({ clip }: { clip: TextClip }) {
@@ -80,7 +80,7 @@ function TextInspector({ clip }: { clip: TextClip }) {
   const checkpoint = () => useEditor.getState().checkpoint();
   return (
     <>
-      <h3>{tr('Metin')}</h3>
+      <h3>{tr('Text')}</h3>
       <div className="sub">
         {formatTime(clip.start)} · {formatTime(clip.duration)}
       </div>
@@ -89,11 +89,11 @@ function TextInspector({ clip }: { clip: TextClip }) {
           rows={3}
           value={clip.text}
           onFocus={checkpoint}
-          // Elle düzenlenen altyazının kelime zamanları artık geçersizdir.
+          // Word timings of a hand-edited caption are no longer valid.
           onChange={(e) => update({ text: e.target.value, words: e.target.value.split(/\s+/).length === clip.words?.length ? clip.words : undefined })}
         />
       </div>
-      <Section title={tr('Stil')}>
+      <Section title={tr('Style')}>
         <div className="chips">
           {PRESETS.map((p) => (
             <button key={p.id} className={`chip ${clip.preset === p.id ? 'active' : ''}`} onClick={() => update({ preset: p.id }, true)}>
@@ -102,7 +102,7 @@ function TextInspector({ clip }: { clip: TextClip }) {
           ))}
         </div>
       </Section>
-      <Section title={tr('Animasyon')}>
+      <Section title={tr('Animation')}>
         <div className="chips">
           {ANIMATIONS.map((a) => (
             <button key={a.id} className={`chip ${clip.animation === a.id ? 'active' : ''}`} onClick={() => update({ animation: a.id }, true)}>
@@ -111,9 +111,9 @@ function TextInspector({ clip }: { clip: TextClip }) {
           ))}
         </div>
       </Section>
-      <Section title={tr('Görünüm')}>
+      <Section title={tr('Appearance')}>
         <div className="field">
-          <label>{tr('Yazı tipi')}</label>
+          <label>{tr('Font')}</label>
           <select value={familyOf(clip)} onChange={(e) => update({ font: e.target.value }, true)}>
             {FONTS.map((f) => (
               <option key={f} value={f} style={{ fontFamily: f }}>
@@ -123,15 +123,15 @@ function TextInspector({ clip }: { clip: TextClip }) {
           </select>
         </div>
         <div className="toggle">
-          <span>{tr('Renk')}</span>
+          <span>{tr('Color')}</span>
           <input type="color" value={clip.color} onFocus={checkpoint} onChange={(e) => update({ color: e.target.value })} />
         </div>
         <div className="toggle">
-          <span>{tr('Vurgu rengi')}</span>
+          <span>{tr('Highlight color')}</span>
           <input type="color" value={clip.highlight} onFocus={checkpoint} onChange={(e) => update({ highlight: e.target.value })} />
         </div>
         <Slider
-          label={tr('Yazı boyutu')}
+          label={tr('Font size')}
           value={clip.fontSize}
           min={0.02}
           max={0.2}
@@ -139,20 +139,20 @@ function TextInspector({ clip }: { clip: TextClip }) {
           onCommit={checkpoint}
           onChange={(fontSize) => update({ fontSize })}
         />
-        <Slider label={tr('Dikey konum')} value={clip.y} min={0.05} max={0.95} onCommit={checkpoint} onChange={(y) => update({ y })} />
+        <Slider label={tr('Vertical position')} value={clip.y} min={0.05} max={0.95} onCommit={checkpoint} onChange={(y) => update({ y })} />
       </Section>
       <div style={{ marginTop: 16 }}>
         <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
-          <Icon name="trash" size={16} /> {tr('Metni sil')}
+          <Icon name="trash" size={16} /> {tr('Delete text')}
         </button>
       </div>
     </>
   );
 }
 
-const BRIDGE_TEXT: Record<BridgeStatus, string> = { off: 'Kapalı', connecting: 'MCP sunucusu bekleniyor…', connected: 'Bağlı' };
+const BRIDGE_TEXT: Record<BridgeStatus, string> = { off: 'Off', connecting: 'Waiting for MCP server…', connected: 'Connected' };
 
-// Claude gibi ajanların MCP sunucusu üzerinden editörü sürmesine izin verir.
+// Lets agents such as Claude drive the editor through the MCP server.
 function AgentBridgeToggle() {
   const [enabled, setEnabled] = useState(bridgeEnabled);
   const [status, setStatus] = useState<BridgeStatus>(enabled ? 'connecting' : 'off');
@@ -162,7 +162,7 @@ function AgentBridgeToggle() {
   return (
     <>
       <Toggle
-        label={tr('Ajan bağlantısı (MCP)')}
+        label={tr('Agent connection (MCP)')}
         on={enabled}
         onChange={(on) => {
           setEnabled(on);
@@ -170,8 +170,9 @@ function AgentBridgeToggle() {
         }}
       />
       <div className="hint">
-        {tr('Durum:')} <b className={`bridge-${status}`}>{tr(BRIDGE_TEXT[status])}</b>
-        {tr('. Sunucuyu')} <code>{tr('npm run mcp')}</code> {tr("ile başlatın; ayrıntılar README'de.")}
+        {tr('Status:')} <b className={`bridge-${status}`}>{tr(BRIDGE_TEXT[status])}</b>
+        <br />
+        {tr('Server command:')} <code>npm run mcp</code>
       </div>
     </>
   );

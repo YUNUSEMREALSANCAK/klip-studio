@@ -32,14 +32,14 @@ async function load(model: string) {
       if (info.status !== 'progress' || !info.file) return;
       files.set(info.file, info.progress ?? 0);
       const average = [...files.values()].reduce((a, b) => a + b, 0) / files.size;
-      post({ type: 'progress', message: 'Model indiriliyor', progress: average / 100 });
+      post({ type: 'progress', message: 'Downloading model', progress: average / 100 });
     },
   })) as AutomaticSpeechRecognitionPipeline;
   loaded = { model, transcriber };
   return transcriber;
 }
 
-// Segment düzeyindeki zamanları kelimelere eşit dağıtır (kelime zamanı desteklenmezse).
+// Spreads segment-level timings evenly across words (when word timestamps aren't supported).
 function spreadWords(chunks: Chunk[], total: number) {
   return chunks.flatMap(({ text, timestamp: [start, end] }) => {
     const words = text.trim().split(/\s+/).filter(Boolean);
@@ -52,7 +52,7 @@ function spreadWords(chunks: Chunk[], total: number) {
 self.onmessage = async ({ data }: MessageEvent<WhisperRequest>) => {
   try {
     const transcriber = await load(data.model);
-    post({ type: 'progress', message: 'Konuşma metne çevriliyor', progress: -1 });
+    post({ type: 'progress', message: 'Transcribing speech', progress: -1 });
     const total = data.audio.length / 16000;
     const options = {
       language: data.language ?? undefined,
@@ -69,7 +69,7 @@ self.onmessage = async ({ data }: MessageEvent<WhisperRequest>) => {
       }));
       post({ type: 'result', words: words.filter((w) => w.text), wordLevel: true });
     } catch {
-      // Bazı modeller kelime zamanını desteklemez; cümle zamanına düş.
+      // Some models don't support word timestamps; fall back to segment timestamps.
       const output = (await transcriber(data.audio, { ...options, return_timestamps: true })) as { chunks?: Chunk[] };
       post({ type: 'result', words: spreadWords(output.chunks ?? [], total), wordLevel: false });
     }

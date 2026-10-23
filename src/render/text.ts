@@ -40,7 +40,7 @@ const easeOut = (x: number) => 1 - (1 - x) ** 3;
 
 export function fontFor(clip: TextClip, size: number) {
   const family = familyOf(clip);
-  // Bebas Neue tek ağırlıklı ve dar bir yazı tipi; aynı görünür boy için büyütülür.
+  // Bebas Neue is a single-weight condensed face; scaled up to match the visual size.
   if (family === 'Bebas Neue') return `${size * 1.3}px "Bebas Neue", Inter, sans-serif`;
   return `${family === 'Inter' ? 800 : 700} ${size}px "${family}", Inter, sans-serif`;
 }
@@ -58,9 +58,9 @@ export function wrapWords(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderi
 
 type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
-// Bir metin klibini tuvale çizer. Karaoke stilinde o an söylenen kelimeyi vurgular.
+// Draws a text clip onto the canvas. The karaoke style highlights the word being spoken.
 export function drawText(ctx: Ctx, clip: TextClip, t: number, W: number, H: number) {
-  void ensureFont(familyOf(clip)); // yüklenene kadar yedek yazı tipiyle çizilir
+  void ensureFont(familyOf(clip)); // drawn with a fallback font until loaded
   const anim = animate(clip, t);
   const size = clip.fontSize * H;
   ctx.save();
@@ -80,7 +80,7 @@ export function drawText(ctx: Ctx, clip: TextClip, t: number, W: number, H: numb
   ctx.scale(anim.scale, anim.scale);
   ctx.translate(-W / 2, -centerY);
 
-  // Karaoke: kelime sırasını kaynaktaki kelimelerle eşleştir.
+  // Karaoke: match word order against the source words.
   const activeIndex = clip.preset === 'karaoke' && clip.words ? clip.words.findIndex((w) => t >= w.start && t < w.end) : -1;
   let wordIndex = 0;
 

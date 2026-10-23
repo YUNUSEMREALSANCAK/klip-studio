@@ -5,6 +5,8 @@ import { familyOf, FONTS } from '../render/fonts';
 import { Section, Slider, Toggle } from './controls';
 import { Icon } from './icons';
 import { MediaInspector } from './MediaInspector';
+import { bridgeEnabled, onBridgeStatus, setBridgeEnabled, type BridgeStatus } from '../agent/bridge';
+import { useEffect, useState } from 'react';
 
 export function Inspector() {
   const clip = useEditor(selectedClip);
@@ -41,6 +43,7 @@ function ProjectSettings() {
         }}
       />
       <div className="hint">Dikey videoya yatay klip koyunca kenarlar videonun bulanık hâliyle dolar.</div>
+      <AgentBridgeToggle />
       <div className="section-title" style={{ marginTop: 16 }}>Kısayollar</div>
       <div className="hint">
         Boşluk — oynat / duraklat
@@ -129,6 +132,32 @@ function TextInspector({ clip }: { clip: TextClip }) {
         <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
           <Icon name="trash" size={16} /> Metni sil
         </button>
+      </div>
+    </>
+  );
+}
+
+const BRIDGE_TEXT: Record<BridgeStatus, string> = { off: 'Kapalı', connecting: 'MCP sunucusu bekleniyor…', connected: 'Bağlı' };
+
+// Claude gibi ajanların MCP sunucusu üzerinden editörü sürmesine izin verir.
+function AgentBridgeToggle() {
+  const [enabled, setEnabled] = useState(bridgeEnabled);
+  const [status, setStatus] = useState<BridgeStatus>(enabled ? 'connecting' : 'off');
+  useEffect(() => {
+    onBridgeStatus(setStatus);
+  }, []);
+  return (
+    <>
+      <Toggle
+        label="Ajan bağlantısı (MCP)"
+        on={enabled}
+        onChange={(on) => {
+          setEnabled(on);
+          setBridgeEnabled(on);
+        }}
+      />
+      <div className="hint">
+        Durum: <b className={`bridge-${status}`}>{BRIDGE_TEXT[status]}</b>. Sunucuyu <code>npm run mcp</code> ile başlatın; ayrıntılar README'de.
       </div>
     </>
   );

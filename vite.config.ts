@@ -6,6 +6,7 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
   worker: { format: 'es' },
-  optimizeDeps: { exclude: ['@huggingface/transformers', '@shiguredo/rnnoise-wasm'] },
+  // Tembel yüklenen SDK'yı baştan hazırla; aksi hâlde ilk kullanımda dev sunucusu sayfayı yeniler.
+  optimizeDeps: { exclude: ['@huggingface/transformers', '@shiguredo/rnnoise-wasm'], include: ['@anthropic-ai/sdk'] },
   test: { include: ['tests/unit/**/*.test.ts'] },
 });

@@ -78,7 +78,9 @@ export function Preview() {
     engineRef.current?.setSize(Math.round(width * scale), Math.round(height * scale));
   }, [width, height]);
 
-  useEffect(() => engineRef.current?.prune(useEditor.getState().project), [clips]);
+  useEffect(() => {
+    engineRef.current?.prune(useEditor.getState().project);
+  }, [clips]);
 
   usePlaybackLoop(engineRef);
 

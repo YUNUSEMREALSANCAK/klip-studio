@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { installWindowApi, startBridgeIfEnabled } from '../agent/bridge';
 import { useEditor } from '../core/store';
 import { ExportDialog } from './ExportDialog';
 import { Inspector } from './Inspector';
@@ -54,6 +55,10 @@ export function App() {
 
 function Editor() {
   useShortcuts();
+  useEffect(() => {
+    installWindowApi();
+    startBridgeIfEnabled();
+  }, []);
   const saveStatus = useAutosave();
   const [missing] = useState(missingFeatures);
   const objectClipId = useUi((s) => s.objectEditorClipId);

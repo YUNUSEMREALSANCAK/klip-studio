@@ -20,6 +20,7 @@ const paths: Record<string, string> = {
   zoomOut: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5M8 11h6',
   volume: 'M4 9h4l5-4v14l-5-4H4zM17 9a4 4 0 0 1 0 6',
   mute: 'M4 9h4l5-4v14l-5-4H4zM17 9l4 6M21 9l-4 6',
+  chat: 'M4 5h16v11H9l-5 4zM8 10h8M8 13h5',
   wand: 'M4 20L16 8M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM19 11l.7 1.3L21 13l-1.3.7L19 15l-.7-1.3L17 13l1.3-.7z',
 };
 

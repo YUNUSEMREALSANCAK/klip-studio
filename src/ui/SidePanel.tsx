@@ -7,11 +7,12 @@ import { FILTER_PRESETS } from '../render/filterPresets';
 import { ensureFont, FONTS } from '../render/fonts';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { AiPanel } from './AiPanel';
+import { AssistantPanel } from './AssistantPanel';
 import { importLut } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 
-type Tab = 'media' | 'text' | 'transition' | 'filter' | 'ai';
+type Tab = 'media' | 'text' | 'transition' | 'filter' | 'ai' | 'assistant';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'media', label: 'Medya', icon: 'media' },
@@ -19,6 +20,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'transition', label: 'Geçiş', icon: 'transition' },
   { id: 'filter', label: 'Filtre', icon: 'filter' },
   { id: 'ai', label: 'Yapay Zeka', icon: 'ai' },
+  { id: 'assistant', label: 'Asistan', icon: 'chat' },
 ];
 
 export function SidePanel() {
@@ -39,6 +41,7 @@ export function SidePanel() {
         {tab === 'transition' && <TransitionTab />}
         {tab === 'filter' && <FilterTab />}
         {tab === 'ai' && <AiPanel />}
+        {tab === 'assistant' && <AssistantPanel />}
       </div>
     </aside>
   );
@@ -146,7 +149,9 @@ const TEXT_PRESETS: TextTemplate[] = [
 
 function TextTab() {
   // Şablon kutucukları kendi yazı tipiyle görünsün diye fontları önceden yükle.
-  useEffect(() => FONTS.forEach((f) => void ensureFont(f)), []);
+  useEffect(() => {
+    FONTS.forEach((f) => void ensureFont(f));
+  }, []);
   const add = (p: (typeof TEXT_PRESETS)[number]) => {
     const s = useEditor.getState();
     s.addText(p.text);

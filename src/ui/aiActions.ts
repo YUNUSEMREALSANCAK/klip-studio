@@ -12,15 +12,18 @@ type Report = (message: string, progress: number) => void;
 
 const editor = () => useEditor.getState();
 
-// Uzun süren bir işi görev kartıyla çalıştırır; hata olursa kartta gösterir.
-async function runTask(label: string, work: (report: Report) => Promise<void>) {
+// Uzun süren bir işi görev kartıyla çalıştırır; hata olursa kartta gösterir ve hata mesajını döndürür.
+async function runTask(label: string, work: (report: Report) => Promise<void>): Promise<string | null> {
   const id = editor().startTask(label);
   try {
     await work((message, progress) => editor().updateTask(id, { message, progress }));
     editor().endTask(id);
+    return null;
   } catch (error) {
-    editor().updateTask(id, { error: error instanceof Error ? error.message : String(error) });
+    const message = error instanceof Error ? error.message : String(error);
+    editor().updateTask(id, { error: message });
     setTimeout(() => editor().endTask(id), 8000);
+    return message;
   }
 }
 

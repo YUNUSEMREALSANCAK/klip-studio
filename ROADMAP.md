@@ -70,10 +70,10 @@ Amaç: CapCut'ın yerelde yaptıklarına yetişmek, bulut gerektirmeden.
 
 Amaç: PhotoCraft ve CapCut'ın yeni ajan yaklaşımı gibi, her işlem programla da yapılabilsin.
 
-- [ ] **Komut katmanı** (L): her düzenleme tipli bir JSON komutu; geri al da komutlar üzerinden
-- [ ] **Kontrol kanalı** (M): `window.klip` API'si, komut çalıştırma ve kare görüntüsü alma
-- [ ] **MCP sunucusu** (M): Claude gibi ajanlar editörü sürebilsin
-- [ ] **Doğal dille kurgu paneli** (M): "sessizlikleri kes, altyazı ekle, 9:16 yap" → komutlar (Claude API)
+- [x] **Komut katmanı** (L): her düzenleme tipli bir JSON komutu (`src/core/commands.ts`), her komut geri alınabilir
+- [x] **Kontrol kanalı** (M): `window.klip` API'si: komut, durum, ekran görüntüsü, adresten içe aktarma
+- [x] **MCP sunucusu** (M): `npm run mcp`; durum, komut, ekran görüntüsü ve dosya içe aktarma araçları
+- [x] **Doğal dille kurgu paneli** (M): Asistan sekmesi, Claude Opus 5.5 + komut araçları (kullanıcının kendi API anahtarı)
 
 ### Faz 5: Dağıtım ve topluluk → v1.0
 

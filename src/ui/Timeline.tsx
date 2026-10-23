@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { useEffect, useMemo, useRef, useState, type DragEvent, type PointerEvent } from 'react';
 import { useEditor } from '../core/store';
 import { assignLanes, clipEnd, createMediaClip, formatTime, projectDuration, sortedTrack } from '../core/timeline';
@@ -147,15 +148,15 @@ export function Timeline() {
   return (
     <section className="timeline">
       <div className="tl-toolbar">
-        <button className="btn ghost small" title="Böl (S)" onClick={() => useEditor.getState().splitAtPlayhead()}>
-          <Icon name="split" size={16} /> Böl
+        <button className="btn ghost small" title={tr('Böl (S)')} onClick={() => useEditor.getState().splitAtPlayhead()}>
+          <Icon name="split" size={16} /> {tr('Böl')}
         </button>
-        <button className="btn ghost small" title="Sil" disabled={!selectedId} onClick={() => selectedId && useEditor.getState().removeClip(selectedId)}>
-          <Icon name="trash" size={16} /> Sil
+        <button className="btn ghost small" title={tr('Sil')} disabled={!selectedId} onClick={() => selectedId && useEditor.getState().removeClip(selectedId)}>
+          <Icon name="trash" size={16} /> {tr('Sil')}
         </button>
         {markers.length > 0 && (
           <button className="btn ghost small" onClick={() => useEditor.getState().setMarkers([])}>
-            Ritim işaretlerini temizle
+            {tr('Ritim işaretlerini temizle')}
           </button>
         )}
         <div className="spacer" />
@@ -171,7 +172,7 @@ export function Timeline() {
         <div className="tl-labels" ref={labelsRef}>
           {TRACKS.map((t) => (
             <div key={t.id} className="tl-label" style={{ height: layout[t.id].height }}>
-              {t.label}
+              {tr(t.label)}
             </div>
           ))}
         </div>
@@ -223,7 +224,7 @@ export function Timeline() {
                       key={`t-${clip.id}`}
                       className={`transition-badge ${clip.transition ? '' : 'empty'}`}
                       style={{ left: clip.start * zoom }}
-                      title={clip.transition ? 'Geçişi düzenle' : 'Geçiş ekle (çapraz geçiş)'}
+                      title={clip.transition ? tr('Geçişi düzenle') : tr('Geçiş ekle (çapraz geçiş)')}
                       onPointerDown={(e) => {
                         e.stopPropagation();
                         // Kesimi hedeflemek için önceki klibi seç; geçiş yoksa çapraz geçiş ekle.
@@ -258,7 +259,15 @@ function Playhead({ zoom, scrollRef }: { zoom: number; scrollRef: React.RefObjec
   return <div className="playhead" style={{ left: x }} />;
 }
 
-function TimelineClip({ clip, zoom, top, height, selected, assets, onDragStart }: {
+function TimelineClip({
+  clip,
+  zoom,
+  top,
+  height,
+  selected,
+  assets,
+  onDragStart,
+}: {
   clip: Clip;
   zoom: number;
   top: number;
@@ -327,7 +336,9 @@ function Waveform({ clip, width, compact }: { clip: MediaClip; width: number; co
 
   useEffect(() => {
     let alive = true;
-    peaksFor(clip.assetId).then((p) => alive && setPeaks(p)).catch(() => {});
+    peaksFor(clip.assetId)
+      .then((p) => alive && setPeaks(p))
+      .catch(() => {});
     return () => {
       alive = false;
     };

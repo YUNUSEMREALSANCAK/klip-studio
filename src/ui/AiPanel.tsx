@@ -1,9 +1,22 @@
+import { tr } from '../i18n';
 import { useState, type ReactNode } from 'react';
 import { TRANSLATION_LANGUAGES, translationModel, TTS_VOICES } from '../ai/models';
 import { LANGUAGES, WHISPER_MODELS } from '../ai/transcribe';
 import { selectedClip, useEditor } from '../core/store';
 import type { MediaClip } from '../core/types';
-import { autoCaptions, beatMarkers, denoise, downloadSrt, enhance, generateSpeech, removeFillers, removeSilences, smartReframe, splitScenes, translateCaptions } from './aiActions';
+import {
+  autoCaptions,
+  beatMarkers,
+  denoise,
+  downloadSrt,
+  enhance,
+  generateSpeech,
+  removeFillers,
+  removeSilences,
+  smartReframe,
+  splitScenes,
+  translateCaptions,
+} from './aiActions';
 import { useUi } from './uiStore';
 
 function Card({ title, model, children }: { title: string; model: string; children: ReactNode }) {
@@ -49,26 +62,26 @@ export function AiPanel() {
   const clipButton = (label: string, kind: 'video' | 'visual' | 'audio', onClick: (clip: MediaClip) => void) => {
     const reason = needClip(kind);
     return (
-      <button className="btn block" disabled={!!reason || busy} title={reason ?? ''} onClick={() => media && onClick(media)}>
-        {label}
+      <button className="btn block" disabled={!!reason || busy} title={reason ? tr(reason) : ''} onClick={() => media && onClick(media)}>
+        {tr(label)}
       </button>
     );
   };
 
   return (
     <>
-      <h3>Yapay Zeka</h3>
+      <h3>{tr('Yapay Zeka')}</h3>
       <p className="hint" style={{ marginBottom: 12 }}>
-        Tüm modeller tarayıcınızda çalışır; videonuz hiçbir sunucuya yüklenmez. Modeller ilk kullanımda bir kez indirilir.
+        {tr('Tüm modeller tarayıcınızda çalışır; videonuz hiçbir sunucuya yüklenmez. Modeller ilk kullanımda bir kez indirilir.')}
       </p>
 
-      <Card title="Otomatik altyazı" model="Whisper">
-        <p>Konuşmayı kelime zamanlarıyla metne çevirir ve karaoke tarzı altyazı ekler.</p>
+      <Card title={tr('Otomatik altyazı')} model="Whisper">
+        <p>{tr('Konuşmayı kelime zamanlarıyla metne çevirir ve karaoke tarzı altyazı ekler.')}</p>
         <div className="row">
           <select value={model} onChange={(e) => setModel(e.target.value)}>
             {WHISPER_MODELS.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.label}
+                {tr(m.label)}
               </option>
             ))}
           </select>
@@ -77,108 +90,125 @@ export function AiPanel() {
           <select value={language} onChange={(e) => setLanguage(e.target.value)}>
             {LANGUAGES.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.label}
+                {tr(l.label)}
               </option>
             ))}
           </select>
           <button className="btn primary" disabled={!hasClips || busy} onClick={() => void autoCaptions(model, language)}>
-            Oluştur
+            {tr('Oluştur')}
           </button>
         </div>
         <button className="btn small" disabled={!hasCaptions} onClick={downloadSrt}>
-          SRT olarak indir
+          {tr('SRT olarak indir')}
         </button>
       </Card>
 
-      <Card title="Altyazı çevirisi" model={translationModel(srcLang, tgtLang).model.includes('nllb') ? 'NLLB' : 'opus-mt'}>
-        <p>Altyazıları başka dile çevirir. Model boyutu: {translationModel(srcLang, tgtLang).size}.</p>
+      <Card title={tr('Altyazı çevirisi')} model={translationModel(srcLang, tgtLang).model.includes('nllb') ? 'NLLB' : 'opus-mt'}>
+        <p>
+          {tr('Altyazıları başka dile çevirir. Model boyutu:')} {translationModel(srcLang, tgtLang).size}.
+        </p>
         <div className="row">
-          <select value={srcLang} onChange={(e) => setSrcLang(e.target.value)} aria-label="Kaynak dil">
+          <select value={srcLang} onChange={(e) => setSrcLang(e.target.value)} aria-label={tr('Kaynak dil')}>
             {TRANSLATION_LANGUAGES.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.label}
+                {tr(l.label)}
               </option>
             ))}
           </select>
           <span style={{ flex: 'none' }}>→</span>
-          <select value={tgtLang} onChange={(e) => setTgtLang(e.target.value)} aria-label="Hedef dil">
+          <select value={tgtLang} onChange={(e) => setTgtLang(e.target.value)} aria-label={tr('Hedef dil')}>
             {TRANSLATION_LANGUAGES.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.label}
+                {tr(l.label)}
               </option>
             ))}
           </select>
         </div>
         <label className="row" style={{ cursor: 'pointer' }}>
           <input type="checkbox" checked={bilingual} onChange={(e) => setBilingual(e.target.checked)} style={{ flex: 'none' }} />
-          <span>İki dilli (orijinali koru)</span>
+          <span>{tr('İki dilli (orijinali koru)')}</span>
         </label>
         <button className="btn block" disabled={!hasCaptions || busy} onClick={() => void translateCaptions(srcLang, tgtLang, bilingual)}>
-          Çevir
+          {tr('Çevir')}
         </button>
       </Card>
 
-      <Card title="Seslendirme" model="MMS-TTS">
-        <p>Yazdığınız metni seslendirip oynatma çizgisine ses klibi olarak ekler. Türkçe ses modeli henüz yok.</p>
-        <textarea rows={3} placeholder="Seslendirilecek metin" value={ttsText} onChange={(e) => setTtsText(e.target.value)} />
+      <Card title={tr('Seslendirme')} model="MMS-TTS">
+        <p>{tr('Yazdığınız metni seslendirip oynatma çizgisine ses klibi olarak ekler. Türkçe ses modeli henüz yok.')}</p>
+        <textarea rows={3} placeholder={tr('Seslendirilecek metin')} value={ttsText} onChange={(e) => setTtsText(e.target.value)} />
         <div className="row">
-          <select value={voice} onChange={(e) => setVoice(e.target.value)} aria-label="Ses dili">
+          <select value={voice} onChange={(e) => setVoice(e.target.value)} aria-label={tr('Ses dili')}>
             {TTS_VOICES.map((v) => (
               <option key={v.id} value={v.id}>
-                {v.label}
+                {tr(v.label)}
               </option>
             ))}
           </select>
           <button className="btn primary" disabled={!ttsText.trim() || busy} onClick={() => void generateSpeech(ttsText, voice)}>
-            Seslendir
+            {tr('Seslendir')}
           </button>
         </div>
       </Card>
 
-      <Card title="Akıllı kesim" model="RMS + Whisper">
-        <p>Sessiz bölümleri ve "eee, şey, um" gibi dolgu kelimelerini otomatik keser.</p>
+      <Card title={tr('Akıllı kesim')} model="RMS + Whisper">
+        <p>{tr('Sessiz bölümleri ve "eee, şey, um" gibi dolgu kelimelerini otomatik keser.')}</p>
         <div className="field">
           <label>
-            Sessizlik eşiği <span>{threshold} dB</span>
+            {tr('Sessizlik eşiği')}{' '}
+            <span>
+              {threshold} {tr('dB')}
+            </span>
           </label>
           <input type="range" min={-60} max={-20} value={threshold} onChange={(e) => setThreshold(+e.target.value)} />
         </div>
         <div className="field">
           <label>
-            En kısa sessizlik <span>{minSilence.toFixed(1)} sn</span>
+            {tr('En kısa sessizlik')}{' '}
+            <span>
+              {minSilence.toFixed(1)} {tr('sn')}
+            </span>
           </label>
           <input type="range" min={0.2} max={2} step={0.1} value={minSilence} onChange={(e) => setMinSilence(+e.target.value)} />
         </div>
         <button className="btn block" disabled={!hasClips || busy} onClick={() => void removeSilences(threshold, minSilence)}>
-          Sessizlikleri kes
+          {tr('Sessizlikleri kes')}
         </button>
-        <input type="text" placeholder="Ek dolgu kelimeleri (virgülle)" value={extraFillers} onChange={(e) => setExtraFillers(e.target.value)} />
+        <input type="text" placeholder={tr('Ek dolgu kelimeleri (virgülle)')} value={extraFillers} onChange={(e) => setExtraFillers(e.target.value)} />
         <button
           className="btn block"
           disabled={!hasCaptions || busy}
-          title={hasCaptions ? '' : 'Önce otomatik altyazı oluşturun'}
-          onClick={() => void removeFillers(extraFillers.split(',').map((w) => w.trim()).filter(Boolean))}
+          title={hasCaptions ? '' : tr('Önce otomatik altyazı oluşturun')}
+          onClick={() =>
+            void removeFillers(
+              extraFillers
+                .split(',')
+                .map((w) => w.trim())
+                .filter(Boolean),
+            )
+          }
         >
-          Dolgu kelimelerini kes
+          {tr('Dolgu kelimelerini kes')}
         </button>
       </Card>
 
-      <Card title="Arka planı kaldır" model="MediaPipe Selfie">
-        <p>Videodaki kişiyi gerçek zamanlı ayırır; arka plan alttaki katmanla değişir.</p>
-        {clipButton(media?.removeBackground ? 'Arka planı geri getir' : 'Arka planı kaldır', 'visual', (clip) => useEditor.getState().updateClip(clip.id, { removeBackground: !clip.removeBackground } as Partial<MediaClip>))}
+      <Card title={tr('Arka planı kaldır')} model="MediaPipe Selfie">
+        <p>{tr('Videodaki kişiyi gerçek zamanlı ayırır; arka plan alttaki katmanla değişir.')}</p>
+        {clipButton(media?.removeBackground ? tr('Arka planı geri getir') : tr('Arka planı kaldır'), 'visual', (clip) =>
+          useEditor.getState().updateClip(clip.id, { removeBackground: !clip.removeBackground } as Partial<MediaClip>),
+        )}
       </Card>
 
-      <Card title="Nesne seç ve sil" model="SlimSAM + BiRefNet">
-        <p>Görsele veya video karesine tıklayarak nesne seçin; silin (görsel temizleme) ya da çıkartma olarak kesin.</p>
+      <Card title={tr('Nesne seç ve sil')} model="SlimSAM + BiRefNet">
+        <p>{tr('Görsele veya video karesine tıklayarak nesne seçin; silin (görsel temizleme) ya da çıkartma olarak kesin.')}</p>
         {clipButton('Nesne düzenleyiciyi aç', 'visual', (clip) => useUi.getState().openObjectEditor(clip.id))}
       </Card>
 
-      <Card title="Gürültü azaltma" model="RNNoise">
-        <p>Rüzgar, uğultu ve arka plan gürültüsünü temizler. Temiz ses, ses izine eklenir.</p>
+      <Card title={tr('Gürültü azaltma')} model="RNNoise">
+        <p>{tr('Rüzgar, uğultu ve arka plan gürültüsünü temizler. Temiz ses, ses izine eklenir.')}</p>
         {clipButton('Sesi temizle', 'audio', (clip) => void denoise(clip.id))}
       </Card>
 
-      <Card title="Video analizi" model="Yerel">
+      <Card title={tr('Video analizi')} model="Yerel">
         {clipButton('Sahneleri otomatik böl', 'video', (clip) => void splitScenes(clip.id))}
         {clipButton('Akıllı çerçeveleme (9:16, yüz takibi)', 'video', (clip) => void smartReframe(clip.id))}
         {clipButton('Otomatik renk iyileştirme', 'visual', (clip) => void enhance(clip.id))}

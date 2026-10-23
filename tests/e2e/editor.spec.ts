@@ -87,3 +87,14 @@ test('480p dışa aktarma oynatılabilir bir video üretir', async ({ page }) =>
   );
   expect(duration).toBeGreaterThan(3.5);
 });
+
+test('İngilizceye geçince arayüz çevrilir, proje korunur', async ({ page }) => {
+  await importMedia(page, 'gradient.webm');
+  await addToMain(page, 0);
+  await page.locator('.topbar select[title="Dil / Language"]').selectOption('en');
+  await expect(page.locator('.topbar .btn.primary')).toHaveText(/Export/);
+  await expect(page.locator('.side-tab', { hasText: 'Media' })).toBeVisible();
+  await expect(page.locator('.clip.main')).toHaveCount(1);
+  await page.locator('.topbar select[title="Dil / Language"]').selectOption('tr');
+  await expect(page.locator('.topbar .btn.primary')).toHaveText(/Dışa aktar/);
+});

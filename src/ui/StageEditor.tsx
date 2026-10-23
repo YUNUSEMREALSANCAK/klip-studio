@@ -60,7 +60,9 @@ export function StageEditor({ width, height }: { width: number; height: number }
 
   // Üstte çizilen önce gelir: metinler, üst katmanlar (sondan başa), en son ana video.
   const targets = clips.filter((c): c is Editable => isEditable(c, assets) && isActiveAt(c, time));
-  targets.sort((a, b) => LAYER_ORDER[a.track as keyof typeof LAYER_ORDER] - LAYER_ORDER[b.track as keyof typeof LAYER_ORDER] || clips.indexOf(b) - clips.indexOf(a));
+  targets.sort(
+    (a, b) => LAYER_ORDER[a.track as keyof typeof LAYER_ORDER] - LAYER_ORDER[b.track as keyof typeof LAYER_ORDER] || clips.indexOf(b) - clips.indexOf(a),
+  );
   const selected = targets.find((c) => c.id === selectedId) ?? null;
   const selectedRect = selected ? rectFor(selected, assets, W, H, time) : null;
 

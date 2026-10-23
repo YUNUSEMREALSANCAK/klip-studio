@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useEditor } from '../core/store';
 import { formatTime, projectDuration } from '../core/timeline';
@@ -98,18 +99,18 @@ export function Preview() {
           </div>
           {!clips.length && (
             <div className="empty">
-              Soldaki Medya sekmesinden video, ses veya görsel ekleyin.
+              {tr('Soldaki Medya sekmesinden video, ses veya görsel ekleyin.')}
               <br />
-              Tüm yapay zeka özellikleri tarayıcınızda, yerel olarak çalışır.
+              {tr('Tüm yapay zeka özellikleri tarayıcınızda, yerel olarak çalışır.')}
             </div>
           )}
         </div>
       </div>
       <div className="controls">
-        <button className="btn ghost icon" title="Başa dön" onClick={() => useEditor.getState().setTime(0)}>
+        <button className="btn ghost icon" title={tr('Başa dön')} onClick={() => useEditor.getState().setTime(0)}>
           ⏮
         </button>
-        <button className="btn primary icon" title="Oynat / Duraklat (Boşluk)" onClick={() => useEditor.getState().setPlaying(!playing)}>
+        <button className="btn primary icon" title={tr('Oynat / Duraklat (Boşluk)')} onClick={() => useEditor.getState().setPlaying(!playing)}>
           <Icon name={playing ? 'pause' : 'play'} size={16} />
         </button>
         <div className="timecode">

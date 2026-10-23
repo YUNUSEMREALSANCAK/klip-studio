@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
@@ -31,7 +32,7 @@ export function SidePanel() {
         {TABS.map((t) => (
           <button key={t.id} className={`side-tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
             <Icon name={t.icon} size={20} />
-            {t.label}
+            {tr(t.label)}
           </button>
         ))}
       </nav>
@@ -84,8 +85,8 @@ function MediaTab() {
         }}
       >
         <Icon name="upload" size={22} />
-        <div style={{ marginTop: 6 }}>Dosyaları sürükleyin veya tıklayın</div>
-        <div className="hint">Video, ses, görsel</div>
+        <div style={{ marginTop: 6 }}>{tr('Dosyaları sürükleyin veya tıklayın')}</div>
+        <div className="hint">{tr('Video, ses, görsel')}</div>
         <input ref={inputRef} type="file" multiple accept="video/*,audio/*,image/*" hidden onChange={(e) => void addFiles(e.target.files)} />
       </div>
       <div className="asset-grid">
@@ -96,18 +97,22 @@ function MediaTab() {
             draggable
             onDragStart={(e) => e.dataTransfer.setData('text/asset-id', asset.id)}
             onDoubleClick={() => useEditor.getState().addAssetToTimeline(asset.id)}
-            title="Çift tıklayın veya zaman çizelgesine sürükleyin"
+            title={tr('Çift tıklayın veya zaman çizelgesine sürükleyin')}
           >
             <div className="asset-thumb" style={{ backgroundImage: thumbnailOf(asset) ? `url(${thumbnailOf(asset)})` : undefined }}>
               {!thumbnailOf(asset) && <Icon name="volume" size={26} />}
             </div>
-            <span className="asset-badge">{asset.kind === 'video' ? 'Video' : asset.kind === 'audio' ? 'Ses' : 'Görsel'}</span>
+            <span className="asset-badge">{asset.kind === 'video' ? tr('Video') : asset.kind === 'audio' ? tr('Ses') : tr('Görsel')}</span>
             <div className="asset-actions">
-              <button className="btn icon" title="Ana ize ekle" onClick={() => useEditor.getState().addAssetToTimeline(asset.id)}>
+              <button className="btn icon" title={tr('Ana ize ekle')} onClick={() => useEditor.getState().addAssetToTimeline(asset.id)}>
                 <Icon name="plus" size={14} />
               </button>
               {asset.kind !== 'audio' && (
-                <button className="btn icon" title="Üst katmana ekle (resim içinde resim)" onClick={() => useEditor.getState().addAssetToTimeline(asset.id, 'overlay')}>
+                <button
+                  className="btn icon"
+                  title={tr('Üst katmana ekle (resim içinde resim)')}
+                  onClick={() => useEditor.getState().addAssetToTimeline(asset.id, 'overlay')}
+                >
                   ⧉
                 </button>
               )}
@@ -156,20 +161,32 @@ function TextTab() {
     const s = useEditor.getState();
     s.addText(p.text);
     const id = useEditor.getState().selectedId!;
-    s.updateClip(id, { preset: p.preset, animation: p.animation, y: p.y, fontSize: p.fontSize, font: p.font, color: p.color ?? '#ffffff', highlight: p.highlight ?? '#ffd400' }, false);
+    s.updateClip(
+      id,
+      {
+        preset: p.preset,
+        animation: p.animation,
+        y: p.y,
+        fontSize: p.fontSize,
+        font: p.font,
+        color: p.color ?? '#ffffff',
+        highlight: p.highlight ?? '#ffd400',
+      },
+      false,
+    );
   };
   return (
     <>
-      <h3>Metin ekle</h3>
+      <h3>{tr('Metin ekle')}</h3>
       <div className="tile-grid">
         {TEXT_PRESETS.map((p) => (
-          <button key={p.label} className="tile" onClick={() => add(p)} style={{ fontFamily: p.font ? `"${p.font}", Inter` : undefined }}>
-            <b>{p.label}</b>
+          <button key={tr(p.label)} className="tile" onClick={() => add(p)} style={{ fontFamily: p.font ? `"${p.font}", Inter` : undefined }}>
+            <b>{tr(p.label)}</b>
           </button>
         ))}
       </div>
       <p className="hint" style={{ marginTop: 12 }}>
-        Metin oynatma çizgisinin olduğu yere eklenir. Konumunu önizlemede sürükleyerek değiştirebilirsiniz.
+        {tr('Metin oynatma çizgisinin olduğu yere eklenir. Konumunu önizlemede sürükleyerek değiştirebilirsiniz.')}
       </p>
     </>
   );
@@ -186,12 +203,12 @@ function TransitionTab() {
   if (!cut) {
     return (
       <>
-        <h3>Geçişler</h3>
+        <h3>{tr('Geçişler')}</h3>
         <div className="notice">
-          Geçiş iki klibin birleştiği yere eklenir. Ana izde en az <b>iki klip</b> olmalı.
+          {tr('Geçiş iki klibin birleştiği yere eklenir. Ana izde en az')} <b>{tr('iki klip')}</b> {tr('olmalı.')}
           <br />
           <br />
-          İkinci bir video ekleyin ya da oynatma çizgisini videonun ortasına getirip <b>S</b> tuşuyla bölün.
+          {tr('İkinci bir video ekleyin ya da oynatma çizgisini videonun ortasına getirip')} <b>{tr('S')}</b> {tr('tuşuyla bölün.')}
         </div>
       </>
     );
@@ -199,26 +216,34 @@ function TransitionTab() {
 
   return (
     <>
-      <h3>Geçişler</h3>
+      <h3>{tr('Geçişler')}</h3>
       <div className="notice">
-        Hedef: <b>{cut.index}. kesim</b> ({formatTime(cut.to.start)}) — {cut.from.duration.toFixed(1)} sn'lik klipten sonraki klibe.
+        {tr('Hedef:')}{' '}
+        <b>
+          {cut.index}
+          {tr('. kesim')}
+        </b>{' '}
+        ({formatTime(cut.to.start)}) — {cut.from.duration.toFixed(1)} {tr("sn'lik klipten sonraki klibe.")}
         <br />
-        Başka bir kesim için zaman çizelgesindeki ◆ işaretine veya bir klibe tıklayın.
+        {tr('Başka bir kesim için zaman çizelgesindeki ◆ işaretine veya bir klibe tıklayın.')}
       </div>
       <div className="tile-grid" style={{ marginTop: 10 }}>
         <button className={`tile ${!current ? 'active' : ''}`} onClick={() => applyTransition(cut, null)}>
-          Yok
+          {tr('Yok')}
         </button>
         {TRANSITION_TYPES.map((t) => (
           <button key={t.type} className={`tile ${current?.type === t.type ? 'active' : ''}`} onClick={() => applyTransition(cut, t.type)}>
-            {t.label}
+            {tr(t.label)}
           </button>
         ))}
       </div>
       {current && (
         <div className="field" style={{ marginTop: 14 }}>
           <label>
-            Süre <span>{current.duration.toFixed(1)} sn</span>
+            {tr('Süre')}{' '}
+            <span>
+              {current.duration.toFixed(1)} {tr('sn')}
+            </span>
           </label>
           <input
             type="range"
@@ -230,7 +255,7 @@ function TransitionTab() {
             onChange={(e) => useEditor.getState().updateClip(cut.to.id, { transition: { ...current, duration: +e.target.value } } as Partial<MediaClip>, false)}
           />
           <button className="btn small" style={{ marginTop: 6 }} onClick={() => applyTransition(cut, current.type)}>
-            ▶ Geçişi önizle
+            {tr('▶ Geçişi önizle')}
           </button>
         </div>
       )}
@@ -245,8 +270,8 @@ function FilterTab() {
   const lutInput = useRef<HTMLInputElement>(null);
   return (
     <>
-      <h3>Filtreler</h3>
-      {!media && <p className="hint">Filtre uygulamak için bir video veya görsel klibi seçin.</p>}
+      <h3>{tr('Filtreler')}</h3>
+      {!media && <p className="hint">{tr('Filtre uygulamak için bir video veya görsel klibi seçin.')}</p>}
       <div className="tile-grid" style={{ marginTop: 10 }}>
         {FILTER_PRESETS.map((p) => (
           <button
@@ -256,12 +281,14 @@ function FilterTab() {
             onClick={() => media && useEditor.getState().updateClip(media.id, { filter: { ...p.filter } } as Partial<MediaClip>)}
           >
             <div className="swatch" style={{ background: p.swatch }} />
-            {p.name}
+            {tr(p.name)}
           </button>
         ))}
       </div>
-      <div className="section-title" style={{ marginTop: 18 }}>LUT (renk tabloları)</div>
-      <p className="hint">Adobe, DaVinci Resolve vb. araçlardan .cube dosyası yükleyin.</p>
+      <div className="section-title" style={{ marginTop: 18 }}>
+        {tr('LUT (renk tabloları)')}
+      </div>
+      <p className="hint">{tr('Adobe, DaVinci Resolve vb. araçlardan .cube dosyası yükleyin.')}</p>
       <div className="tile-grid" style={{ marginTop: 8 }}>
         {Object.values(luts).map((lut) => (
           <button
@@ -274,7 +301,7 @@ function FilterTab() {
           </button>
         ))}
         <button className="tile" onClick={() => lutInput.current?.click()}>
-          + .cube yükle
+          {tr('+ .cube yükle')}
         </button>
       </div>
       <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], media ?? undefined)} />

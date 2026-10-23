@@ -12,11 +12,13 @@ export function useAutosave(): SaveStatus {
 
   useEffect(() => {
     let timer = 0;
+    let dirty = false;
     let unsubscribe = () => {};
     let cancelled = false;
     const savedAssets = new Set<string>();
 
     const persist = async () => {
+      dirty = false;
       const { project, assets } = useEditor.getState();
       setStatus('saving');
       try {
@@ -32,7 +34,11 @@ export function useAutosave(): SaveStatus {
       }
     };
 
-    loadSession()
+    // Store doluysa (ör. dil değişince arayüz yeniden kurulduysa) oturumu yeniden yükleme.
+    const current = useEditor.getState();
+    const alreadyOpen = current.project.clips.length > 0 || Object.keys(current.assets).length > 0;
+    if (alreadyOpen) Object.keys(current.assets).forEach((id) => savedAssets.add(id));
+    (alreadyOpen ? Promise.resolve(null) : loadSession())
       .then((session) => {
         if (cancelled) return;
         if (session) {
@@ -49,6 +55,7 @@ export function useAutosave(): SaveStatus {
           // Yeni proje veya .klip yüklemesi varlık listesini değiştirir; kayıt kümesini sıfırla.
           if (Object.keys(state.assets).length < savedAssets.size) savedAssets.clear();
           window.clearTimeout(timer);
+          dirty = true;
           timer = window.setTimeout(() => void persist(), DEBOUNCE_MS);
         });
       });
@@ -56,6 +63,7 @@ export function useAutosave(): SaveStatus {
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
+      if (dirty) void persist(); // bekleyen değişikliği kaybetme
       unsubscribe();
     };
   }, []);

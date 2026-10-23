@@ -1,3 +1,4 @@
+import { tr, useLang } from '../i18n';
 import { useEffect, useState } from 'react';
 import { installWindowApi, startBridgeIfEnabled } from '../agent/bridge';
 import { useEditor } from '../core/store';
@@ -46,9 +47,11 @@ function useShortcuts() {
 }
 
 export function App() {
+  // Dil değişince arayüz baştan kurulur; proje durumu store'da olduğu için korunur.
+  const lang = useLang((s) => s.lang);
   return (
     <ErrorBoundary>
-      <Editor />
+      <Editor key={lang} />
     </ErrorBoundary>
   );
 }
@@ -66,7 +69,14 @@ function Editor() {
 
   return (
     <div className="app">
-      <div>{missing.length > 0 && <div className="compat">Tarayıcınızda şu özellikler yok: {missing.join(', ')}. Güncel Chrome veya Edge önerilir.</div>}</div>
+      <div>
+        {missing.length > 0 && (
+          <div className="compat">
+            {tr('Tarayıcınızda şu özellikler yok:')} {missing.join(', ')}
+            {tr('. Güncel Chrome veya Edge önerilir.')}
+          </div>
+        )}
+      </div>
       <TopBar saveStatus={saveStatus} />
       <div className="workspace">
         <SidePanel />

@@ -13,6 +13,7 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     viewport: { width: 1440, height: 900 },
+    locale: 'tr-TR', // testler Türkçe arayüz metinleriyle yazıldı
     // Yerelde kurulu Chrome, CI'da Playwright'ın Chromium'u kullanılır.
     channel: process.env.CI ? undefined : 'chrome',
     launchOptions: { args: ['--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] },

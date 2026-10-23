@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { AssistantEvent, Message } from '../agent/assistant';
 
@@ -54,23 +55,21 @@ export function AssistantPanel() {
 
   return (
     <div className="assistant">
-      <h3>Asistan</h3>
-      <p className="hint">
-        İstediğinizi yazın; Claude editörün komutlarını kullanarak uygular. Her adım geri alınabilir (⌘Z).
-      </p>
+      <h3>{tr('Asistan')}</h3>
+      <p className="hint">{tr('İstediğinizi yazın; Claude editörün komutlarını kullanarak uygular. Her adım geri alınabilir (⌘Z).')}</p>
       <div className="field">
-        <label>Anthropic API anahtarı</label>
-        <input type="password" placeholder="sk-ant-…" value={apiKey} onChange={(e) => saveKey(e.target.value)} />
+        <label>{tr('Anthropic API anahtarı')}</label>
+        <input type="password" placeholder={tr('sk-ant-…')} value={apiKey} onChange={(e) => saveKey(e.target.value)} />
         <span className="hint">
-          Anahtar yalnız bu tarayıcıda saklanır. Claude'a proje özeti ve önizleme kareleri gönderilir, medya dosyalarınız gönderilmez.
+          {tr("Anahtar yalnız bu tarayıcıda saklanır. Claude'a proje özeti ve önizleme kareleri gönderilir, medya dosyalarınız gönderilmez.")}
         </span>
       </div>
       <div className="chat-log" ref={logRef}>
         {!entries.length && (
           <div className="chips">
             {EXAMPLES.map((example) => (
-              <button key={example} className="chip" disabled={!apiKey} onClick={() => void send(example)}>
-                {example}
+              <button key={example} className="chip" disabled={!apiKey} onClick={() => void send(tr(example))}>
+                {tr(example)}
               </button>
             ))}
           </div>
@@ -80,7 +79,7 @@ export function AssistantPanel() {
             {entry.kind === 'tool' ? `⚙ ${entry.text}` : entry.text}
           </div>
         ))}
-        {busy && <div className="chat-entry assistant tool">Çalışıyor…</div>}
+        {busy && <div className="chat-entry assistant tool">{tr('Çalışıyor…')}</div>}
       </div>
       <form
         className="row"
@@ -89,9 +88,15 @@ export function AssistantPanel() {
           void send(input);
         }}
       >
-        <input type="text" placeholder={apiKey ? 'Ne yapmak istersiniz?' : 'Önce API anahtarını girin'} value={input} disabled={!apiKey || busy} onChange={(e) => setInput(e.target.value)} />
+        <input
+          type="text"
+          placeholder={apiKey ? tr('Ne yapmak istersiniz?') : tr('Önce API anahtarını girin')}
+          value={input}
+          disabled={!apiKey || busy}
+          onChange={(e) => setInput(e.target.value)}
+        />
         <button className="btn primary" style={{ flex: 'none' }} disabled={!apiKey || busy || !input.trim()}>
-          Gönder
+          {tr('Gönder')}
         </button>
       </form>
       {entries.length > 0 && (
@@ -103,7 +108,7 @@ export function AssistantPanel() {
             setEntries([]);
           }}
         >
-          Yeni sohbet
+          {tr('Yeni sohbet')}
         </button>
       )}
     </div>

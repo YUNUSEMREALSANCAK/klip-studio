@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { ALL_FORMATS, BlobSource, CanvasSink, Input } from 'mediabunny';
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { matteImage } from '../ai/models';
@@ -222,7 +223,9 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     busy(async () => {
       const mask = finalMask();
       if (!clip || !asset || !mask) return;
-      const result = await removeObjectFromVideo(clip, asset, samRef.current!, mask, frameTime.current, (message, progress) => setStatus({ message, progress }));
+      const result = await removeObjectFromVideo(clip, asset, samRef.current!, mask, frameTime.current, (message, progress) =>
+        setStatus({ message, progress }),
+      );
       const s = useEditor.getState();
       s.addAsset(result);
       s.updateClip(clip.id, { assetId: result.id, in: 0, reframe: undefined } as Partial<MediaClip>);
@@ -235,7 +238,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     <div className="modal-backdrop" onPointerDown={(e) => e.target === e.currentTarget && close()}>
       <div className="modal">
         <header>
-          <h3>Nesne seç ve sil</h3>
+          <h3>{tr('Nesne seç ve sil')}</h3>
           <button className="btn ghost icon" onClick={close}>
             <Icon name="close" />
           </button>
@@ -253,23 +256,21 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
           <div>
             <div className="chips" style={{ marginBottom: 12 }}>
               <button className={`chip ${mode === 'click' ? 'active' : ''}`} onClick={() => setMode('click')}>
-                Tıklayarak seç (AI)
+                {tr('Tıklayarak seç (AI)')}
               </button>
               <button className={`chip ${mode === 'brush' ? 'active' : ''}`} onClick={() => setMode('brush')}>
-                Fırça
+                {tr('Fırça')}
               </button>
             </div>
             {mode === 'click' ? (
-              <p className="hint">
-                Nesneye tıklayın. Seçimden çıkarmak için Alt + tık veya sağ tık kullanın. Model: SlimSAM (Segment Anything).
-              </p>
+              <p className="hint">{tr('Nesneye tıklayın. Seçimden çıkarmak için Alt + tık veya sağ tık kullanın. Model: SlimSAM (Segment Anything).')}</p>
             ) : (
               <div className="field">
                 <label>
-                  Fırça boyutu <span>{brushSize}</span>
+                  {tr('Fırça boyutu')} <span>{brushSize}</span>
                 </label>
                 <input type="range" min={6} max={80} value={brushSize} onChange={(e) => setBrushSize(+e.target.value)} />
-                <p className="hint">Yazı, logo veya küçük lekeleri boyayarak işaretleyin.</p>
+                <p className="hint">{tr('Yazı, logo veya küçük lekeleri boyayarak işaretleyin.')}</p>
               </div>
             )}
             {status && (
@@ -281,32 +282,34 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
               </div>
             )}
             <button className="btn block" disabled={!ready} onClick={() => void autoSelect()}>
-              Ön planı otomatik seç (BiRefNet / MODNet)
+              {tr('Ön planı otomatik seç (BiRefNet / MODNet)')}
             </button>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               {asset.kind === 'video' && (
                 <button className="btn primary block" disabled={!hasSelection} onClick={() => void removeFromVideo()}>
-                  Videonun tamamında sil (deneysel)
+                  {tr('Videonun tamamında sil (deneysel)')}
                 </button>
               )}
               <button className={`btn block ${asset.kind === 'image' ? 'primary' : ''}`} disabled={!hasSelection} onClick={() => void removeObject()}>
-                {asset.kind === 'image' ? 'Nesneyi sil (görseli temizle)' : 'Yalnız bu kareyi temizle'}
+                {asset.kind === 'image' ? tr('Nesneyi sil (görseli temizle)') : tr('Yalnız bu kareyi temizle')}
               </button>
               {asset.kind === 'image' && (
                 <button className="btn block" disabled={!hasSelection} onClick={() => void removeBackground()}>
-                  Seçili olanı koru, arka planı sil
+                  {tr('Seçili olanı koru, arka planı sil')}
                 </button>
               )}
               <button className="btn block" disabled={!hasSelection} onClick={() => void cutObject()}>
-                Nesneyi kes → çıkartma olarak ekle
+                {tr('Nesneyi kes → çıkartma olarak ekle')}
               </button>
               <button className="btn ghost block" onClick={reset}>
-                Seçimi temizle
+                {tr('Seçimi temizle')}
               </button>
             </div>
             {asset.kind === 'video' && (
               <p className="hint" style={{ marginTop: 12 }}>
-                Seçim oynatma çizgisindeki karede yapılır. "Videonun tamamında sil" nesneyi diğer karelerde takip eder ve klibi temizlenmiş videoyla değiştirir; kısa kliplerde en iyi sonucu verir.
+                {tr(
+                  'Seçim oynatma çizgisindeki karede yapılır. "Videonun tamamında sil" nesneyi diğer karelerde takip eder ve klibi temizlenmiş videoyla değiştirir; kısa kliplerde en iyi sonucu verir.',
+                )}
               </p>
             )}
           </div>

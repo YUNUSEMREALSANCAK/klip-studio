@@ -1,3 +1,4 @@
+import { tr } from '../i18n';
 import { useRef, useState } from 'react';
 import { useEditor } from '../core/store';
 import { ASPECT_SIZES } from '../core/types';
@@ -47,58 +48,60 @@ export function ExportDialog() {
     <div className="modal-backdrop">
       <div className="modal narrow">
         <header>
-          <h3>Dışa aktar</h3>
+          <h3>{tr('Dışa aktar')}</h3>
           <button className="btn ghost icon" onClick={() => (abort.current?.abort(), close())}>
             <Icon name="close" />
           </button>
         </header>
         <div className="modal-body">
           <div className="field">
-            <label>Çözünürlük</label>
+            <label>{tr('Çözünürlük')}</label>
             <select value={scale} onChange={(e) => setScale(+e.target.value)} disabled={progress !== null}>
               {QUALITIES.map((q) => (
-                <option key={q.label} value={q.id}>
-                  {q.label}
+                <option key={tr(q.label)} value={q.id}>
+                  {tr(q.label)}
                 </option>
               ))}
             </select>
           </div>
           <div className="field">
-            <label>Kare hızı</label>
+            <label>{tr('Kare hızı')}</label>
             <select value={fps} onChange={(e) => setFps(+e.target.value)} disabled={progress !== null}>
-              <option value={24}>24 fps (sinema)</option>
-              <option value={30}>30 fps</option>
-              <option value={60}>60 fps</option>
+              <option value={24}>{tr('24 fps (sinema)')}</option>
+              <option value={30}>{tr('30 fps')}</option>
+              <option value={60}>{tr('60 fps')}</option>
             </select>
           </div>
           <div className="hint">
-            Çıktı: {width}×{height}, MP4. Kodlama tarayıcınızda WebCodecs ile yapılır.
+            {tr('Çıktı:')} {width}×{height}
+            {tr(', MP4. Kodlama tarayıcınızda WebCodecs ile yapılır.')}
           </div>
           {progress !== null && (
             <div style={{ marginTop: 16 }}>
-              <div className="task-msg">İşleniyor… %{Math.round(progress * 100)}</div>
+              <div className="task-msg">
+                {tr('İşleniyor… %')}
+                {Math.round(progress * 100)}
+              </div>
               <div className="progress">
                 <div style={{ width: `${progress * 100}%` }} />
               </div>
             </div>
           )}
           {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
-          {result && (
-            <video src={result} controls style={{ width: '100%', marginTop: 16, borderRadius: 8, background: '#000' }} />
-          )}
+          {result && <video src={result} controls style={{ width: '100%', marginTop: 16, borderRadius: 8, background: '#000' }} />}
         </div>
         <footer>
           {progress !== null ? (
             <button className="btn" onClick={() => abort.current?.abort()}>
-              İptal
+              {tr('İptal')}
             </button>
           ) : result ? (
             <a className="btn primary" href={result} download="klip-studyo.mp4">
-              <Icon name="export" size={16} /> İndir
+              <Icon name="export" size={16} /> {tr('İndir')}
             </a>
           ) : (
             <button className="btn primary" onClick={() => void start()}>
-              Dışa aktarmayı başlat
+              {tr('Dışa aktarmayı başlat')}
             </button>
           )}
         </footer>

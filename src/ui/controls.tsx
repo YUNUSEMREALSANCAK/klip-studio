@@ -1,9 +1,20 @@
+import { tr } from '../i18n';
 import type { ReactNode } from 'react';
 import { keyframeAt, setValue, toggleKeyframe, valueAt } from '../core/animation';
 import { useEditor } from '../core/store';
 import type { KeyframeProp, MediaClip } from '../core/types';
 
-export function Slider({ label, value, min, max, step = 0.01, format, onChange, onCommit, extra }: {
+export function Slider({
+  label,
+  value,
+  min,
+  max,
+  step = 0.01,
+  format,
+  onChange,
+  onCommit,
+  extra,
+}: {
   label: string;
   value: number;
   min: number;
@@ -48,7 +59,14 @@ export function Section({ title, children, open = true }: { title: string; child
 }
 
 // Anahtar kare destekli kaydırıcı: ◆ ile oynatma çizgisinde kare ekler/siler; değer o anki animasyondan okunur.
-export function KeySlider({ clip, prop, label, min, max, format }: {
+export function KeySlider({
+  clip,
+  prop,
+  label,
+  min,
+  max,
+  format,
+}: {
   clip: MediaClip;
   prop: KeyframeProp;
   label: string;
@@ -72,7 +90,7 @@ export function KeySlider({ clip, prop, label, min, max, format }: {
       extra={
         <button
           className={`key-toggle ${active ? 'on' : animated ? 'animated' : ''}`}
-          title={active ? 'Bu anahtar kareyi sil' : 'Oynatma çizgisine anahtar kare ekle'}
+          title={tr(active ? 'Bu anahtar kareyi sil' : 'Oynatma çizgisine anahtar kare ekle')}
           onClick={(e) => {
             e.preventDefault();
             s().updateClip(clip.id, toggleKeyframe(clip, prop, s().time) as Partial<MediaClip>);

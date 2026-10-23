@@ -75,7 +75,7 @@ test('LUT içe aktarılır ve renkleri değiştirir', async ({ page }) => {
 test('bulanık tuval dikey projede boşlukları doldurur', async ({ page }) => {
   await importMedia(page, 'gradient.webm');
   await addToMain(page, 0);
-  await page.locator('.topbar select').selectOption('9:16');
+  await page.locator('.topbar select[title="En-boy oranı"]').selectOption('9:16');
   await seek(page, 1);
   await expect.poll(() => pixelAt(page, 0.5, 0.08).then((p) => p[0] + p[1] + p[2])).toBeLessThan(30);
   await page.locator('.track').first().click({ position: { x: 900, y: 10 } }); // seçimi kaldır → proje ayarları

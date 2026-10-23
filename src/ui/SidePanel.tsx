@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
 import type { MediaClip, TextAnimation, TextStylePreset } from '../core/types';
-import { importFile } from '../media/importMedia';
+import { importFile, thumbnailOf } from '../media/importMedia';
 import { FILTER_PRESETS } from '../render/filterPresets';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { AiPanel } from './AiPanel';
@@ -93,8 +93,8 @@ function MediaTab() {
             onDoubleClick={() => useEditor.getState().addAssetToTimeline(asset.id)}
             title="Çift tıklayın veya zaman çizelgesine sürükleyin"
           >
-            <div className="asset-thumb" style={{ backgroundImage: asset.thumbnail ? `url(${asset.thumbnail})` : undefined }}>
-              {!asset.thumbnail && <Icon name="volume" size={26} />}
+            <div className="asset-thumb" style={{ backgroundImage: thumbnailOf(asset) ? `url(${thumbnailOf(asset)})` : undefined }}>
+              {!thumbnailOf(asset) && <Icon name="volume" size={26} />}
             </div>
             <span className="asset-badge">{asset.kind === 'video' ? 'Video' : asset.kind === 'audio' ? 'Ses' : 'Görsel'}</span>
             <div className="asset-actions">

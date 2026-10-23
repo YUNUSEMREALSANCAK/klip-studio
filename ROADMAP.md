@@ -11,8 +11,8 @@
 | Temel kurgu akışı | ✅ çalışıyor | içe aktar → kes/böl → geçiş → metin → dışa aktar |
 | Yerel AI özellikleri | 9 özellik | altyazı, akıllı kesim, arka plan, nesne sil, gürültü, sahne, çerçeveleme, iyileştirme, ritim |
 | CapCut temel özellik kapsamı | ~%35 | aşağıdaki tabloya göre ağırlıklı tahmin |
-| Otomatik test | ❌ yok | uçtan uca testler elle çalıştırıldı, CI'da yalnızca tip kontrolü + derleme |
-| Proje kaydetme | ❌ yok | sayfa yenilenince proje kaybolur: en acil eksik |
+| Otomatik test | ✅ | Vitest birim testleri + Playwright uçtan uca testleri, her push'ta CI'da |
+| Proje kaydetme | ✅ | IndexedDB otomatik kayıt + `.klip` dosyası |
 
 ### Alanlara göre kapsam (CapCut'a göre, tahmini)
 
@@ -34,12 +34,12 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 
 Amaç: kullanıcı işini kaybetmesin, her değişiklik testle korunsun.
 
-- [ ] **Proje kaydetme/yükleme** (M): IndexedDB'de otomatik kayıt; medya dosyaları OPFS'de; `.klip` dosyası olarak dışa/içe aktarma
-- [ ] **Birim testleri** (S): Vitest ile `core/timeline.ts` (rippleDelete, splitClip, packMainTrack, buildCaptions)
-- [ ] **Uçtan uca testler** (M): Playwright ile içe aktar, geçiş, altyazı, dışa aktarma; CI'da çalışsın
-- [ ] **Çoklu metin ve üst katman izleri** (M): aynı anda iki metin üst üste binmesin; izler otomatik çoğalsın
-- [ ] **Hata sınırları ve tarayıcı denetimi** (S): WebGL2/WebCodecs yoksa açık uyarı
-- [ ] **Canlı demo** (S): GitHub Pages veya Vercel'e otomatik yayın
+- [x] **Proje kaydetme/yükleme** (M): IndexedDB'de otomatik kayıt; medya dosyaları OPFS'de; `.klip` dosyası olarak dışa/içe aktarma
+- [x] **Birim testleri** (S): Vitest ile `core/timeline.ts` (rippleDelete, splitClip, packMainTrack, buildCaptions)
+- [x] **Uçtan uca testler** (M): Playwright ile içe aktar, geçiş, altyazı, dışa aktarma; CI'da çalışsın
+- [x] **Çoklu metin ve üst katman izleri** (M): aynı anda iki metin üst üste binmesin; izler otomatik çoğalsın
+- [x] **Hata sınırları ve tarayıcı denetimi** (S): WebGL2/WebCodecs yoksa açık uyarı
+- [x] **Canlı demo** (S): GitHub Pages veya Vercel'e otomatik yayın
 
 ### Faz 2: Kurgu derinliği → v0.3
 
@@ -82,7 +82,5 @@ Amaç: PhotoCraft ve CapCut'ın yeni ajan yaklaşımı gibi, her işlem programl
 
 ## Bilinen sorunlar
 
-- Aynı anda iki metin klibi metin izinde üst üste biniyor (Faz 1).
 - Nesne silme videoda yalnızca tek kareyi temizliyor; büyük nesnelerde sonuç bulanık (Faz 3).
 - Arka plan kaldırma yalnızca insanlarda çalışıyor (Faz 3).
-- Sayfa yenilenince proje kayboluyor (Faz 1).

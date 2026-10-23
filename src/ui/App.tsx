@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useEditor } from '../core/store';
 import { ExportDialog } from './ExportDialog';
 import { Inspector } from './Inspector';
@@ -8,6 +8,9 @@ import { SidePanel } from './SidePanel';
 import { TaskToasts } from './TaskToasts';
 import { Timeline } from './Timeline';
 import { TopBar } from './TopBar';
+import { missingFeatures } from './compat';
+import { ErrorBoundary } from './ErrorBoundary';
+import { useAutosave } from './useAutosave';
 import { useUi } from './uiStore';
 
 function useShortcuts() {
@@ -42,13 +45,24 @@ function useShortcuts() {
 }
 
 export function App() {
+  return (
+    <ErrorBoundary>
+      <Editor />
+    </ErrorBoundary>
+  );
+}
+
+function Editor() {
   useShortcuts();
+  const saveStatus = useAutosave();
+  const [missing] = useState(missingFeatures);
   const objectClipId = useUi((s) => s.objectEditorClipId);
   const exportOpen = useUi((s) => s.exportOpen);
 
   return (
     <div className="app">
-      <TopBar />
+      <div>{missing.length > 0 && <div className="compat">Tarayıcınızda şu özellikler yok: {missing.join(', ')}. Güncel Chrome veya Edge önerilir.</div>}</div>
+      <TopBar saveStatus={saveStatus} />
       <div className="workspace">
         <SidePanel />
         <Preview />

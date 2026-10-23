@@ -9,6 +9,9 @@ function kindOf(file: Blob): AssetKind | null {
   return null;
 }
 
+// Görsellerin küçük resmi dosyanın kendisidir; diğerleri içe aktarırken üretilir.
+export const thumbnailOf = (asset: Asset) => asset.thumbnail ?? (asset.kind === 'image' ? asset.url : undefined);
+
 export async function importFile(file: File): Promise<Asset> {
   return createAsset(file, file.name);
 }
@@ -27,7 +30,6 @@ export async function createAsset(file: Blob, name: string): Promise<Asset> {
       width: image.naturalWidth,
       height: image.naturalHeight,
       hasAudio: false,
-      thumbnail: url,
     };
   }
 
@@ -61,8 +63,13 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+// Her zaman data URL üretilir; böylece küçük resimler projeyle birlikte kalıcı olarak saklanabilir.
 async function canvasToDataUrl(canvas: HTMLCanvasElement | OffscreenCanvas) {
   if (canvas instanceof HTMLCanvasElement) return canvas.toDataURL('image/jpeg', 0.7);
   const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.7 });
-  return URL.createObjectURL(blob);
+  return new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
 }

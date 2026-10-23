@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type DragEvent, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent, type PointerEvent } from 'react';
 import { useEditor } from '../core/store';
-import { clipEnd, createMediaClip, formatTime, projectDuration, sortedTrack } from '../core/timeline';
+import { assignLanes, clipEnd, createMediaClip, formatTime, projectDuration, sortedTrack } from '../core/timeline';
 import type { Clip, MediaClip, TrackId } from '../core/types';
 import { decodeAssetAudio } from '../media/audio';
+import { thumbnailOf } from '../media/importMedia';
 import { Icon } from './icons';
 import { applyTransition } from './transitions';
 
@@ -14,6 +15,8 @@ const TRACKS: { id: TrackId; label: string }[] = [
 ];
 
 const SNAP_PX = 8;
+const LANE_HEIGHT = 44;
+const MAIN_HEIGHT = 64;
 const TICK_STEPS = [0.5, 1, 2, 5, 10, 15, 30, 60, 120];
 
 type DragMode = 'move' | 'trim-start' | 'trim-end';
@@ -32,6 +35,7 @@ export function Timeline() {
   const selectedId = useEditor((s) => s.selectedId);
   const markers = useEditor((s) => s.project.markers);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const labelsRef = useRef<HTMLDivElement>(null);
   const drag = useRef<DragState | null>(null);
 
   const duration = projectDuration(clips);
@@ -124,6 +128,20 @@ export function Timeline() {
 
   const mainClips = sortedTrack<MediaClip>(clips, 'main');
 
+  // Üst üste binen metin/üst katman/ses klipleri ayrı şeritlere dizilir; iz yüksekliği şerit sayısıyla büyür.
+  const layout = useMemo(() => {
+    const result = {} as Record<TrackId, { lanes: Map<string, number>; height: number }>;
+    for (const { id } of TRACKS) {
+      const onTrack = clips.filter((c) => c.track === id);
+      if (id === 'main') result[id] = { lanes: new Map(), height: MAIN_HEIGHT };
+      else {
+        const { lanes, count } = assignLanes(onTrack);
+        result[id] = { lanes, height: count * LANE_HEIGHT + 8 };
+      }
+    }
+    return result;
+  }, [clips]);
+
   return (
     <section className="timeline">
       <div className="tl-toolbar">
@@ -148,14 +166,14 @@ export function Timeline() {
         </button>
       </div>
       <div className="tl-body">
-        <div className="tl-labels">
+        <div className="tl-labels" ref={labelsRef}>
           {TRACKS.map((t) => (
-            <div key={t.id} className={`tl-label ${t.id === 'main' ? 'main' : ''}`}>
+            <div key={t.id} className="tl-label" style={{ height: layout[t.id].height }}>
               {t.label}
             </div>
           ))}
         </div>
-        <div className="tl-scroll" ref={scrollRef}>
+        <div className="tl-scroll" ref={scrollRef} onScroll={(e) => labelsRef.current && (labelsRef.current.scrollTop = e.currentTarget.scrollTop)}>
           <div className="tl-content" style={{ width: contentWidth }} onPointerMove={onDragMove} onPointerUp={endDrag}>
             <div
               className="ruler"
@@ -175,6 +193,7 @@ export function Timeline() {
               <div
                 key={track.id}
                 className={`track ${track.id === 'main' ? 'main' : ''}`}
+                style={{ height: layout[track.id].height }}
                 onPointerDown={(e) => {
                   useEditor.getState().select(null);
                   scrub(e);
@@ -185,7 +204,16 @@ export function Timeline() {
                 {clips
                   .filter((c) => c.track === track.id)
                   .map((clip) => (
-                    <TimelineClip key={clip.id} clip={clip} zoom={zoom} selected={clip.id === selectedId} assets={assets} onDragStart={startDrag} />
+                    <TimelineClip
+                      key={clip.id}
+                      clip={clip}
+                      zoom={zoom}
+                      top={track.id === 'main' ? 6 : (layout[track.id].lanes.get(clip.id) ?? 0) * LANE_HEIGHT + 6}
+                      height={track.id === 'main' ? MAIN_HEIGHT - 12 : LANE_HEIGHT - 8}
+                      selected={clip.id === selectedId}
+                      assets={assets}
+                      onDragStart={startDrag}
+                    />
                   ))}
                 {track.id === 'main' &&
                   mainClips.slice(1).map((clip, i) => (
@@ -228,9 +256,11 @@ function Playhead({ zoom, scrollRef }: { zoom: number; scrollRef: React.RefObjec
   return <div className="playhead" style={{ left: x }} />;
 }
 
-function TimelineClip({ clip, zoom, selected, assets, onDragStart }: {
+function TimelineClip({ clip, zoom, top, height, selected, assets, onDragStart }: {
   clip: Clip;
   zoom: number;
+  top: number;
+  height: number;
   selected: boolean;
   assets: ReturnType<typeof useEditor.getState>['assets'];
   onDragStart: (event: PointerEvent, clip: Clip, mode: DragMode) => void;
@@ -245,12 +275,14 @@ function TimelineClip({ clip, zoom, selected, assets, onDragStart }: {
       style={{
         left: clip.start * zoom,
         width,
-        backgroundImage: asset?.thumbnail && asset.kind !== 'audio' ? `url(${asset.thumbnail})` : undefined,
+        top,
+        height,
+        backgroundImage: asset && asset.kind !== 'audio' && thumbnailOf(asset) ? `url(${thumbnailOf(asset)})` : undefined,
       }}
       onPointerDown={(e) => onDragStart(e, clip, 'move')}
       title={label}
     >
-      {asset && asset.hasAudio && asset.kind === 'audio' && clip.type === 'media' && <Waveform clip={clip} width={width} />}
+      {asset && asset.hasAudio && clip.type === 'media' && <Waveform clip={clip} width={width} compact={asset.kind !== 'audio'} />}
       <div className="handle left" onPointerDown={(e) => onDragStart(e, clip, 'trim-start')} />
       <span className="clip-label">
         {clip.type === 'media' && clip.removeBackground ? '✂ ' : ''}
@@ -285,7 +317,7 @@ function peaksFor(assetId: string) {
   return peaksCache.get(assetId)!;
 }
 
-function Waveform({ clip, width }: { clip: MediaClip; width: number }) {
+function Waveform({ clip, width, compact }: { clip: MediaClip; width: number; compact: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
 
@@ -316,5 +348,5 @@ function Waveform({ clip, width }: { clip: MediaClip; width: number }) {
     }
   }, [peaks, width, clip.in, clip.duration]);
 
-  return <canvas ref={ref} className="wave" />;
+  return <canvas ref={ref} className={`wave ${compact ? 'compact' : ''}`} />;
 }

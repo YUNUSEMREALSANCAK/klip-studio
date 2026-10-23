@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createMediaClip, createTextClip, packMainTrack, splitClip, trackEnd } from './timeline';
+import { normalizeProject } from './migrate';
 import type { AspectRatio, Asset, Clip, Project } from './types';
 
 export interface Task {
@@ -26,6 +27,8 @@ interface EditorState {
   mutate: (fn: (clips: Clip[]) => Clip[], record?: boolean) => void;
   updateClip: (id: string, patch: Partial<Clip>, record?: boolean) => void;
   addAsset: (asset: Asset) => void;
+  loadProject: (project: Project, assets: Record<string, Asset>) => void;
+  newProject: () => void;
   addAssetToTimeline: (assetId: string, track?: 'main' | 'overlay' | 'audio') => void;
   addText: (text?: string) => void;
   removeClip: (id: string) => void;
@@ -46,8 +49,10 @@ interface EditorState {
 
 const HISTORY_LIMIT = 80;
 
+export const emptyProject = (): Project => ({ aspect: '16:9', fps: 30, background: '#000000', clips: [], markers: [] });
+
 export const useEditor = create<EditorState>((set, get) => ({
-  project: { aspect: '16:9', fps: 30, background: '#000000', clips: [], markers: [] },
+  project: emptyProject(),
   assets: {},
   selectedId: null,
   time: 0,
@@ -70,6 +75,12 @@ export const useEditor = create<EditorState>((set, get) => ({
     get().mutate((clips) => clips.map((c) => (c.id === id ? ({ ...c, ...patch } as Clip) : c)), record),
 
   addAsset: (asset) => set((s) => ({ assets: { ...s.assets, [asset.id]: asset } })),
+
+  loadProject: (project, assets) =>
+    set({ project: normalizeProject(project), assets, selectedId: null, time: 0, playing: false, past: [], future: [] }),
+
+  newProject: () =>
+    set({ project: emptyProject(), assets: {}, selectedId: null, time: 0, playing: false, past: [], future: [] }),
 
   addAssetToTimeline: (assetId, track) => {
     const asset = get().assets[assetId];

@@ -1,3 +1,5 @@
 node_modules
 dist
 public/mediapipe-wasm
+test-results
+playwright-report

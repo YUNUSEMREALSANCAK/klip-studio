@@ -10,7 +10,7 @@ const FACE_MODEL =
 const MASK_WIDTH = 256;
 
 let fileset: ReturnType<typeof FilesetResolver.forVisionTasks> | null = null;
-const getFileset = () => (fileset ??= FilesetResolver.forVisionTasks('/mediapipe-wasm'));
+const getFileset = () => (fileset ??= FilesetResolver.forVisionTasks(`${import.meta.env.BASE_URL}mediapipe-wasm`));
 
 async function withGpuFallback<T>(create: (delegate: 'GPU' | 'CPU') => Promise<T>): Promise<T> {
   try {

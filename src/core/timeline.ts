@@ -34,6 +34,19 @@ export function packMainTrack(clips: Clip[]): Clip[] {
   });
 }
 
+// Üst üste binen klipleri ayrı şeritlere yerleştirir (ilk boş şerit). Ana iz hep tek şerittir.
+export function assignLanes(clips: Clip[]): { lanes: Map<string, number>; count: number } {
+  const ends: number[] = [];
+  const lanes = new Map<string, number>();
+  for (const clip of [...clips].sort((a, b) => a.start - b.start)) {
+    let lane = ends.findIndex((end) => end <= clip.start + 1e-3);
+    if (lane < 0) lane = ends.length;
+    ends[lane] = clipEnd(clip);
+    lanes.set(clip.id, lane);
+  }
+  return { lanes, count: Math.max(1, ends.length) };
+}
+
 export function createMediaClip(asset: Asset, track: MediaClip['track'], start: number): MediaClip {
   return {
     id: uid(),

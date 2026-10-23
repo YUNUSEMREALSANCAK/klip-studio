@@ -24,13 +24,19 @@ html, body, #root { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--text); overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
 
-.app { display: grid; grid-template-rows: 52px minmax(0, 1fr) 300px; height: 100%; }
+.app { display: grid; grid-template-rows: auto 52px minmax(0, 1fr) 300px; height: 100%; }
 
 /* Üst çubuk */
 .topbar { display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
 .brand { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
 .brand-dot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
 .topbar .spacer { flex: 1; }
+.topbar .divider { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+.save-status { font-size: 11px; color: var(--muted); margin-left: 4px; }
+.save-status.error { color: var(--danger); }
+.compat { padding: 8px 16px; background: #3b2a0a; color: #fcd34d; font-size: 12px; border-bottom: 1px solid #5c4210; }
+.crash { height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; }
+.crash pre { max-width: 640px; white-space: pre-wrap; color: var(--danger); font-size: 12px; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; transition: background .15s, border-color .15s; white-space: nowrap; }
 .btn:hover:not(:disabled) { background: var(--panel-3); }
@@ -134,16 +140,15 @@ input[type='color'] { width: 32px; height: 26px; border: none; background: none;
 .tl-toolbar .spacer { flex: 1; }
 .tl-toolbar input[type='range'] { width: 120px; }
 .tl-body { flex: 1; display: grid; grid-template-columns: 96px 1fr; min-height: 0; }
-.tl-labels { border-right: 1px solid var(--line); padding-top: 26px; }
-.tl-label { height: 52px; display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 11px; border-bottom: 1px solid transparent; }
-.tl-label.main { height: 64px; }
+.tl-labels { border-right: 1px solid var(--line); padding-top: 26px; overflow: hidden; }
+.tl-label { display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 11px; border-bottom: 1px solid rgba(255,255,255,.03); }
 .tl-scroll { position: relative; overflow: auto; }
 .tl-content { position: relative; min-height: 100%; }
 .ruler { position: sticky; top: 0; height: 26px; border-bottom: 1px solid var(--line); background: var(--panel); z-index: 3; cursor: ew-resize; }
 .tick { position: absolute; top: 0; height: 100%; border-left: 1px solid var(--line); font-size: 10px; color: var(--muted); padding: 4px 0 0 4px; pointer-events: none; }
-.track { position: relative; height: 52px; border-bottom: 1px solid rgba(255,255,255,.03); }
-.track.main { height: 64px; background: rgba(255,255,255,.015); }
-.clip { position: absolute; top: 6px; bottom: 6px; border-radius: 7px; overflow: hidden; cursor: grab; border: 1.5px solid transparent; display: flex; align-items: flex-end; font-size: 11px; user-select: none; }
+.track { position: relative; border-bottom: 1px solid rgba(255,255,255,.03); }
+.track.main { background: rgba(255,255,255,.015); }
+.clip { position: absolute; border-radius: 7px; overflow: hidden; cursor: grab; border: 1.5px solid transparent; display: flex; align-items: flex-end; font-size: 11px; user-select: none; }
 .clip.selected { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.15); }
 .clip.main { background: var(--main-clip) repeat-x left center / auto 100%; }
 .clip.overlay { background: var(--overlay-clip) repeat-x left center / auto 100%; }
@@ -153,6 +158,7 @@ input[type='color'] { width: 32px; height: 26px; border: none; background: none;
 .clip-label { position: relative; z-index: 1; padding: 2px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0,0,0,.8); background: linear-gradient(transparent, rgba(0,0,0,.45)); width: 100%; }
 .clip.text .clip-label { background: none; }
 .clip canvas.wave { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .55; }
+.clip canvas.wave.compact { top: auto; height: 40%; opacity: .7; background: rgba(0,0,0,.35); }
 .handle { position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 2; }
 .handle.left { left: 0; }
 .handle.right { right: 0; }

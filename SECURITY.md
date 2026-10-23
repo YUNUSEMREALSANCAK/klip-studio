@@ -1,13 +1,13 @@
-# Güvenlik
+# Security
 
-Klip Stüdyo tamamen tarayıcıda çalışır; kullanıcının medyası hiçbir sunucuya gönderilmez. Ağ istekleri yalnızca model dosyalarını indirmek içindir (Hugging Face, Google model deposu) ve web yazı tipleri içindir.
+Klip Studio runs entirely in the browser; the user's media is never sent to a server. Network requests are only for downloading model files (Hugging Face, Google's model storage) and web fonts.
 
-## Açık bildirme
+## Reporting a vulnerability
 
-Bir güvenlik açığı bulduysanız herkese açık issue açmayın. GitHub'ın **Security → Report a vulnerability** (özel bildirim) özelliğini kullanın. Bildirime şunları ekleyin:
+If you find a security issue, please don't open a public issue. Use GitHub's **Security → Report a vulnerability** (private reporting). Include:
 
-- Etkilenen sürüm veya commit
-- Yeniden üretme adımları
-- Olası etkisi
+- The affected version or commit
+- Steps to reproduce
+- The likely impact
 
-İlk yanıtı 7 gün içinde vermeye çalışırız.
+We aim to respond within 7 days.

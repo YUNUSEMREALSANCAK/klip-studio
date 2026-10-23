@@ -1,6 +1,6 @@
-// Klip Stüdyo service worker: uygulamayı çevrimdışı açılabilir yapar.
-// Sayfalar önce ağdan (güncel kalsın), dosyalar ve yazı tipleri önce önbellekten gelir.
-// Yapay zeka modellerini transformers.js zaten kendi önbelleğinde tutar.
+// Klip Studio service worker: makes the app open offline.
+// Pages are network-first (to stay fresh); files and fonts are cache-first.
+// transformers.js already keeps AI models in its own cache.
 const CACHE = 'klip-studio-v1';
 const CACHEABLE_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com', 'storage.googleapis.com'];
 

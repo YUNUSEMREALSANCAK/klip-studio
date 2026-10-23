@@ -1,7 +1,7 @@
 import { tr } from '../i18n';
 import { Component, type ReactNode } from 'react';
 
-// Beklenmeyen bir hata tüm arayüzü beyaz ekrana çevirmesin; proje IndexedDB'de güvende kalır.
+// An unexpected error shouldn't blank the whole UI; the project stays safe in IndexedDB.
 export class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
 
@@ -14,11 +14,11 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
     return (
       <div className="crash">
         <div>
-          <h2>{tr('Bir şeyler ters gitti')}</h2>
-          <p className="hint">{tr('Projeniz otomatik kaydedildi. Sayfayı yenileyerek kaldığınız yerden devam edebilirsiniz.')}</p>
+          <h2>{tr('Something went wrong')}</h2>
+          <p className="hint">{tr('Your project was saved automatically. Reload the page to continue where you left off.')}</p>
           <pre>{this.state.error.message}</pre>
           <button className="btn primary" onClick={() => location.reload()}>
-            {tr('Sayfayı yenile')}
+            {tr('Reload page')}
           </button>
         </div>
       </div>

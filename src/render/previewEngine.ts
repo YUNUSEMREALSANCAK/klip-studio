@@ -10,16 +10,19 @@ import { clipSourceTime, clipsToDraw, composeFrame, drawTexts, visibleClips, typ
 const DRIFT_PLAYING = 0.25;
 const DRIFT_PAUSED = 0.02;
 
-// Önizleme: her klip için bir <video> öğesi atar, zamanı senkronlar ve kareyi WebGL ile çizer.
+// Preview: assigns a <video> element per clip, syncs time and draws the frame with WebGL.
 export class PreviewEngine {
   private compositor: Compositor;
-  private pools = new Map<string, HTMLVideoElement[]>(); // varlık başına öğe havuzu
+  private pools = new Map<string, HTMLVideoElement[]>(); // element pool per asset
   private images = new Map<string, HTMLImageElement>();
-  private assigned = new Map<string, HTMLVideoElement>(); // klip → öğe
+  private assigned = new Map<string, HTMLVideoElement>(); // clip → element
   private remover: BackgroundRemover | null = null;
   private masks = new Map<string, { time: number; mask: Mask }>();
 
-  constructor(glCanvas: HTMLCanvasElement, private textCanvas: HTMLCanvasElement) {
+  constructor(
+    glCanvas: HTMLCanvasElement,
+    private textCanvas: HTMLCanvasElement,
+  ) {
     this.compositor = new Compositor(glCanvas, 2, 2);
   }
 
@@ -41,7 +44,7 @@ export class PreviewEngine {
       if (!source) ready = false;
       else sources.set(clip.id, source);
     }
-    // Kare hazır değilse önceki kareyi ekranda bırak (titremeyi önler).
+    // If a frame isn't ready, keep the previous one on screen (prevents flicker).
     if (ready) {
       composeFrame(
         this.compositor,
@@ -57,7 +60,7 @@ export class PreviewEngine {
     drawTexts(ctx, project.clips, t, this.textCanvas.width, this.textCanvas.height);
   }
 
-  // Görüntüsü veya sesi o an gereken klipler.
+  // Clips whose picture or sound is needed right now.
   private mediaClipsAt(project: Project, assets: Record<string, Asset>, t: number, drawn: MediaClip[]) {
     const clips = new Set(drawn);
     for (const clip of project.clips) {
@@ -120,7 +123,7 @@ export class PreviewEngine {
     return mask ?? cached?.mask ?? null;
   }
 
-  // Bir varlığın klipleri silinmişse havuzu boşalt.
+  // Empty an asset's pool once its clips are gone.
   prune(project: Project) {
     const assetIds = new Set(project.clips.flatMap((c) => (c.type === 'media' ? [c.assetId] : [])));
     for (const [assetId, pool] of this.pools) {
@@ -170,4 +173,3 @@ function syncElement(element: HTMLVideoElement, clip: MediaClip, t: number, expe
   if (!element.paused) element.pause();
   if (drift > DRIFT_PAUSED && !element.seeking) element.currentTime = expected;
 }
-

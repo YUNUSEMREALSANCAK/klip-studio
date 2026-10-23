@@ -1,8 +1,8 @@
-# Mimari
+# Architecture
 
-Klip Stüdyo tek sayfalık bir React uygulamasıdır; sunucu tarafı yoktur. Ajanlar için ayrı bir MCP sunucusu (`mcp/server.mjs`) isteğe bağlı olarak çalıştırılır.
+Klip Studio is a single-page React app with no server side. A separate MCP server for agents (`mcp/server.mjs`) can be run optionally.
 
-## Veri modeli (`src/core/types.ts`)
+## Data model (`src/core/types.ts`)
 
 ```
 Project
@@ -11,62 +11,64 @@ Project
     MediaClip  track: main | overlay | audio
                assetId, start, in, duration, speed, volume, opacity, transform {x, y, scale, rotation},
                keyframes[], filter (+ lutId), mask, chroma, transition, fadeIn/fadeOut, duck, removeBackground, reframe
-    TextClip   track: text → text, preset, animation, font, color, words (karaoke zamanları)
-Asset (proje dışında): file, url, duration, width, height, hasAudio, thumbnail
+    TextClip   track: text → text, preset, animation, font, color, words (karaoke timings)
+Asset (outside the project): file, url, duration, width, height, hasAudio, thumbnail
 ```
 
-- **Ana iz manyetiktir:** `packMainTrack` klipleri boşluksuz dizer.
-- **Geçiş**, giren klibin `transition` alanında tutulur ve kesim noktasının iki yanına yayılır.
-- **Hız:** kaynak zamanı = `in + (t − start) × speed`. Bölme, kırpma ve ripple silme bunu hesaba katar.
-- **Anahtar kareler** klibin başına göre saniyedir; `core/animation.ts` o anki değeri yumuşak geçişle hesaplar.
-- **Migrasyon:** `core/migrate.ts`, eski projelere yeni alanların varsayılanlarını ekler.
+- **The main track is magnetic:** `packMainTrack` lays clips out without gaps.
+- A **transition** is stored on the incoming clip's `transition` field and spans both sides of the cut.
+- **Speed:** source time = `in + (t − start) × speed`. Split, trim and ripple delete account for it.
+- **Keyframes** are in seconds from the clip start; `core/animation.ts` computes the current value with easing.
+- **Migration:** `core/migrate.ts` adds defaults for new fields to older projects.
 
-## Kare hattı
+## Frame pipeline
 
 ```
-               ┌────────────── önizleme ──────────────┐
-zaman (t) ──▶  │ PreviewEngine: <video> havuzu + senkron │──▶ composeFrame ──▶ Compositor (WebGL2) ──▶ ekran
+               ┌─────────────── preview ───────────────┐
+time (t) ──▶   │ PreviewEngine: <video> pool + sync    │──▶ composeFrame ──▶ Compositor (WebGL2) ──▶ screen
                └───────────────────────────────────────┘          │
-               ┌─────────────── dışa aktarma ──────────┐          └──▶ drawTexts (Canvas 2D)
-zaman (t) ──▶  │ FrameReader: Mediabunny CanvasSink    │──▶ composeFrame ──▶ CanvasSource ──▶ MP4
+               ┌─────────────── export ────────────────┐          └──▶ drawTexts (Canvas 2D)
+time (t) ──▶   │ FrameReader: Mediabunny CanvasSink    │──▶ composeFrame ──▶ CanvasSource ──▶ MP4
                └───────────────────────────────────────┘
 ```
 
-- `render/composeFrame.ts`: görünen klipleri bulur (geçişte iki ana klip), anahtar karelerle animasyonlu durumu, bulanık tuvali, maskeyi, LUT'u ve kare harmanlamayı uygular.
-- `render/compositor.ts` + `render/shaders.ts`: katman shader'ı (renk, bulanıklık, LUT, keskinlik, vinyet, arka plan maskesi, şekil maskesi, chroma key) ve 12 geçiş shader'ı; döndürme çizim dörtgeninde yapılır.
-- `render/layout.ts`: katman dikdörtgenleri; önizlemedeki seçim kutusu (`ui/StageEditor.tsx`) da bunu kullanır.
+- `render/composeFrame.ts`: finds the visible clips (two main clips during a transition) and applies the keyframed state, blurred canvas, masks, LUTs and frame blending.
+- `render/compositor.ts` + `render/shaders.ts`: the layer shader (color, blur, LUT, sharpen, vignette, background matte, shape mask, chroma key) and 12 transition shaders; rotation happens in the draw quad.
+- `render/layout.ts`: layer rectangles; the preview selection box (`ui/StageEditor.tsx`) uses them too.
 
-## Ses hattı
+## Audio pipeline
 
-- **Önizleme:** her klip bir `<video>` öğesiyle çalınır; `playbackRate` = hız (`preservesPitch`), ses düzeyi = anahtar kare × fade × kısma zarfı.
-- **Dışa aktarma ve analiz:** `media/audio.ts` `mixTimelineAudio`, klipleri `OfflineAudioContext`'te karıştırır; hız için `media/timeStretch.ts` (WSOLA), ses düzeyi için eğri, müzik kısma için `media/ducking.ts` zarfı.
+- **Preview:** each clip plays through a `<video>` element; `playbackRate` = speed (`preservesPitch`), volume = keyframe × fade × ducking envelope.
+- **Export and analysis:** `mixTimelineAudio` in `media/audio.ts` mixes clips in an `OfflineAudioContext`, using `media/timeStretch.ts` (WSOLA) for speed, an envelope for volume, and the `media/ducking.ts` envelope for ducking.
 
-## Yapay zeka (`src/ai/`)
+## AI (`src/ai/`)
 
-| Modül | Çalıştığı yer | Not |
+| Module | Runs on | Notes |
 | --- | --- | --- |
-| `whisper.worker.ts` | Web Worker | transformers.js; WebGPU varsa GPU, yoksa WASM |
-| `sam.worker.ts` | Web Worker | SlimSAM; görsel gömmesi bir kez, her tıklamada yalnız kod çözücü; video için tek istekte gömme + maske |
-| `models.worker.ts` | Web Worker | çeviri (opus-mt / NLLB), seslendirme (MMS-TTS), ön plan ayırma (BiRefNet / MODNet) |
-| `videoInpaint.ts` | ana iş parçacığı | nesneyi örnek karelerde SAM ile takip eder, her kareyi doldurur, yeni video kodlar |
-| `vision.ts` | ana iş parçacığı | MediaPipe; önizlemede gerçek zamanlı kişi maskesi, yüz algılama |
-| `audioTools.ts` · `videoTools.ts` · `objectTools.ts` | ana iş parçacığı | RNNoise, sessizlik/ritim; sahne, çerçeveleme, iyileştirme; push-pull doldurma |
+| `whisper.worker.ts` | Web Worker | transformers.js; GPU with WebGPU, otherwise WASM |
+| `sam.worker.ts` | Web Worker | SlimSAM; image embedding once, only the decoder per click; embedding + mask in one request for video |
+| `models.worker.ts` | Web Worker | translation (opus-mt / NLLB), text to speech (MMS-TTS), foreground segmentation (BiRefNet / MODNet) |
+| `lama.worker.ts` · `rife.worker.ts` | Web Worker | onnxruntime-web; LaMa inpainting, RIFE frame interpolation; WebGPU with a CPU retry |
+| `matte.worker.ts` | Web Worker | export-time person segmentation (MediaPipe) |
+| `videoInpaint.ts` | main thread | tracks the object with SAM on sample frames, fills every frame, encodes a new video |
+| `vision.ts` | main thread | MediaPipe; real-time person matte in the preview, face detection |
+| `audioTools.ts` · `videoTools.ts` · `objectTools.ts` | main thread | RNNoise, silence/beats; scenes, reframing, auto color; push-pull fill |
 
-## Ajanlar (`src/core/commands.ts`, `src/agent/`)
+## Agents (`src/core/commands.ts`, `src/agent/`)
 
 ```
-Arayüz ─┐
+UI ─┐
 window.klip ─┤
-MCP sunucusu ⇄ WebSocket :5299 ⇄ bridge.ts ─┼──▶ execute(Command) ──▶ store (geri alınabilir)
-Asistan (Claude Opus 5.5, araç döngüsü) ─┘
+MCP server ⇄ WebSocket :5299 ⇄ bridge.ts ─┼──▶ execute(Command) ──▶ store (undoable)
+Assistant (Claude Opus 5.5, tool loop) ─┘
 ```
 
-- `COMMAND_SPECS` hem Claude araçlarının hem MCP'nin şemasıdır.
-- `agent/assistant.ts`: elle yazılmış araç döngüsü, sunucu tarafı yedek model (`fallbacks: "default"`), geçmiş yalnız sona eklenir.
+- `COMMAND_SPECS` is the schema for both the Claude tools and MCP.
+- `agent/assistant.ts`: a hand-written tool loop, server-side model fallback (`fallbacks: "default"`), append-only history.
 
-## Durum, kayıt ve dil
+## State, persistence and language
 
-- `core/store.ts` (Zustand): proje, varlıklar, seçim, zaman, oynatma, geçmiş (geri al/yinele), görev kartları.
-- `core/persistence.ts` + `ui/useAutosave.ts`: IndexedDB'ye otomatik kayıt, `.klip` zip arşivi.
-- `i18n/`: `tr('Türkçe metin')` seçili dile çevirir; anahtar Türkçe metindir, İngilizcesi `i18n/en.ts`'te.
-- `public/sw.js`: PWA önbelleği (sayfalar önce ağdan, dosyalar önce önbellekten).
+- `core/store.ts` (Zustand): project, assets, selection, time, playback, history (undo/redo), task cards.
+- `core/persistence.ts` + `ui/useAutosave.ts`: IndexedDB autosave, `.klip` zip archive.
+- `i18n/`: `tr('English text')` returns the text in the selected language; English is the source, Turkish lives in `i18n/tr.ts`.
+- `public/sw.js`: PWA cache (pages network-first, files cache-first).

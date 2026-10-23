@@ -3,35 +3,35 @@ import { mixTimelineAudio, toMono } from '../media/audio';
 import type { WhisperMessage, WhisperRequest } from './whisper.worker';
 
 export const WHISPER_MODELS = [
-  { id: 'onnx-community/whisper-tiny_timestamped', label: 'Tiny — en hızlı (~40 MB)' },
-  { id: 'onnx-community/whisper-base_timestamped', label: 'Base — dengeli (~80 MB)' },
-  { id: 'onnx-community/whisper-small_timestamped', label: 'Small — en doğru (~250 MB)' },
+  { id: 'onnx-community/whisper-tiny_timestamped', label: 'Tiny — fastest (~40 MB)' },
+  { id: 'onnx-community/whisper-base_timestamped', label: 'Base — balanced (~80 MB)' },
+  { id: 'onnx-community/whisper-small_timestamped', label: 'Small — most accurate (~250 MB)' },
 ];
 
 export const LANGUAGES = [
-  { id: 'turkish', label: 'Türkçe' },
-  { id: 'english', label: 'İngilizce' },
-  { id: 'german', label: 'Almanca' },
-  { id: 'french', label: 'Fransızca' },
-  { id: 'spanish', label: 'İspanyolca' },
-  { id: 'arabic', label: 'Arapça' },
-  { id: 'auto', label: 'Otomatik algıla' },
+  { id: 'turkish', label: 'Turkish' },
+  { id: 'english', label: 'English' },
+  { id: 'german', label: 'German' },
+  { id: 'french', label: 'French' },
+  { id: 'spanish', label: 'Spanish' },
+  { id: 'arabic', label: 'Arabic' },
+  { id: 'auto', label: 'Auto-detect' },
 ];
 
 let worker: Worker | null = null;
 const getWorker = () => (worker ??= new Worker(new URL('./whisper.worker.ts', import.meta.url), { type: 'module' }));
 
-// Zaman çizelgesinin tüm sesini Whisper ile metne çevirir; kelime zamanları zaman çizelgesine göredir.
+// Transcribes all timeline audio with Whisper; word times are in timeline seconds.
 export async function transcribeTimeline(
   clips: Clip[],
   assets: Record<string, Asset>,
   options: { model: string; language: string },
   onProgress: (message: string, progress: number) => void,
 ): Promise<{ words: Word[]; wordLevel: boolean }> {
-  onProgress('Ses hazırlanıyor', -1);
+  onProgress('Preparing audio', -1);
   const mix = await mixTimelineAudio(clips, assets, 16000, 1);
   const audio = await toMono(mix, 16000);
-  if (!audio.some((v) => Math.abs(v) > 0.001)) throw new Error('Zaman çizelgesinde ses bulunamadı');
+  if (!audio.some((v) => Math.abs(v) > 0.001)) throw new Error('No audio on the timeline');
 
   return new Promise((resolve, reject) => {
     const w = getWorker();

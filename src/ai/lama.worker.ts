@@ -2,7 +2,7 @@
 import * as ort from 'onnxruntime-web';
 import { cachedModel } from './modelCache';
 
-// LaMa (big-lama, Apache-2.0) ile doldurma: 512×512 görsel + maske → doldurulmuş görsel.
+// Inpainting with LaMa (big-lama, Apache-2.0): 512×512 image + mask → filled image.
 const MODEL_URL = 'https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx';
 export const LAMA_SIZE = 512;
 
@@ -18,13 +18,13 @@ let session: Promise<ort.InferenceSession> | null = null;
 let cpuOnly = false;
 
 function getSession(id: number) {
-  session ??= cachedModel(MODEL_URL, (progress) => post({ id, type: 'progress', message: 'LaMa modeli indiriliyor', progress })).then((bytes) =>
+  session ??= cachedModel(MODEL_URL, (progress) => post({ id, type: 'progress', message: 'Downloading LaMa model', progress })).then((bytes) =>
     ort.InferenceSession.create(bytes, { executionProviders: cpuOnly ? ['wasm'] : ['webgpu', 'wasm'] }),
   );
   return session;
 }
 
-// Modelin FFT dalındaki bazı işlemler WebGPU'da çalışmayabilir; o zaman oturum işlemcide yeniden kurulur.
+// Some ops in the model's FFT branch may fail on WebGPU; the session is then rebuilt on the CPU.
 async function runModel(id: number, feeds: Record<string, ort.Tensor>) {
   try {
     const model = await getSession(id);
@@ -33,7 +33,7 @@ async function runModel(id: number, feeds: Record<string, ort.Tensor>) {
     if (cpuOnly) throw error;
     cpuOnly = true;
     session = null;
-    post({ id, type: 'progress', message: 'İşlemcide yeniden deneniyor', progress: -1 });
+    post({ id, type: 'progress', message: 'Retrying on the CPU', progress: -1 });
     const model = await getSession(id);
     return { model, outputs: await model.run(feeds) };
   }

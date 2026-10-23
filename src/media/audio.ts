@@ -7,7 +7,7 @@ import { timeStretch } from './timeStretch';
 
 const decoded = new Map<string, Promise<AudioBuffer>>();
 
-// Varlığın sesini bir kez çözer ve önbellekte tutar.
+// Decodes an asset's audio once and caches it.
 export function decodeAssetAudio(asset: Asset): Promise<AudioBuffer> {
   if (!decoded.has(asset.id)) decoded.set(asset.id, decode(asset));
   return decoded.get(asset.id)!;
@@ -24,11 +24,11 @@ async function decode(asset: Asset): Promise<AudioBuffer> {
   }
 }
 
-// decodeAudioData'nın açamadığı kapsayıcılar için yedek yol.
+// Fallback for containers decodeAudioData can't open.
 async function decodeWithMediabunny(asset: Asset): Promise<AudioBuffer> {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
   const track = await input.getPrimaryAudioTrack();
-  if (!track) throw new Error('Bu dosyada ses yok');
+  if (!track) throw new Error('This file has no audio');
   const parts: AudioBuffer[] = [];
   for await (const { buffer } of new AudioBufferSink(track).buffers()) parts.push(buffer);
   const first = parts[0];
@@ -47,9 +47,9 @@ async function decodeWithMediabunny(asset: Asset): Promise<AudioBuffer> {
 const audible = (clip: Clip, assets: Record<string, Asset>): clip is MediaClip =>
   clip.type === 'media' && !clip.muted && clip.volume > 0 && !!assets[clip.assetId]?.hasAudio;
 
-const GAIN_RATE = 50; // ses düzeyi eğrisi örnek/sn
+const GAIN_RATE = 50; // volume envelope samples/s
 
-// Kaynaktaki [from, from + length) aralığını keser (gerekirse sessizlikle tamamlar).
+// Cuts [from, from + length) from the source (padding with silence if needed).
 function slice(buffer: AudioBuffer, from: number, length: number): AudioBuffer {
   const start = Math.max(0, Math.floor(from * buffer.sampleRate));
   const frames = Math.max(1, Math.floor(length * buffer.sampleRate));
@@ -60,9 +60,9 @@ function slice(buffer: AudioBuffer, from: number, length: number): AudioBuffer {
   return out;
 }
 
-const CURVE_CHUNK = 0.25; // sn; eğri bu aralıklarla sabit hız parçalarına bölünür
+const CURVE_CHUNK = 0.25; // s; the curve is split into constant-speed pieces of this length
 
-// Hız eğrili klibin sesini kısa parçalar hâlinde, her parçayı kendi ortalama hızıyla esneterek üretir.
+// Renders a speed-curved clip's audio in short pieces, stretching each at its own average speed.
 function stretchCurve(decoded: AudioBuffer, clip: MediaClip, skip: number, length: number): AudioBuffer {
   const parts: AudioBuffer[] = [];
   for (let local = skip; local < skip + length - 1e-6; local += CURVE_CHUNK) {
@@ -81,8 +81,8 @@ function stretchCurve(decoded: AudioBuffer, clip: MediaClip, skip: number, lengt
   return out;
 }
 
-// Zaman çizelgesindeki tüm sesleri tek bir AudioBuffer'a karıştırır.
-// Hız (perde korunarak), ses düzeyi anahtar kareleri, fade ve müzik kısma uygulanır.
+// Mixes all timeline audio into a single AudioBuffer.
+// Applies speed (pitch preserved), volume keyframes, fades and ducking.
 export async function mixTimelineAudio(
   clips: Clip[],
   assets: Record<string, Asset>,
@@ -108,7 +108,7 @@ export async function mixTimelineAudio(
     const source = context.createBufferSource();
     source.buffer = segment;
 
-    // Ses düzeyi eğrisi: temel/anahtar kare × fade × kısma
+    // Volume envelope: base/keyframe × fade × ducking
     const gain = context.createGain();
     const steps = Math.max(2, Math.ceil(playLength * GAIN_RATE));
     const curve = Float32Array.from({ length: steps }, (_, i) => {
@@ -123,7 +123,7 @@ export async function mixTimelineAudio(
   return context.startRendering();
 }
 
-// Bir AudioBuffer'ı istenen örnekleme hızında tek kanala indirir.
+// Downmixes an AudioBuffer to mono at the requested sample rate.
 export async function toMono(buffer: AudioBuffer, sampleRate: number): Promise<Float32Array> {
   const length = Math.ceil(buffer.duration * sampleRate);
   const context = new OfflineAudioContext({ numberOfChannels: 1, length, sampleRate });
@@ -138,8 +138,7 @@ export async function toMono(buffer: AudioBuffer, sampleRate: number): Promise<F
 export function encodeWav(samples: Float32Array, sampleRate: number): Blob {
   const buffer = new ArrayBuffer(44 + samples.length * 2);
   const view = new DataView(buffer);
-  const writeString = (offset: number, text: string) =>
-    [...text].forEach((ch, i) => view.setUint8(offset + i, ch.charCodeAt(0)));
+  const writeString = (offset: number, text: string) => [...text].forEach((ch, i) => view.setUint8(offset + i, ch.charCodeAt(0)));
   writeString(0, 'RIFF');
   view.setUint32(4, 36 + samples.length * 2, true);
   writeString(8, 'WAVE');

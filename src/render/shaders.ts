@@ -9,8 +9,8 @@ void main() {
   gl_Position = vec4(aPosition, 0.0, 1.0);
 }`;
 
-// Katman shader'ı: kaynak + bulanıklık + renk ayarları + LUT + keskinleştirme + vinyet
-// + arka plan maskesi + şekil maskesi + yeşil perde.
+// Layer shader: source + blur + color adjustments + LUT + sharpen + vignette
+// + background matte + shape mask + chroma key.
 export const LAYER_FRAGMENT = /* glsl */ `#version 300 es
 precision highp float;
 precision mediump sampler3D;
@@ -98,26 +98,23 @@ void main() {
 }`;
 
 export const TRANSITION_TYPES: { type: TransitionType; label: string }[] = [
-  { type: 'fade', label: 'Çapraz geçiş' },
-  { type: 'fadeblack', label: 'Siyaha geçiş' },
-  { type: 'slideleft', label: 'Sola kaydır' },
-  { type: 'slideright', label: 'Sağa kaydır' },
-  { type: 'slideup', label: 'Yukarı kaydır' },
-  { type: 'wipeleft', label: 'Sola sil' },
-  { type: 'wiperight', label: 'Sağa sil' },
-  { type: 'circleopen', label: 'Daire aç' },
-  { type: 'zoomin', label: 'Yakınlaş' },
-  { type: 'pixelize', label: 'Pikselleştir' },
-  { type: 'radial', label: 'Saat yönü' },
-  { type: 'blur', label: 'Bulanık' },
+  { type: 'fade', label: 'Crossfade' },
+  { type: 'fadeblack', label: 'Fade to black' },
+  { type: 'slideleft', label: 'Slide left' },
+  { type: 'slideright', label: 'Slide right' },
+  { type: 'slideup', label: 'Slide up' },
+  { type: 'wipeleft', label: 'Wipe left' },
+  { type: 'wiperight', label: 'Wipe right' },
+  { type: 'circleopen', label: 'Circle open' },
+  { type: 'zoomin', label: 'Zoom in' },
+  { type: 'pixelize', label: 'Pixelate' },
+  { type: 'radial', label: 'Clock wipe' },
+  { type: 'blur', label: 'Blur' },
 ];
 
-export const TRANSITION_INDEX = Object.fromEntries(TRANSITION_TYPES.map((t, i) => [t.type, i])) as Record<
-  TransitionType,
-  number
->;
+export const TRANSITION_INDEX = Object.fromEntries(TRANSITION_TYPES.map((t, i) => [t.type, i])) as Record<TransitionType, number>;
 
-// gl-transitions ile aynı model: iki doku (çıkan/giren) + 0→1 ilerleme.
+// Same model as gl-transitions: two textures (outgoing/incoming) + 0→1 progress.
 export const TRANSITION_FRAGMENT = /* glsl */ `#version 300 es
 precision highp float;
 in vec2 vUv;

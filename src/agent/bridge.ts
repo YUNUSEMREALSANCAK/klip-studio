@@ -2,15 +2,15 @@ import { COMMAND_SPECS, execute, type Command } from '../core/commands';
 import { useEditor } from '../core/store';
 import { createAsset } from '../media/importMedia';
 
-// Ajanlar için tarayıcı tarafı: window.klip API'si ve MCP sunucusuna giden WebSocket köprüsü.
+// Browser side for agents: the window.klip API and the WebSocket bridge to the MCP server.
 
 export const BRIDGE_PORT = 5299;
 const STORAGE_KEY = 'klip-bridge';
 
-// Önizlemenin o anki görüntüsü (video katmanı + metin katmanı).
+// The current preview image (video layer + text layer).
 export function screenshot(quality = 0.85): string {
   const [gl, text] = document.querySelectorAll<HTMLCanvasElement>('.stage canvas');
-  if (!gl) throw new Error('Önizleme bulunamadı');
+  if (!gl) throw new Error('Preview not found');
   const canvas = document.createElement('canvas');
   canvas.width = gl.width;
   canvas.height = gl.height;
@@ -28,7 +28,7 @@ async function importBlob(blob: Blob, name: string) {
 
 export async function importUrl(url: string, name = url.split('/').pop() || 'medya') {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`İndirilemedi: ${response.status}`);
+  if (!response.ok) throw new Error(`Download failed: ${response.status}`);
   return importBlob(await response.blob(), name);
 }
 
@@ -114,7 +114,7 @@ export function setBridgeEnabled(enabled: boolean) {
   try {
     localStorage.setItem(STORAGE_KEY, enabled ? '1' : '0');
   } catch {
-    // Depolama kapalıysa yalnız bu oturum için geçerli olur.
+    // If storage is unavailable, it applies to this session only.
   }
   window.clearTimeout(retry);
   if (enabled && !socket) connect();

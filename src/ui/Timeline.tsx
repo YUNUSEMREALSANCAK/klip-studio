@@ -9,10 +9,10 @@ import { Icon } from './icons';
 import { applyTransition } from './transitions';
 
 const TRACKS: { id: TrackId; label: string }[] = [
-  { id: 'text', label: 'Metin' },
-  { id: 'overlay', label: 'Üst katman' },
-  { id: 'main', label: 'Ana video' },
-  { id: 'audio', label: 'Ses' },
+  { id: 'text', label: 'Text' },
+  { id: 'overlay', label: 'Overlay' },
+  { id: 'main', label: 'Main video' },
+  { id: 'audio', label: 'Audio' },
 ];
 
 const SNAP_PX = 8;
@@ -76,7 +76,7 @@ export function Timeline() {
   const onDragMove = (event: PointerEvent) => {
     const state = drag.current;
     if (!state) return;
-    // Tuş bırakılmışsa (ör. imleç çizelge dışında bırakıldıysa) sürükleme biter; klipler kendiliğinden kaymaz.
+    // If the button was released (e.g. outside the timeline) the drag ends, so clips don't keep sliding.
     if (!(event.buttons & 1)) {
       drag.current = null;
       return;
@@ -96,7 +96,7 @@ export function Timeline() {
       const snappedEnd = snap(start + original.duration, original.id);
       patch.start = snappedStart !== start ? snappedStart : snappedEnd - original.duration;
     } else if (mode === 'trim-start') {
-      // Kaynağın başından öteye uzatılamaz; ana iz dışında zaman çizelgesinin başından da öteye.
+      // Can't extend past the start of the source, nor (off the main track) past the start of the timeline.
       const sourceLimit = asset && asset.kind !== 'image' ? -sourceIn / speed : -Infinity;
       const minDelta = original.track === 'main' ? sourceLimit : Math.max(sourceLimit, -original.start);
       const d = Math.min(Math.max(snap(original.start + delta, original.id) - original.start, minDelta), original.duration - 0.1);
@@ -106,7 +106,7 @@ export function Timeline() {
       const end = snap(clipEnd(original) + delta, original.id);
       patch.duration = Math.min(Math.max(end - original.start, 0.1), (maxSource - sourceIn) / speed);
     }
-    // Eğri klibin süresine göre ölçeklendiği için kırpılan klip ortalama sabit hıza döner.
+    // The curve is scaled to the clip's duration, so a trimmed clip falls back to its average constant speed.
     if (mode !== 'move' && original.type === 'media' && original.speedCurve) (patch as Partial<MediaClip>).speedCurve = undefined;
     s.updateClip(original.id, patch, false);
   };
@@ -133,7 +133,7 @@ export function Timeline() {
 
   const mainClips = sortedTrack<MediaClip>(clips, 'main');
 
-  // Üst üste binen metin/üst katman/ses klipleri ayrı şeritlere dizilir; iz yüksekliği şerit sayısıyla büyür.
+  // Overlapping text/overlay/audio clips go into separate lanes; track height grows with the lane count.
   const layout = useMemo(() => {
     const result = {} as Record<TrackId, { lanes: Map<string, number>; height: number }>;
     for (const { id } of TRACKS) {
@@ -150,15 +150,20 @@ export function Timeline() {
   return (
     <section className="timeline">
       <div className="tl-toolbar">
-        <button className="btn ghost small" title={tr('Böl (S)')} onClick={() => useEditor.getState().splitAtPlayhead()}>
-          <Icon name="split" size={16} /> {tr('Böl')}
+        <button className="btn ghost small" title={tr('Split (S)')} onClick={() => useEditor.getState().splitAtPlayhead()}>
+          <Icon name="split" size={16} /> {tr('Split')}
         </button>
-        <button className="btn ghost small" title={tr('Sil')} disabled={!selectedId} onClick={() => selectedId && useEditor.getState().removeClip(selectedId)}>
-          <Icon name="trash" size={16} /> {tr('Sil')}
+        <button
+          className="btn ghost small"
+          title={tr('Delete')}
+          disabled={!selectedId}
+          onClick={() => selectedId && useEditor.getState().removeClip(selectedId)}
+        >
+          <Icon name="trash" size={16} /> {tr('Delete')}
         </button>
         {markers.length > 0 && (
           <button className="btn ghost small" onClick={() => useEditor.getState().setMarkers([])}>
-            {tr('Ritim işaretlerini temizle')}
+            {tr('Clear beat markers')}
           </button>
         )}
         <div className="spacer" />
@@ -226,10 +231,10 @@ export function Timeline() {
                       key={`t-${clip.id}`}
                       className={`transition-badge ${clip.transition ? '' : 'empty'}`}
                       style={{ left: clip.start * zoom }}
-                      title={clip.transition ? tr('Geçişi düzenle') : tr('Geçiş ekle (çapraz geçiş)')}
+                      title={clip.transition ? tr('Edit transition') : tr('Add transition (crossfade)')}
                       onPointerDown={(e) => {
                         e.stopPropagation();
-                        // Kesimi hedeflemek için önceki klibi seç; geçiş yoksa çapraz geçiş ekle.
+                        // Select the previous clip to target the cut; add a crossfade if there's no transition.
                         useEditor.getState().select(mainClips[i].id);
                         const cut = { from: mainClips[i], to: clip, index: i + 1 };
                         applyTransition(cut, clip.transition?.type ?? 'fade');

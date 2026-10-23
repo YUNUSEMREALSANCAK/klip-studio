@@ -23,7 +23,7 @@ import { mixTimelineAudio } from '../media/audio';
 import { Compositor, type Mask } from '../render/compositor';
 import { clipSourceTime, clipsToDraw, composeFrame, drawTexts, visibleClips, type VisualSource } from '../render/composeFrame';
 
-// Bir klibin karelerini sırayla, gerektiğinde ileri sararak okur.
+// Reads a clip's frames in order, seeking forward when needed.
 class FrameReader {
   private iterator: AsyncGenerator<WrappedCanvas> | null = null;
   private current: WrappedCanvas | null = null;
@@ -50,7 +50,7 @@ class FrameReader {
     return this.current;
   }
 
-  // Bekleyen (sonraki) kare ve iki kare arasındaki konum; kare harmanlama için.
+  // The pending (next) frame and the position between frames, for frame blending.
   blendAt(time: number) {
     if (!this.current || !this.pending) return null;
     const span = this.pending.timestamp - this.current.timestamp;
@@ -74,10 +74,10 @@ export interface ExportOptions {
 export async function exportVideo(project: Project, assets: Record<string, Asset>, options: ExportOptions): Promise<Blob> {
   const { width, height, fps } = options;
   const duration = projectDuration(project.clips);
-  if (duration <= 0) throw new Error('Zaman çizelgesi boş');
+  if (duration <= 0) throw new Error('The timeline is empty');
 
   const videoCodec = await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width, height });
-  if (!videoCodec) throw new Error('Tarayıcınız video kodlamayı desteklemiyor (WebCodecs)');
+  if (!videoCodec) throw new Error('Your browser does not support video encoding (WebCodecs)');
   const audioCodec = await getFirstEncodableAudioCodec(['aac', 'opus'], { numberOfChannels: 2, sampleRate: 48000 });
 
   await ensureFonts(project.clips.filter((c): c is TextClip => c.type === 'text'));
@@ -127,7 +127,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
     const { width, height } = frame.canvas;
     const next = clip.slowMotion && clip.speed < 1 ? reader.blendAt(time) : null;
     if (next && clip.slowMotion === 'ai' && next.weight > 0.01) {
-      // RIFE ile gerçek ara kare; özgün boyuta geri ölçeklenir.
+      // A real in-between frame from RIFE, scaled back to the original size.
       interpolation.client ??= new FrameInterpolator();
       const middle = await interpolation.client.interpolate(frame.canvas, next.source, width, height, next.weight);
       const canvas = new OffscreenCanvas(width, height);
@@ -141,7 +141,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   for (let i = 0; i < totalFrames; i++) {
     if (options.signal?.aborted) {
       await output.cancel();
-      throw new DOMException('İptal edildi', 'AbortError');
+      throw new DOMException('Cancelled', 'AbortError');
     }
     const t = i / fps;
     const visible = visibleClips(project.clips, assets, t);
@@ -158,7 +158,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
     drawTexts(ctx, project.clips, t, width, height);
     await videoSource.add(t, 1 / fps);
 
-    // Bitmiş kliplerin okuyucularını kapatıp belleği boşalt.
+    // Close readers of finished clips to free memory.
     for (const [id, reader] of readers) {
       const clip = project.clips.find((c) => c.id === id);
       if (!clip || clipEnd(clip) + 1 < t) {

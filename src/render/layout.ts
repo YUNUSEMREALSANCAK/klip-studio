@@ -8,23 +8,15 @@ export interface Rect {
   h: number;
 }
 
-// Üst katmanın tuval üzerindeki dikdörtgeni (piksel). Hem çizim hem önizleme seçimi bunu kullanır.
+// An overlay's rectangle on the canvas (pixels). Used by both rendering and preview selection.
 export function overlayRect(transform: Transform, srcWidth: number, srcHeight: number, W: number, H: number): Rect {
   const w = W * transform.scale;
   const h = w * (srcHeight / srcWidth);
   return { x: transform.x * W - w / 2, y: transform.y * H - h / 2, w, h };
 }
 
-// Ana iz klibinin dikdörtgeni: tuvale sığdırma (contain) veya doldurma (cover), sonra kullanıcı ölçeği.
-export function fitRect(
-  transform: Transform,
-  srcWidth: number,
-  srcHeight: number,
-  W: number,
-  H: number,
-  mode: 'contain' | 'cover',
-  focusX?: number,
-): Rect {
+// A main-track clip's rectangle: fit (contain) or fill (cover) the canvas, then the user's scale.
+export function fitRect(transform: Transform, srcWidth: number, srcHeight: number, W: number, H: number, mode: 'contain' | 'cover', focusX?: number): Rect {
   const fit = mode === 'cover' ? Math.max(W / srcWidth, H / srcHeight) : Math.min(W / srcWidth, H / srcHeight);
   const w = srcWidth * fit * transform.scale;
   const h = srcHeight * fit * transform.scale;

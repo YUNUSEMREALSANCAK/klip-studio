@@ -1,4 +1,4 @@
-// Basit çizgi ikonları (24px ızgara).
+// Simple line icons (24px grid).
 const paths: Record<string, string> = {
   media: 'M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5M15 9.5a1.5 1.5 0 1 0 0-.01',
   text: 'M5 6V4h14v2M12 4v16M9 20h6',

@@ -6,16 +6,16 @@ export interface SamPoint {
   positive: boolean;
 }
 
-// Doldurma yöntemi: hızlı (push-pull, anında) veya LaMa (yapay zeka, ~200 MB model).
+// Fill method: fast (push-pull, instant) or LaMa (AI, ~200 MB model).
 export type FillQuality = 'fast' | 'lama';
 
 export interface BinaryMask {
-  data: Uint8Array; // 1 = seçili
+  data: Uint8Array; // 1 = selected
   width: number;
   height: number;
 }
 
-// SlimSAM worker'ı için söz (promise) tabanlı küçük istemci.
+// Small promise-based client for the SlimSAM worker.
 export class SamClient {
   private worker = new Worker(new URL('./sam.worker.ts', import.meta.url), { type: 'module' });
   onProgress: (message: string, progress: number) => void = () => {};
@@ -40,7 +40,7 @@ export class SamClient {
     return { data: result.mask, width: result.width, height: result.height };
   }
 
-  // Gömme ve maske çıkarmayı tek istekte yapar (video takibinde her kare için).
+  // Embeds and extracts a mask in one request (per frame during video tracking).
   async segment(image: ImageData, points: SamPoint[]): Promise<BinaryMask> {
     const result = await this.request({ type: 'segment', image, points }, 'mask');
     return { data: result.mask, width: result.width, height: result.height };
@@ -73,11 +73,11 @@ export function dilate(mask: BinaryMask, radius: number): BinaryMask {
 interface Level {
   width: number;
   height: number;
-  rgb: Float32Array; // ağırlıkla çarpılmamış renk
+  rgb: Float32Array; // color not premultiplied by weight
   weight: Float32Array; // 1 = bilinen piksel
 }
 
-// Push-pull doldurma: maskelenen bölgeyi çevresindeki renklerden çok ölçekli olarak tamamlar.
+// Push-pull fill: completes the masked region from surrounding colors at multiple scales.
 export function inpaint(image: ImageData, mask: BinaryMask): ImageData {
   const { width, height } = image;
   const grown = dilate(mask, 4);
@@ -138,7 +138,7 @@ function pullUp(fine: Level, coarse: Level) {
       const i = y * fine.width + x;
       const w = fine.weight[i];
       if (w >= 1) continue;
-      // Kaba seviyeden çift doğrusal (bilinear) örnekleme
+      // Bilinear sampling from the coarser level
       const cx = Math.min(Math.max((x + 0.5) / 2 - 0.5, 0), coarse.width - 1);
       const cy = Math.min(Math.max((y + 0.5) / 2 - 0.5, 0), coarse.height - 1);
       const x0 = Math.floor(cx);
@@ -159,7 +159,7 @@ function pullUp(fine: Level, coarse: Level) {
   }
 }
 
-// Maskelenen nesneyi saydam arka planlı PNG olarak keser (sınırlarına kırpılmış).
+// Cuts the masked object out as a transparent PNG (cropped to its bounds).
 export async function cutout(image: ImageData, mask: BinaryMask, invert = false): Promise<Blob> {
   const { width, height } = image;
   let minX = width;
@@ -180,7 +180,7 @@ export async function cutout(image: ImageData, mask: BinaryMask, invert = false)
       }
     }
   }
-  if (maxX < minX) throw new Error('Seçili alan boş');
+  if (maxX < minX) throw new Error('The selection is empty');
   const canvas = new OffscreenCanvas(width, height);
   canvas.getContext('2d')!.putImageData(out, 0, 0);
   const cropped = new OffscreenCanvas(maxX - minX + 1, maxY - minY + 1);
@@ -188,7 +188,7 @@ export async function cutout(image: ImageData, mask: BinaryMask, invert = false)
   return cropped.convertToBlob({ type: 'image/png' });
 }
 
-// Maskenin dışını saydam yapar; görsel boyutu korunur (kırpmadan).
+// Makes everything outside the mask transparent; image size is kept (no crop).
 export function applyAlpha(image: ImageData, mask: BinaryMask): ImageData {
   const out = new ImageData(new Uint8ClampedArray(image.data), image.width, image.height);
   for (let i = 0; i < mask.data.length; i++) if (!mask.data[i]) out.data[i * 4 + 3] = 0;

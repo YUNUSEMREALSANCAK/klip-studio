@@ -25,9 +25,9 @@ async function loadFrame(asset: Asset, time: number): Promise<ImageData> {
   } else {
     const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
     const track = await input.getPrimaryVideoTrack();
-    if (!track) throw new Error('Video karesi okunamadı');
+    if (!track) throw new Error('Could not read video frame');
     const frame = await new CanvasSink(track).getCanvas(time);
-    if (!frame) throw new Error('Video karesi okunamadı');
+    if (!frame) throw new Error('Could not read video frame');
     [source, width, height] = [frame.canvas, frame.canvas.width, frame.canvas.height];
   }
   const scale = Math.min(1, MAX_SIZE / Math.max(width, height));
@@ -51,19 +51,19 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
   const samRef = useRef<SamClient | null>(null);
   const brushRef = useRef<Uint8Array | null>(null);
   const painting = useRef(false);
-  const frameTime = useRef(0); // düzenlenen karenin kaynak saniyesi
+  const frameTime = useRef(0); // source time of the frame being edited
 
   const [image, setImage] = useState<ImageData | null>(null);
-  const [status, setStatus] = useState<{ message: string; progress: number } | null>({ message: 'Kare yükleniyor', progress: -1 });
+  const [status, setStatus] = useState<{ message: string; progress: number } | null>({ message: 'Loading frame', progress: -1 });
   const [ready, setReady] = useState(false);
   const [points, setPoints] = useState<SamPoint[]>([]);
   const [samMask, setSamMask] = useState<BinaryMask | null>(null);
   const [mode, setMode] = useState<'click' | 'brush'>('click');
   const [brushSize, setBrushSize] = useState(24);
   const [quality, setQuality] = useState<FillQuality>('fast');
-  const [revision, setRevision] = useState(0); // fırça boyandıkça yeniden çiz
+  const [revision, setRevision] = useState(0); // redraw as the brush paints
 
-  // Kareyi yükle ve SAM gömmesini (embedding) hesapla.
+  // Load the frame and compute its SAM embedding.
   useEffect(() => {
     if (!clip || !asset) return;
     const sam = new SamClient();
@@ -87,10 +87,10 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
       alive = false;
       sam.dispose();
     };
-    // Pencere açıkken klip değişmez; yalnızca açılışta çalışır.
+    // The clip can't change while the dialog is open; runs only on open.
   }, []);
 
-  // Görsel + maske + noktaları çiz.
+  // Draw image + mask + points.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !image) return;
@@ -148,7 +148,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     const positive = event.button !== 2 && !event.altKey;
     const next = [...points, { ...toImageCoords(event), positive }];
     setPoints(next);
-    setStatus({ message: 'Nesne seçiliyor', progress: -1 });
+    setStatus({ message: 'Selecting object', progress: -1 });
     try {
       setSamMask(await samRef.current!.decode(next));
       setStatus(null);
@@ -194,19 +194,19 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     busy(async () => {
       const mask = finalMask();
       if (!image || !mask) return;
-      setStatus({ message: 'Nesne siliniyor', progress: -1 });
-      await new Promise((r) => setTimeout(r, 30)); // durum mesajı ekrana çizilsin
+      setStatus({ message: 'Removing object', progress: -1 });
+      await new Promise((r) => setTimeout(r, 30)); // let the status message paint
       const cleaned = quality === 'lama' ? await inpaintLama(image, mask, (message, progress) => setStatus({ message, progress })) : inpaint(image, mask);
-      await addResult(await imageDataToBlob(cleaned), `${asset?.name ?? 'kare'} (temizlenmiş).png`, true);
+      await addResult(await imageDataToBlob(cleaned), `${asset?.name ?? 'frame'} (cleaned).png`, true);
     });
 
   const cutObject = async () => {
     const mask = finalMask();
     if (!image || !mask) return;
-    await addResult(await cutout(image, mask), `${asset?.name ?? 'nesne'} (kesilmiş).png`, false);
+    await addResult(await cutout(image, mask), `${asset?.name ?? 'object'} (cutout).png`, false);
   };
 
-  // BiRefNet ile ön plandaki nesneyi tek tıkla seç (her tür nesne).
+  // One-click selection of the foreground object with BiRefNet (any kind of object).
   const autoSelect = () =>
     busy(async () => {
       if (!image) return;
@@ -214,12 +214,12 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
       setStatus(null);
     });
 
-  // Görselin arka planını siler; görsel klibin kendisi saydam arka planlı hâliyle değişir.
+  // Removes the image background; the image clip itself is replaced by the transparent version.
   const removeBackground = () =>
     busy(async () => {
       const mask = finalMask();
       if (!image || !mask) return;
-      await addResult(await imageDataToBlob(applyAlpha(image, mask)), `${asset?.name ?? 'görsel'} (arka plansız).png`, true);
+      await addResult(await imageDataToBlob(applyAlpha(image, mask)), `${asset?.name ?? 'image'} (no background).png`, true);
     });
 
   const processVideo = (mode: VideoObjectMode) =>
@@ -238,7 +238,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
       );
       const s = useEditor.getState();
       s.addAsset(result);
-      // Ayırmada arka plan yeşile boyandı; yeşil perde onu saydam yapar.
+      // Isolation painted the background green; the chroma key makes it transparent.
       const chroma = mode === 'isolate' ? { color: KEY_COLOR, similarity: 0.35, smoothness: 0.1 } : clip.chroma;
       s.updateClip(clip.id, { assetId: result.id, in: 0, reframe: undefined, chroma } as Partial<MediaClip>);
       close();
@@ -250,7 +250,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     <div className="modal-backdrop" onPointerDown={(e) => e.target === e.currentTarget && close()}>
       <div className="modal">
         <header>
-          <h3>{tr('Nesne seç ve sil')}</h3>
+          <h3>{tr('Select & remove object')}</h3>
           <button className="btn ghost icon" onClick={close}>
             <Icon name="close" />
           </button>
@@ -268,21 +268,21 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
           <div>
             <div className="chips" style={{ marginBottom: 12 }}>
               <button className={`chip ${mode === 'click' ? 'active' : ''}`} onClick={() => setMode('click')}>
-                {tr('Tıklayarak seç (AI)')}
+                {tr('Click to select (AI)')}
               </button>
               <button className={`chip ${mode === 'brush' ? 'active' : ''}`} onClick={() => setMode('brush')}>
-                {tr('Fırça')}
+                {tr('Brush')}
               </button>
             </div>
             {mode === 'click' ? (
-              <p className="hint">{tr('Nesneye tıklayın. Seçimden çıkarmak için Alt + tık veya sağ tık kullanın. Model: SlimSAM (Segment Anything).')}</p>
+              <p className="hint">{tr('Click the object. Alt + click or right-click to subtract. Model: SlimSAM (Segment Anything).')}</p>
             ) : (
               <div className="field">
                 <label>
-                  {tr('Fırça boyutu')} <span>{brushSize}</span>
+                  {tr('Brush size')} <span>{brushSize}</span>
                 </label>
                 <input type="range" min={6} max={80} value={brushSize} onChange={(e) => setBrushSize(+e.target.value)} />
-                <p className="hint">{tr('Yazı, logo veya küçük lekeleri boyayarak işaretleyin.')}</p>
+                <p className="hint">{tr('Paint over text, logos or small blemishes to mark them.')}</p>
               </div>
             )}
             {status && (
@@ -294,53 +294,53 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
               </div>
             )}
             <button className="btn block" disabled={!ready} onClick={() => void autoSelect()}>
-              {tr('Ön planı otomatik seç (BiRefNet / MODNet)')}
+              {tr('Auto-select foreground (BiRefNet / MODNet)')}
             </button>
             <div className="field-label" style={{ marginTop: 12 }}>
-              {tr('Doldurma kalitesi')}
+              {tr('Fill quality')}
             </div>
             <div className="chips" style={{ marginTop: 6 }}>
               <button className={`chip ${quality === 'fast' ? 'active' : ''}`} onClick={() => setQuality('fast')}>
-                {tr('Hızlı')}
+                {tr('Fast')}
               </button>
               <button
                 className={`chip ${quality === 'lama' ? 'active' : ''}`}
                 onClick={() => setQuality('lama')}
-                title={tr('İlk kullanımda ~200 MB model indirilir')}
+                title={tr('Downloads a ~200 MB model on first use')}
               >
-                {tr('Yüksek (LaMa)')}
+                {tr('High (LaMa)')}
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               {asset.kind === 'video' && (
                 <>
                   <button className="btn primary block" disabled={!hasSelection} onClick={() => void processVideo('remove')}>
-                    {tr('Videonun tamamında sil (deneysel)')}
+                    {tr('Remove across the whole video (experimental)')}
                   </button>
                   <button className="btn block" disabled={!hasSelection} onClick={() => void processVideo('isolate')}>
-                    {tr('Nesneyi videoda ayır, arka planı kaldır (deneysel)')}
+                    {tr('Isolate object in video, remove background (experimental)')}
                   </button>
                 </>
               )}
               <button className={`btn block ${asset.kind === 'image' ? 'primary' : ''}`} disabled={!hasSelection} onClick={() => void removeObject()}>
-                {asset.kind === 'image' ? tr('Nesneyi sil (görseli temizle)') : tr('Yalnız bu kareyi temizle')}
+                {asset.kind === 'image' ? tr('Remove object (clean up image)') : tr('Clean this frame only')}
               </button>
               {asset.kind === 'image' && (
                 <button className="btn block" disabled={!hasSelection} onClick={() => void removeBackground()}>
-                  {tr('Seçili olanı koru, arka planı sil')}
+                  {tr('Keep selection, remove background')}
                 </button>
               )}
               <button className="btn block" disabled={!hasSelection} onClick={() => void cutObject()}>
-                {tr('Nesneyi kes → çıkartma olarak ekle')}
+                {tr('Cut out → add as sticker')}
               </button>
               <button className="btn ghost block" onClick={reset}>
-                {tr('Seçimi temizle')}
+                {tr('Clear selection')}
               </button>
             </div>
             {asset.kind === 'video' && (
               <p className="hint" style={{ marginTop: 12 }}>
                 {tr(
-                  'Seçim oynatma çizgisindeki karede yapılır. "Videonun tamamında sil" nesneyi diğer karelerde takip eder ve klibi temizlenmiş videoyla değiştirir; kısa kliplerde en iyi sonucu verir.',
+                  'Selection is made on the frame at the playhead. "Remove across the whole video" tracks the object through the other frames and replaces the clip with the cleaned video; works best on short clips.',
                 )}
               </p>
             )}

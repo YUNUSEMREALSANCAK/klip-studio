@@ -1,9 +1,9 @@
 import type { RifeMessage, RifeRequest } from './rife.worker';
 
 const MAX_WIDTH = 960;
-const align = (n: number) => Math.max(32, Math.round(n / 32) * 32); // model 32'nin katı boyut ister
+const align = (n: number) => Math.max(32, Math.round(n / 32) * 32); // the model needs sizes that are multiples of 32
 
-// Dışa aktarmada yapay zeka ile ara kare üreten istemci.
+// Client that generates AI in-between frames during export.
 export class FrameInterpolator {
   private worker = new Worker(new URL('./rife.worker.ts', import.meta.url), { type: 'module' });
   private nextId = 1;
@@ -30,7 +30,7 @@ export class FrameInterpolator {
     return ctx.getImageData(0, 0, width, height).data;
   }
 
-  // a ile b arasında t (0..1) konumundaki kareyi üretir; sonuç bir tuvaldir.
+  // Generates the frame at t (0..1) between a and b; the result is a canvas.
   async interpolate(a: CanvasImageSource, b: CanvasImageSource, sourceWidth: number, sourceHeight: number, t: number): Promise<OffscreenCanvas> {
     const width = align(Math.min(MAX_WIDTH, sourceWidth));
     const height = align((width * sourceHeight) / sourceWidth);

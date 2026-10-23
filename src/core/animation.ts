@@ -1,6 +1,6 @@
 import type { Keyframe, KeyframeProp, MediaClip, Transform } from './types';
 
-const FRAME = 1 / 60; // aynı ana düşen anahtar kare toleransı
+const FRAME = 1 / 60; // tolerance for keyframes at the same moment
 
 export function baseValue(clip: MediaClip, prop: KeyframeProp): number {
   if (prop === 'opacity') return clip.opacity;
@@ -8,12 +8,11 @@ export function baseValue(clip: MediaClip, prop: KeyframeProp): number {
   return clip.transform[prop];
 }
 
-const keysFor = (clip: MediaClip, prop: KeyframeProp) =>
-  clip.keyframes.filter((k) => k.prop === prop).sort((a, b) => a.time - b.time);
+const keysFor = (clip: MediaClip, prop: KeyframeProp) => clip.keyframes.filter((k) => k.prop === prop).sort((a, b) => a.time - b.time);
 
 const smooth = (x: number) => x * x * (3 - 2 * x);
 
-// t: zaman çizelgesi saniyesi. Anahtar kare yoksa temel değer döner.
+// t: timeline seconds. Returns the base value when there are no keyframes.
 export function valueAt(clip: MediaClip, prop: KeyframeProp, t: number): number {
   const keys = keysFor(clip, prop);
   if (!keys.length) return baseValue(clip, prop);
@@ -58,7 +57,7 @@ function withBase(clip: MediaClip, prop: KeyframeProp, value: number): Partial<M
   return { transform: { ...clip.transform, [prop]: value } };
 }
 
-// Bir özelliği değiştirir: o özellikte anahtar kare varsa t anındaki kareyi günceller/ekler, yoksa temel değeri.
+// Sets a property: if it has keyframes, updates/adds the keyframe at t; otherwise the base value.
 export function setValue(clip: MediaClip, prop: KeyframeProp, value: number, t: number): Partial<MediaClip> {
   if (!hasKeyframes(clip, prop)) return withBase(clip, prop, value);
   const time = t - clip.start;
@@ -66,7 +65,7 @@ export function setValue(clip: MediaClip, prop: KeyframeProp, value: number, t: 
   return { keyframes: [...others, { prop, time, value }] };
 }
 
-// t anında anahtar kare varsa siler, yoksa o anki değerle ekler.
+// Removes the keyframe at t if there is one, otherwise adds one with the current value.
 export function toggleKeyframe(clip: MediaClip, prop: KeyframeProp, t: number): Partial<MediaClip> {
   const existing = keyframeAt(clip, prop, t);
   if (existing) return { keyframes: clip.keyframes.filter((k) => k !== existing) };
@@ -74,7 +73,7 @@ export function toggleKeyframe(clip: MediaClip, prop: KeyframeProp, t: number): 
   return { keyframes: [...clip.keyframes, { prop, time, value: valueAt(clip, prop, t) }] };
 }
 
-// Giriş/çıkış fade çarpanı (0..1).
+// Fade-in/out multiplier (0..1).
 export function fadeGain(clip: MediaClip, t: number): number {
   const local = t - clip.start;
   let gain = 1;

@@ -2,15 +2,15 @@
 import type { FilesetResolver } from '@mediapipe/tasks-vision';
 import { createSelfieSegmenter, segmentFrame } from './segmenter';
 
-// Dışa aktarmada kişi ayırma; ana iş parçacığını meşgul etmez.
+// Person segmentation during export, off the main thread.
 export type MatteRequest = { id: number; frame: ImageBitmap };
 export type MatteMessage = { id: number; mask?: Uint8Array; width?: number; height?: number; error?: string };
 
 const work = new OffscreenCanvas(1, 1);
 const BASE = `${import.meta.env.BASE_URL}mediapipe-wasm`;
 
-// Modül yükleyicisi Blob adresinden içe aktarılır: Vite'ın geliştirme sunucusu public/ içindeki
-// dosyaların doğrudan modül olarak içe aktarılmasına izin vermez.
+// The module loader is imported from a Blob URL: Vite's dev server doesn't allow importing
+// files in public/ directly as modules.
 async function moduleFileset(): Promise<Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>>> {
   const source = await (await fetch(`${BASE}/vision_wasm_module_internal.js`)).text();
   return {

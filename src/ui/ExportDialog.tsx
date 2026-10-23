@@ -7,9 +7,9 @@ import { Icon } from './icons';
 import { useUi } from './uiStore';
 
 const QUALITIES = [
-  { id: 1, label: '1080p (tam)' },
+  { id: 1, label: '1080p (full)' },
   { id: 2 / 3, label: '720p' },
-  { id: 4 / 9, label: '480p (hızlı)' },
+  { id: 4 / 9, label: '480p (fast)' },
 ];
 
 const even = (n: number) => Math.round(n / 2) * 2;
@@ -48,14 +48,14 @@ export function ExportDialog() {
     <div className="modal-backdrop">
       <div className="modal narrow">
         <header>
-          <h3>{tr('Dışa aktar')}</h3>
+          <h3>{tr('Export')}</h3>
           <button className="btn ghost icon" onClick={() => (abort.current?.abort(), close())}>
             <Icon name="close" />
           </button>
         </header>
         <div className="modal-body">
           <div className="field">
-            <label>{tr('Çözünürlük')}</label>
+            <label>{tr('Resolution')}</label>
             <select value={scale} onChange={(e) => setScale(+e.target.value)} disabled={progress !== null}>
               {QUALITIES.map((q) => (
                 <option key={tr(q.label)} value={q.id}>
@@ -65,21 +65,21 @@ export function ExportDialog() {
             </select>
           </div>
           <div className="field">
-            <label>{tr('Kare hızı')}</label>
+            <label>{tr('Frame rate')}</label>
             <select value={fps} onChange={(e) => setFps(+e.target.value)} disabled={progress !== null}>
-              <option value={24}>{tr('24 fps (sinema)')}</option>
+              <option value={24}>{tr('24 fps (cinema)')}</option>
               <option value={30}>{tr('30 fps')}</option>
               <option value={60}>{tr('60 fps')}</option>
             </select>
           </div>
           <div className="hint">
-            {tr('Çıktı:')} {width}×{height}
-            {tr(', MP4. Kodlama tarayıcınızda WebCodecs ile yapılır.')}
+            {tr('Output:')} {width}×{height}
+            {tr(', MP4. Encoded in your browser with WebCodecs.')}
           </div>
           {progress !== null && (
             <div style={{ marginTop: 16 }}>
               <div className="task-msg">
-                {tr('İşleniyor… %')}
+                {tr('Processing… %')}
                 {Math.round(progress * 100)}
               </div>
               <div className="progress">
@@ -93,15 +93,15 @@ export function ExportDialog() {
         <footer>
           {progress !== null ? (
             <button className="btn" onClick={() => abort.current?.abort()}>
-              {tr('İptal')}
+              {tr('Cancel')}
             </button>
           ) : result ? (
-            <a className="btn primary" href={result} download="klip-studyo.mp4">
-              <Icon name="export" size={16} /> {tr('İndir')}
+            <a className="btn primary" href={result} download="klip-studio.mp4">
+              <Icon name="export" size={16} /> {tr('Download')}
             </a>
           ) : (
             <button className="btn primary" onClick={() => void start()}>
-              {tr('Dışa aktarmayı başlat')}
+              {tr('Start export')}
             </button>
           )}
         </footer>

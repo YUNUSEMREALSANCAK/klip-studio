@@ -17,8 +17,8 @@ interface EditorState {
   selectedId: string | null;
   time: number;
   playing: boolean;
-  stopAt: number | null; // önizleme oynatmasının duracağı an
-  zoom: number; // saniye başına piksel
+  stopAt: number | null; // time at which preview playback stops
+  zoom: number; // pixels per second
   past: Project[];
   future: Project[];
   tasks: Task[];
@@ -71,24 +71,20 @@ export const useEditor = create<EditorState>((set, get) => ({
   future: [],
   tasks: [],
 
-  checkpoint: () =>
-    set((s) => ({ past: [...s.past.slice(-HISTORY_LIMIT), s.project], future: [] })),
+  checkpoint: () => set((s) => ({ past: [...s.past.slice(-HISTORY_LIMIT), s.project], future: [] })),
 
   mutate: (fn, record = true) => {
     if (record) get().checkpoint();
     set((s) => ({ project: { ...s.project, clips: packMainTrack(fn(s.project.clips)) } }));
   },
 
-  updateClip: (id, patch, record = true) =>
-    get().mutate((clips) => clips.map((c) => (c.id === id ? ({ ...c, ...patch } as Clip) : c)), record),
+  updateClip: (id, patch, record = true) => get().mutate((clips) => clips.map((c) => (c.id === id ? ({ ...c, ...patch } as Clip) : c)), record),
 
   addAsset: (asset) => set((s) => ({ assets: { ...s.assets, [asset.id]: asset } })),
 
-  loadProject: (project, assets) =>
-    set({ project: normalizeProject(project), assets, selectedId: null, time: 0, playing: false, past: [], future: [] }),
+  loadProject: (project, assets) => set({ project: normalizeProject(project), assets, selectedId: null, time: 0, playing: false, past: [], future: [] }),
 
-  newProject: () =>
-    set({ project: emptyProject(), assets: {}, selectedId: null, time: 0, playing: false, past: [], future: [] }),
+  newProject: () => set({ project: emptyProject(), assets: {}, selectedId: null, time: 0, playing: false, past: [], future: [] }),
 
   addAssetToTimeline: (assetId, track) => {
     const asset = get().assets[assetId];
@@ -113,7 +109,7 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   splitAtPlayhead: () => {
     const { time, selectedId, project } = get();
-    // Seçili klip oynatma çizgisindeyse yalnız onu, değilse çizgideki tüm klipleri böler.
+    // Splits only the selected clip if it's under the playhead, otherwise every clip under it.
     const underPlayhead = project.clips.filter((c) => time > c.start && time < c.start + c.duration);
     const selected = underPlayhead.filter((c) => c.id === selectedId);
     const targets = selected.length ? selected : underPlayhead;
@@ -159,8 +155,7 @@ export const useEditor = create<EditorState>((set, get) => ({
     return id;
   },
 
-  updateTask: (id, patch) =>
-    set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+  updateTask: (id, patch) => set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
 
   endTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 }));

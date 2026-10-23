@@ -32,7 +32,7 @@ function run(image: Uint8ClampedArray, mask: Uint8Array, report: Report) {
   });
 }
 
-// Maskenin çevresinden bir bölge kesip LaMa ile doldurur ve yalnız maskeli pikselleri geri yazar.
+// Crops a region around the mask, fills it with LaMa and writes back only the masked pixels.
 export async function inpaintLama(image: ImageData, mask: BinaryMask, report: Report = () => {}): Promise<ImageData> {
   const { width, height } = image;
   const grown = dilate(mask, 6);
@@ -51,7 +51,7 @@ export async function inpaintLama(image: ImageData, mask: BinaryMask, report: Re
   }
   if (maxX < 0) return image;
 
-  // Nesnenin çevresinden yeterli bağlam alınacak şekilde genişletilmiş kesim alanı.
+  // Crop area expanded to include enough context around the object.
   const side = (n: number, limit: number) => Math.min(limit, Math.max(256, Math.round(n * 1.8)));
   const cw = side(maxX - minX + 1, width);
   const ch = side(maxY - minY + 1, height);

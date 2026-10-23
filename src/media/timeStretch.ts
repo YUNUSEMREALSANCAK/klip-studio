@@ -1,15 +1,15 @@
-// WSOLA zaman esnetme: sesi perdesini değiştirmeden hızlandırır/yavaşlatır.
-// Önizlemedeki <video> öğesinin preservesPitch davranışıyla aynı sonucu dışa aktarmada üretir.
+// WSOLA time-stretch: speeds audio up or down without changing pitch.
+// Gives the export the same result as the preview <video> element's preservesPitch.
 
 const FRAME = 2048;
 const HOP_OUT = FRAME / 2;
 const TOLERANCE = 512;
 const CORR_LENGTH = 512;
-const STEP = 4; // benzerlik aramasını hızlandırmak için örnek atlama
+const STEP = 4; // sample stride to speed up the similarity search
 
 const HANN = Float32Array.from({ length: FRAME }, (_, i) => 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / FRAME));
 
-// En iyi örtüşmeyi arayıp her çıkış karesi için kaynak konumlarını belirler (tüm kanallar aynı konumları kullanır).
+// Searches for the best overlap to pick source positions for each output frame (all channels share them).
 function framePositions(mono: Float32Array, rate: number, frames: number) {
   const positions = [0];
   for (let k = 1; k < frames; k++) {

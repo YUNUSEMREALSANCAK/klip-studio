@@ -31,7 +31,7 @@ function request(message: Distribute<ModelRequest>, report: Report, transfer: Tr
   });
 }
 
-// Doğrudan çevirmen modeli olan dil çiftleri (Helsinki-NLP opus-mt); diğerleri NLLB ile.
+// Language pairs with a dedicated translation model (Helsinki-NLP opus-mt); others use NLLB.
 const OPUS_PAIRS = new Set(['tr-en', 'en-de', 'en-es', 'en-fr', 'de-en', 'es-en', 'fr-en']);
 const NLLB_CODES: Record<string, string> = {
   tr: 'tur_Latn',
@@ -45,15 +45,15 @@ const NLLB_CODES: Record<string, string> = {
   pt: 'por_Latn',
 };
 export const TRANSLATION_LANGUAGES = [
-  { id: 'tr', label: 'Türkçe' },
-  { id: 'en', label: 'İngilizce' },
-  { id: 'de', label: 'Almanca' },
-  { id: 'fr', label: 'Fransızca' },
-  { id: 'es', label: 'İspanyolca' },
-  { id: 'ar', label: 'Arapça' },
-  { id: 'ru', label: 'Rusça' },
-  { id: 'it', label: 'İtalyanca' },
-  { id: 'pt', label: 'Portekizce' },
+  { id: 'tr', label: 'Turkish' },
+  { id: 'en', label: 'English' },
+  { id: 'de', label: 'German' },
+  { id: 'fr', label: 'French' },
+  { id: 'es', label: 'Spanish' },
+  { id: 'ar', label: 'Arabic' },
+  { id: 'ru', label: 'Russian' },
+  { id: 'it', label: 'Italian' },
+  { id: 'pt', label: 'Portuguese' },
 ];
 
 export function translationModel(src: string, tgt: string) {
@@ -69,31 +69,31 @@ export async function translateTexts(texts: string[], src: string, tgt: string, 
 }
 
 export const TTS_VOICES = [
-  { id: 'eng', label: 'İngilizce' },
-  { id: 'deu', label: 'Almanca' },
-  { id: 'fra', label: 'Fransızca' },
-  { id: 'spa', label: 'İspanyolca' },
-  { id: 'por', label: 'Portekizce' },
-  { id: 'rus', label: 'Rusça' },
-  { id: 'ara', label: 'Arapça' },
-  { id: 'kor', label: 'Korece' },
-  { id: 'hin', label: 'Hintçe' },
-  { id: 'vie', label: 'Vietnamca' },
-  { id: 'ron', label: 'Rumence' },
+  { id: 'eng', label: 'English' },
+  { id: 'deu', label: 'German' },
+  { id: 'fra', label: 'French' },
+  { id: 'spa', label: 'Spanish' },
+  { id: 'por', label: 'Portuguese' },
+  { id: 'rus', label: 'Russian' },
+  { id: 'ara', label: 'Arabic' },
+  { id: 'kor', label: 'Korean' },
+  { id: 'hin', label: 'Hindi' },
+  { id: 'vie', label: 'Vietnamese' },
+  { id: 'ron', label: 'Romanian' },
 ];
 
 export async function synthesize(text: string, voice: string, report: Report): Promise<{ audio: Float32Array; sampleRate: number }> {
   const result = await request({ type: 'tts', model: `Xenova/mms-tts-${voice}`, text }, report);
-  if (result.type !== 'speech') throw new Error('Ses üretilemedi');
+  if (result.type !== 'speech') throw new Error('Could not generate speech');
   return { audio: result.audio, sampleRate: result.sampleRate };
 }
 
-// BiRefNet ile herhangi bir nesneyi arka plandan ayırır; 1 = ön plan.
+// Separates any object from the background with BiRefNet; 1 = foreground.
 export async function matteImage(image: ImageData, report: Report): Promise<BinaryMask> {
   const result = await request({ type: 'matting', image }, report);
-  if (result.type !== 'matte') throw new Error('Maske üretilemedi');
+  if (result.type !== 'matte') throw new Error('Could not generate mask');
   const data = new Uint8Array(image.width * image.height);
-  // Model çıktısı görselle aynı boyutta değilse en yakın komşu ile ölçekle.
+  // If the model output differs in size from the image, scale it with nearest neighbor.
   for (let y = 0; y < image.height; y++) {
     const sy = Math.floor((y * result.height) / image.height);
     for (let x = 0; x < image.width; x++) {

@@ -9,7 +9,7 @@ function kindOf(file: Blob): AssetKind | null {
   return null;
 }
 
-// Görsellerin küçük resmi dosyanın kendisidir; diğerleri içe aktarırken üretilir.
+// An image is its own thumbnail; other thumbnails are generated on import.
 export const thumbnailOf = (asset: Asset) => asset.thumbnail ?? (asset.kind === 'image' ? asset.url : undefined);
 
 export async function importFile(file: File): Promise<Asset> {
@@ -18,7 +18,7 @@ export async function importFile(file: File): Promise<Asset> {
 
 export async function createAsset(file: Blob, name: string): Promise<Asset> {
   const kind = kindOf(file);
-  if (!kind) throw new Error(`Desteklenmeyen dosya türü: ${name}`);
+  if (!kind) throw new Error(`Unsupported file type: ${name}`);
   const url = URL.createObjectURL(file);
   const base = { id: uid(), name, kind, file, url };
 
@@ -58,12 +58,12 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('Görsel yüklenemedi'));
+    image.onerror = () => reject(new Error('Could not load image'));
     image.src = url;
   });
 }
 
-// Her zaman data URL üretilir; böylece küçük resimler projeyle birlikte kalıcı olarak saklanabilir.
+// Always produces a data URL so thumbnails can be persisted with the project.
 async function canvasToDataUrl(canvas: HTMLCanvasElement | OffscreenCanvas) {
   if (canvas instanceof HTMLCanvasElement) return canvas.toDataURL('image/jpeg', 0.7);
   const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.7 });

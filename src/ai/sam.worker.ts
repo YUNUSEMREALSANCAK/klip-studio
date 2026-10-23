@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { AutoProcessor, RawImage, SamModel, Tensor, type Processor } from '@huggingface/transformers';
 
-// Segment Anything'in tarayıcıya uygun küçültülmüş sürümü (~40 MB).
+// A browser-friendly distilled Segment Anything (~40 MB).
 const MODEL_ID = 'Xenova/slimsam-77-uniform';
 
 export type SamRequest =
@@ -30,7 +30,7 @@ function loadModel() {
       if (info.status !== 'progress' || !info.file) return;
       files.set(info.file, info.progress ?? 0);
       const average = [...files.values()].reduce((a, b) => a + b, 0) / files.size;
-      post({ type: 'progress', message: 'Nesne seçme modeli indiriliyor', progress: average / 100 });
+      post({ type: 'progress', message: 'Downloading object selection model', progress: average / 100 });
     };
     const [samModel, processor] = await Promise.all([
       SamModel.from_pretrained(MODEL_ID, {
@@ -47,7 +47,7 @@ function loadModel() {
 
 async function embed(image: ImageData, announce = true) {
   const { model: sam, processor } = await loadModel();
-  if (announce) post({ type: 'progress', message: 'Görsel analiz ediliyor', progress: -1 });
+  if (announce) post({ type: 'progress', message: 'Analyzing image', progress: -1 });
   const raw = new RawImage(new Uint8ClampedArray(image.data), image.width, image.height, 4);
   const inputs = (await processor(raw)) as ModelInputs;
   const embeddings = (await sam.get_image_embeddings(inputs as never)) as unknown as Record<string, Tensor>;
@@ -56,7 +56,7 @@ async function embed(image: ImageData, announce = true) {
 }
 
 async function decode(points: { x: number; y: number; positive: boolean }[]) {
-  if (!current) throw new Error('Önce görsel yüklenmeli');
+  if (!current) throw new Error('Load an image first');
   const { model: sam, processor } = await loadModel();
   const [height, width] = current.inputs.reshaped_input_sizes[0];
   const input_points = new Tensor(
@@ -79,7 +79,7 @@ async function decode(points: { x: number; y: number; positive: boolean }[]) {
     current.inputs.reshaped_input_sizes,
   )) as Tensor[];
 
-  // Üç aday maske içinden en yüksek puanlıyı seç.
+  // Pick the highest-scoring of the three candidate masks.
   const scores = outputs.iou_scores.data as Float32Array;
   let best = 0;
   for (let i = 1; i < scores.length; i++) if (scores[i] > scores[best]) best = i;
@@ -94,7 +94,7 @@ self.onmessage = async ({ data }: MessageEvent<SamRequest>) => {
     if (data.type === 'embed') await embed(data.image);
     else if (data.type === 'decode') await decode(data.points);
     else {
-      // Video takibi: her kare için gömme + maske tek istekte.
+      // Video tracking: embedding + mask in a single request per frame.
       await embed(data.image, false);
       await decode(data.points);
     }

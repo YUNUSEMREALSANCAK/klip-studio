@@ -20,7 +20,7 @@ import { inpaintLama } from './lama';
 import { dilate, inpaint, type BinaryMask, type FillQuality, type SamClient, type SamPoint } from './objectTools';
 
 const MAX_WIDTH = 1280;
-const SAMPLE_FPS = 6; // nesne takibi için saniyede kaç karede SAM çalışır
+const SAMPLE_FPS = 6; // frames per second SAM runs at for object tracking
 
 const even = (n: number) => Math.max(2, Math.round(n / 2) * 2);
 
@@ -35,7 +35,7 @@ function resample(mask: BinaryMask, width: number, height: number): BinaryMask {
 
 const area = (mask: BinaryMask) => mask.data.reduce((sum, v) => sum + v, 0);
 
-// Önceki maskenin içinden, sonraki karede nesneyi işaretleyecek birkaç pozitif nokta seçer.
+// Picks a few positive points inside the previous mask to mark the object in the next frame.
 function promptPoints(mask: BinaryMask): SamPoint[] {
   const { data, width, height } = mask;
   let sx = 0;
@@ -61,18 +61,18 @@ function promptPoints(mask: BinaryMask): SamPoint[] {
 
 async function frameImage(sink: CanvasSink, time: number, width: number, height: number): Promise<ImageData> {
   const frame = await sink.getCanvas(time);
-  if (!frame) throw new Error('Kare okunamadı');
+  if (!frame) throw new Error('Could not read frame');
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(frame.canvas, 0, 0, width, height);
   return ctx.getImageData(0, 0, width, height);
 }
 
-// Seçilen nesneyi klibin tamamında takip edip siler; sonuç yeni bir video varlığıdır.
-// Ayırma modunda arka plan bu renge boyanır; klibe aynı renkte yeşil perde uygulanır.
+// Tracks the selected object through the whole clip and removes it; the result is a new video asset.
+// In isolate mode the background is painted this color; the clip gets a chroma key of the same color.
 export const KEY_COLOR = '#00ff00';
 
-// remove: nesneyi her karede siler · isolate: nesne dışını yeşile boyar (her türlü nesne için video matting).
+// remove: erases the object in every frame · isolate: paints everything else green (video matting for any object).
 export type VideoObjectMode = 'remove' | 'isolate';
 
 export async function processVideoObject(
@@ -87,14 +87,14 @@ export async function processVideoObject(
 ): Promise<Asset> {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
   const track = await input.getPrimaryVideoTrack();
-  if (!track) throw new Error('Video izi bulunamadı');
+  if (!track) throw new Error('No video track found');
   const width = even(Math.min(MAX_WIDTH, track.displayWidth));
   const height = even((width * track.displayHeight) / track.displayWidth);
   const sink = new CanvasSink(track, { width, height, fit: 'fill' });
   const from = clip.in;
   const to = Math.min(asset.duration, clip.in + sourceSpan(clip));
 
-  // 1) Takip: örnek karelerde maske çıkar, referans kareden ileri ve geri yayılarak.
+  // 1) Tracking: extract masks on sample frames, propagating forward and backward from the reference frame.
   const times: number[] = [];
   for (let t = from; t < to; t += 1 / SAMPLE_FPS) times.push(t);
   const ref = times.reduce((best, t, i) => (Math.abs(t - referenceTime) < Math.abs(times[best] - referenceTime) ? i : best), 0);
@@ -109,20 +109,20 @@ export async function processVideoObject(
       if (points.length) {
         const candidate = resample(await sam.segment(await frameImage(sink, times[i], width, height), points), width, height);
         const ratio = area(candidate) / Math.max(area(previous), 1);
-        // Maske birden çok büyür/küçülürse takip kaymıştır; önceki maskeyi koru.
+        // If the mask grows or shrinks abruptly, tracking has drifted; keep the previous mask.
         if (ratio > 0.33 && ratio < 3) mask = candidate;
       }
       masks[i] = mask;
-      onProgress('Nesne karelerde takip ediliyor', (++done / times.length) * 0.5);
+      onProgress('Tracking object across frames', (++done / times.length) * 0.5);
     }
   };
   await trackDirection(1);
   await trackDirection(-1);
   const grown = masks.map((m) => dilate(m, 5));
 
-  // 2) Doldurma ve kodlama: her kare en yakın örnek karenin maskesiyle temizlenir.
+  // 2) Fill and encode: each frame is cleaned with the mask of the nearest sample frame.
   const videoCodec = await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width, height });
-  if (!videoCodec) throw new Error('Video kodlama desteklenmiyor');
+  if (!videoCodec) throw new Error('Video encoding is not supported');
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
   const target = new BufferTarget();
@@ -142,7 +142,7 @@ export async function processVideoObject(
       mode === 'isolate' ? isolate(pixels, masks[index]) : quality === 'lama' ? await inpaintLama(pixels, masks[index]) : inpaint(pixels, grown[index]);
     ctx.putImageData(result, 0, 0);
     await videoSource.add(frame.timestamp - from, frame.duration);
-    onProgress(mode === 'isolate' ? 'Kareler ayrılıyor' : 'Kareler temizleniyor', 0.5 + ((frame.timestamp - from) / (to - from)) * 0.5);
+    onProgress(mode === 'isolate' ? 'Isolating frames' : 'Cleaning frames', 0.5 + ((frame.timestamp - from) / (to - from)) * 0.5);
   }
 
   if (audioSource) {
@@ -154,11 +154,11 @@ export async function processVideoObject(
     await audioSource.add(segment);
   }
   await output.finalize();
-  const suffix = mode === 'isolate' ? 'nesne ayrıldı' : 'nesne silindi';
+  const suffix = mode === 'isolate' ? 'object isolated' : 'object removed';
   return createAsset(new Blob([target.buffer!], { type: 'video/mp4' }), `${asset.name} (${suffix}).mp4`);
 }
 
-// Maskenin dışını anahtar renge boyar.
+// Paints everything outside the mask with the key color.
 function isolate(image: ImageData, mask: BinaryMask): ImageData {
   for (let i = 0; i < mask.data.length; i++) {
     if (mask.data[i]) continue;

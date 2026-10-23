@@ -5,24 +5,22 @@ export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export const clipEnd = (clip: Clip) => clip.start + clip.duration;
 
-// Klibin kaynakta kapladığı süre (hız 2× ise zaman çizelgesindeki sürenin iki katı).
+// How much source time a clip covers (twice its timeline duration at 2× speed).
 export const sourceSpan = (clip: MediaClip) => clip.duration * clip.speed;
 
-// Bölünen klibin sağ parçası için anahtar kareleri sola kaydırır.
+// Shifts keyframes left for the right half of a split clip.
 const shiftKeyframes = (clip: MediaClip, offset: number) =>
   clip.keyframes.length ? clip.keyframes.map((k) => ({ ...k, time: k.time - offset })) : clip.keyframes;
 
 export const projectDuration = (clips: Clip[]) => clips.reduce((max, c) => Math.max(max, clipEnd(c)), 0);
 
-export const trackEnd = (clips: Clip[], track: TrackId) =>
-  clips.filter((c) => c.track === track).reduce((max, c) => Math.max(max, clipEnd(c)), 0);
+export const trackEnd = (clips: Clip[], track: TrackId) => clips.filter((c) => c.track === track).reduce((max, c) => Math.max(max, clipEnd(c)), 0);
 
 export const isActiveAt = (clip: Clip, t: number) => t >= clip.start && t < clipEnd(clip);
 
-export const sortedTrack = <T extends Clip>(clips: Clip[], track: TrackId) =>
-  clips.filter((c) => c.track === track).sort((a, b) => a.start - b.start) as T[];
+export const sortedTrack = <T extends Clip>(clips: Clip[], track: TrackId) => clips.filter((c) => c.track === track).sort((a, b) => a.start - b.start) as T[];
 
-// Ana iz "manyetiktir": klipler arada boşluk kalmadan art arda dizilir.
+// The main track is "magnetic": clips sit back to back with no gaps.
 export function packMainTrack(clips: Clip[]): Clip[] {
   const main = sortedTrack<MediaClip>(clips, 'main');
   let cursor = 0;
@@ -34,7 +32,7 @@ export function packMainTrack(clips: Clip[]): Clip[] {
   return clips.map((c) => {
     if (!packed.has(c.id)) return c;
     const start = packed.get(c.id)!;
-    // İlk klibin geçişi olamaz; geçiş süresi iki klibin de yarısını aşamaz.
+    // The first clip can't have a transition; a transition can't exceed half of either clip.
     const media = c as MediaClip;
     const index = main.findIndex((m) => m.id === c.id);
     const transition = index === 0 ? undefined : media.transition;
@@ -42,7 +40,7 @@ export function packMainTrack(clips: Clip[]): Clip[] {
   });
 }
 
-// Üst üste binen klipleri ayrı şeritlere yerleştirir (ilk boş şerit). Ana iz hep tek şerittir.
+// Places overlapping clips in separate lanes (first free lane). The main track is always one lane.
 export function assignLanes(clips: Clip[]): { lanes: Map<string, number>; count: number } {
   const ends: number[] = [];
   const lanes = new Map<string, number>();
@@ -78,7 +76,7 @@ export function createMediaClip(asset: Asset, track: MediaClip['track'], start: 
   };
 }
 
-export function createTextClip(start: number, text = 'Yeni metin', duration = 3): TextClip {
+export function createTextClip(start: number, text = 'New text', duration = 3): TextClip {
   return {
     id: uid(),
     type: 'text',
@@ -95,7 +93,7 @@ export function createTextClip(start: number, text = 'Yeni metin', duration = 3)
   };
 }
 
-// Klibi t anında ikiye böler. t klibin içinde değilse null döner.
+// Splits a clip in two at t. Returns null if t is outside the clip.
 export function splitClip(clip: Clip, t: number): [Clip, Clip] | null {
   const offset = t - clip.start;
   if (offset <= 0.05 || offset >= clip.duration - 0.05) return null;
@@ -105,7 +103,7 @@ export function splitClip(clip: Clip, t: number): [Clip, Clip] | null {
     const media = clip as MediaClip;
     right.in = media.in + sourceOffset(media, offset);
     right.transition = undefined;
-    // Eğri bölünemez: iki parça da kendi ortalama hızıyla sabit hıza döner.
+    // A curve can't be split: both halves fall back to a constant speed at their own average.
     if (media.speedCurve) {
       (left as MediaClip).speed = sourceOffset(media, offset) / offset;
       right.speed = (sourceSpan(media) - sourceOffset(media, offset)) / right.duration;
@@ -139,7 +137,7 @@ function shiftClip(clip: Clip, delta: number): Clip {
   return { ...clip, start: clip.start + delta };
 }
 
-// [start, end) aralığını tüm izlerden siler ve sonrasını sola kaydırır.
+// Deletes [start, end) from every track and shifts what follows to the left.
 export function rippleDelete(clips: Clip[], start: number, end: number): Clip[] {
   const gap = end - start;
   const result: Clip[] = [];
@@ -187,7 +185,7 @@ export function rippleDelete(clips: Clip[], start: number, end: number): Clip[] 
   return packMainTrack(result.filter((c) => c.duration > 0.04 && !(c.type === 'text' && c.text.trim() === '')));
 }
 
-// Birden fazla aralığı sondan başa doğru siler (kaymalar birbirini bozmasın diye).
+// Deletes several ranges from last to first (so the shifts don't interfere).
 export function rippleDeleteRanges(clips: Clip[], ranges: [number, number][]): Clip[] {
   return mergeRanges(ranges)
     .sort((a, b) => b[0] - a[0])
@@ -211,7 +209,7 @@ export interface TransitionState {
   progress: number; // 0..1
 }
 
-// Ana izde t anında bir geçiş oynuyorsa iki klibi ve ilerlemeyi döndürür.
+// If a transition is playing on the main track at t, returns both clips and the progress.
 export function transitionAt(clips: Clip[], t: number): TransitionState | null {
   const main = sortedTrack<MediaClip>(clips, 'main');
   for (let i = 1; i < main.length; i++) {
@@ -225,13 +223,13 @@ export function transitionAt(clips: Clip[], t: number): TransitionState | null {
   return null;
 }
 
-// Klibin kaynak zamanı; geçiş taşmalarında kaynak sınırlarına sıkıştırılır.
+// The clip's source time; clamped to the source bounds when a transition overhangs.
 export function sourceTime(clip: MediaClip, t: number, assetDuration: number) {
   const time = clip.in + sourceOffset(clip, t - clip.start);
   return Math.min(Math.max(time, 0), Math.max(assetDuration - 0.04, 0));
 }
 
-// Kelimeleri okunabilir altyazı satırlarına böler.
+// Splits words into readable caption lines.
 export function buildCaptions(words: Word[], maxWords = 6, maxDuration = 2.8): TextClip[] {
   const groups: Word[][] = [];
   let current: Word[] = [];

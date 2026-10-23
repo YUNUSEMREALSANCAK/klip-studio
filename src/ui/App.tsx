@@ -47,7 +47,7 @@ function useShortcuts() {
 }
 
 export function App() {
-  // Dil değişince arayüz baştan kurulur; proje durumu store'da olduğu için korunur.
+  // Changing the language remounts the UI; project state lives in the store, so it survives.
   const lang = useLang((s) => s.lang);
   return (
     <ErrorBoundary>
@@ -72,8 +72,7 @@ function Editor() {
       <div>
         {missing.length > 0 && (
           <div className="compat">
-            {tr('Tarayıcınızda şu özellikler yok:')} {missing.join(', ')}
-            {tr('. Güncel Chrome veya Edge önerilir.')}
+            {tr('Your browser is missing:')} {missing.map(tr).join(', ')}. {tr('A recent Chrome or Edge is recommended.')}
           </div>
         )}
       </div>

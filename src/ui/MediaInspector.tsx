@@ -14,12 +14,12 @@ import { useUi } from './uiStore';
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
 const DEFAULT_MASK: MaskSettings = { shape: 'ellipse', x: 0.5, y: 0.5, width: 0.6, height: 0.6, feather: 0.1, invert: false };
 const percent = (v: number) => `${Math.round(v * 100)}%`;
-const seconds = (v: number) => `${v.toFixed(1)} sn`;
+const seconds = (v: number) => `${v.toFixed(1)} s`;
 
 export function MediaInspector({ clip }: { clip: MediaClip }) {
   const asset = useEditor((s) => s.assets[clip.assetId]);
   const luts = useEditor((s) => s.project.luts);
-  useEditor((s) => s.project.clips); // kesimler değişince yeniden hesapla
+  useEditor((s) => s.project.clips); // recompute when cuts change
   const lutInput = useRef<HTMLInputElement>(null);
   const cut = clip.track === 'main' ? targetCut() : null;
   const update = (patch: Partial<MediaClip>, record = false) => useEditor.getState().updateClip(clip.id, patch, record);
@@ -33,12 +33,12 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
     <>
       <h3>{asset.name}</h3>
       <div className="sub">
-        {clip.track === 'main' ? tr('Ana iz') : clip.track === 'overlay' ? tr('Üst katman') : tr('Ses izi')} · {formatTime(clip.duration)}
+        {clip.track === 'main' ? tr('Main track') : clip.track === 'overlay' ? tr('Overlay') : tr('Audio track')} · {formatTime(clip.duration)}
         {clip.speed !== 1 && ` · ${Number(clip.speed.toFixed(2))}×`}
       </div>
 
       {asset.kind !== 'image' && (
-        <Section title={tr('Hız')}>
+        <Section title={tr('Speed')}>
           <div className="chips" style={{ marginBottom: 10 }}>
             {SPEEDS.map((v) => (
               <button key={v} className={`chip ${clip.speed === v ? 'active' : ''}`} onClick={() => setSpeed(clip, v)}>
@@ -47,11 +47,11 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             ))}
           </div>
           <div className="field-label" style={{ marginBottom: 6 }}>
-            {tr('Hız eğrisi')}
+            {tr('Speed curve')}
           </div>
           <div className="chips" style={{ marginBottom: 10 }}>
             <button className={`chip ${!clip.speedCurve ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, null)}>
-              {tr('Yok')}
+              {tr('None')}
             </button>
             {SPEED_CURVES.map((curve) => (
               <button key={curve.name} className={`chip ${clip.speedCurve?.name === curve.name ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, curve)}>
@@ -62,14 +62,14 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
           {clip.speed < 1 && isVideo && (
             <>
               <div className="field-label" style={{ marginBottom: 6 }}>
-                {tr('Akıcı yavaş çekim (dışa aktarmada)')}
+                {tr('Smooth slow motion (on export)')}
               </div>
               <div className="chips" style={{ marginBottom: 10 }}>
                 {(
                   [
-                    [undefined, 'Kapalı'],
-                    ['blend', 'Kare harmanlama'],
-                    ['ai', 'Yapay zeka (RIFE)'],
+                    [undefined, 'Off'],
+                    ['blend', 'Frame blending'],
+                    ['ai', 'AI (RIFE)'],
                   ] as const
                 ).map(([mode, label]) => (
                   <button key={label} className={`chip ${clip.slowMotion === mode ? 'active' : ''}`} onClick={() => update({ slowMotion: mode }, true)}>
@@ -80,7 +80,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             </>
           )}
           <Slider
-            label={tr('Özel hız')}
+            label={tr('Custom speed')}
             value={clip.speed}
             min={0.25}
             max={4}
@@ -94,13 +94,13 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
               <button
                 className="btn small"
                 disabled={clip.track !== 'main'}
-                title={clip.track !== 'main' ? tr('Ana izdeki kliplerde çalışır') : ''}
+                title={clip.track !== 'main' ? tr('Works on main-track clips') : ''}
                 onClick={() => void freezeFrame(clip)}
               >
-                {tr('Kareyi dondur')}
+                {tr('Freeze frame')}
               </button>
               <button className="btn small" onClick={() => void reverse(clip)}>
-                {tr('Ters çevir')}
+                {tr('Reverse')}
               </button>
             </div>
           )}
@@ -108,34 +108,34 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
       )}
 
       {visual && (
-        <Section title={tr('Konum ve boyut')}>
-          <KeySlider clip={clip} prop="scale" label={tr('Boyut')} min={0.05} max={2} format={percent} />
-          <KeySlider clip={clip} prop="x" label={tr('Yatay konum')} min={0} max={1} format={percent} />
-          <KeySlider clip={clip} prop="y" label={tr('Dikey konum')} min={0} max={1} format={percent} />
-          <KeySlider clip={clip} prop="rotation" label={tr('Döndürme')} min={-180} max={180} format={(v) => `${Math.round(v)}°`} />
-          <KeySlider clip={clip} prop="opacity" label={tr('Opaklık')} min={0} max={1} format={percent} />
+        <Section title={tr('Position & size')}>
+          <KeySlider clip={clip} prop="scale" label={tr('Size')} min={0.05} max={2} format={percent} />
+          <KeySlider clip={clip} prop="x" label={tr('Horizontal position')} min={0} max={1} format={percent} />
+          <KeySlider clip={clip} prop="y" label={tr('Vertical position')} min={0} max={1} format={percent} />
+          <KeySlider clip={clip} prop="rotation" label={tr('Rotation')} min={-180} max={180} format={(v) => `${Math.round(v)}°`} />
+          <KeySlider clip={clip} prop="opacity" label={tr('Opacity')} min={0} max={1} format={percent} />
           <div className="row">
             <button className="btn small" onClick={() => update({ transform: { ...clip.transform, x: 0.5, y: 0.5 } }, true)}>
-              {tr('Ortala')}
+              {tr('Center')}
             </button>
             {clip.track === 'main' && (
               <button className="btn small" onClick={() => update({ transform: { ...DEFAULT_TRANSFORM } }, true)}>
-                {tr('Tuvale sığdır')}
+                {tr('Fit to canvas')}
               </button>
             )}
           </div>
           <div className="hint" style={{ marginTop: 8 }}>
-            {tr('◆ ile oynatma çizgisine anahtar kare ekleyin; iki kare arasında değer yumuşakça değişir.')}
+            {tr('Add a keyframe at the playhead with ◆; values ease smoothly between keyframes.')}
           </div>
         </Section>
       )}
 
       {asset.hasAudio && (
-        <Section title={tr('Ses')}>
-          <KeySlider clip={clip} prop="volume" label={tr('Ses düzeyi')} min={0} max={2} format={percent} />
-          <Toggle label={tr('Sesi kapat')} on={clip.muted} onChange={(muted) => update({ muted }, true)} />
+        <Section title={tr('Audio')}>
+          <KeySlider clip={clip} prop="volume" label={tr('Volume')} min={0} max={2} format={percent} />
+          <Toggle label={tr('Mute')} on={clip.muted} onChange={(muted) => update({ muted }, true)} />
           <Slider
-            label={tr('Giriş (fade in)')}
+            label={tr('Fade in')}
             value={clip.fadeIn}
             min={0}
             max={Math.min(5, clip.duration / 2)}
@@ -145,7 +145,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             onChange={(fadeIn) => update({ fadeIn })}
           />
           <Slider
-            label={tr('Çıkış (fade out)')}
+            label={tr('Fade out')}
             value={clip.fadeOut}
             min={0}
             max={Math.min(5, clip.duration / 2)}
@@ -154,18 +154,18 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             onCommit={checkpoint}
             onChange={(fadeOut) => update({ fadeOut })}
           />
-          <Toggle label={tr('Konuşmada müziği kıs')} on={clip.duck} onChange={(duck) => update({ duck }, true)} />
+          <Toggle label={tr('Duck music under speech')} on={clip.duck} onChange={(duck) => update({ duck }, true)} />
         </Section>
       )}
 
       {cut && (
-        <Section title={`${tr('Geçiş')} · ${cut.index}. ${tr('kesim')}`}>
+        <Section title={`${tr('Transition')} · ${tr('Cut')} ${cut.index}`}>
           <select
             value={cut.to.transition?.type ?? ''}
             onChange={(e) => applyTransition(cut, (e.target.value || null) as TransitionType | null)}
             style={{ width: '100%', marginBottom: 10 }}
           >
-            <option value="">{tr('Geçiş yok')}</option>
+            <option value="">{tr('No transition')}</option>
             {TRANSITION_TYPES.map((t) => (
               <option key={t.type} value={t.type}>
                 {tr(t.label)}
@@ -174,7 +174,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
           </select>
           {cut.to.transition && (
             <Slider
-              label={tr('Süre')}
+              label={tr('Duration')}
               value={cut.to.transition.duration}
               min={0.2}
               max={maxTransitionDuration(cut)}
@@ -189,18 +189,18 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
       )}
 
       {visual && (
-        <Section title={tr('Renk ayarı')}>
+        <Section title={tr('Color')}>
           <Slider
-            label={tr('Parlaklık')}
+            label={tr('Brightness')}
             value={clip.filter.brightness}
             min={-1}
             max={1}
             onCommit={checkpoint}
             onChange={(brightness) => setFilter({ brightness })}
           />
-          <Slider label={tr('Kontrast')} value={clip.filter.contrast} min={-1} max={1} onCommit={checkpoint} onChange={(contrast) => setFilter({ contrast })} />
+          <Slider label={tr('Contrast')} value={clip.filter.contrast} min={-1} max={1} onCommit={checkpoint} onChange={(contrast) => setFilter({ contrast })} />
           <Slider
-            label={tr('Doygunluk')}
+            label={tr('Saturation')}
             value={clip.filter.saturation}
             min={-1}
             max={1}
@@ -208,21 +208,21 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             onChange={(saturation) => setFilter({ saturation })}
           />
           <Slider
-            label={tr('Sıcaklık')}
+            label={tr('Temperature')}
             value={clip.filter.temperature}
             min={-1}
             max={1}
             onCommit={checkpoint}
             onChange={(temperature) => setFilter({ temperature })}
           />
-          <Slider label={tr('Keskinlik')} value={clip.filter.sharpen} min={0} max={1} onCommit={checkpoint} onChange={(sharpen) => setFilter({ sharpen })} />
-          <Slider label={tr('Vinyet')} value={clip.filter.vignette} min={0} max={1} onCommit={checkpoint} onChange={(vignette) => setFilter({ vignette })} />
-          <Toggle label={tr('Siyah-beyaz')} on={clip.filter.grayscale} onChange={(grayscale) => update({ filter: { ...clip.filter, grayscale } }, true)} />
+          <Slider label={tr('Sharpness')} value={clip.filter.sharpen} min={0} max={1} onCommit={checkpoint} onChange={(sharpen) => setFilter({ sharpen })} />
+          <Slider label={tr('Vignette')} value={clip.filter.vignette} min={0} max={1} onCommit={checkpoint} onChange={(vignette) => setFilter({ vignette })} />
+          <Toggle label={tr('Black & white')} on={clip.filter.grayscale} onChange={(grayscale) => update({ filter: { ...clip.filter, grayscale } }, true)} />
           <div className="field">
-            <label>{tr('LUT (renk tablosu)')}</label>
+            <label>{tr('LUT (color table)')}</label>
             <div className="row">
               <select value={clip.filter.lutId ?? ''} onChange={(e) => update({ filter: { ...clip.filter, lutId: e.target.value || undefined } }, true)}>
-                <option value="">{tr('Yok')}</option>
+                <option value="">{tr('None')}</option>
                 {Object.values(luts).map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
@@ -230,14 +230,14 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 ))}
               </select>
               <button className="btn small" style={{ flex: 'none' }} onClick={() => lutInput.current?.click()}>
-                {tr('.cube yükle')}
+                {tr('Load .cube')}
               </button>
             </div>
             <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], clip)} />
           </div>
           {clip.filter.lutId && (
             <Slider
-              label={tr('LUT yoğunluğu')}
+              label={tr('LUT intensity')}
               value={clip.filter.lutIntensity}
               min={0}
               max={1}
@@ -247,20 +247,20 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             />
           )}
           <button className="btn small" onClick={() => update({ filter: { ...DEFAULT_FILTER } }, true)}>
-            {tr('Sıfırla')}
+            {tr('Reset')}
           </button>
         </Section>
       )}
 
       {visual && (
-        <Section title={tr('Maske')} open={!!clip.mask}>
+        <Section title={tr('Mask')} open={!!clip.mask}>
           <div className="chips" style={{ marginBottom: 10 }}>
             {(
               [
-                ['', 'Yok'],
-                ['rect', 'Dikdörtgen'],
-                ['ellipse', 'Elips'],
-                ['linear', 'Doğrusal'],
+                ['', 'None'],
+                ['rect', 'Rectangle'],
+                ['ellipse', 'Ellipse'],
+                ['linear', 'Linear'],
               ] as const
             ).map(([shape, label]) => (
               <button
@@ -274,12 +274,28 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
           </div>
           {clip.mask && (
             <>
-              <Slider label={tr('Yatay merkez')} value={clip.mask.x} min={0} max={1} format={percent} onCommit={checkpoint} onChange={(x) => setMask({ x })} />
-              <Slider label={tr('Dikey merkez')} value={clip.mask.y} min={0} max={1} format={percent} onCommit={checkpoint} onChange={(y) => setMask({ y })} />
+              <Slider
+                label={tr('Horizontal center')}
+                value={clip.mask.x}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(x) => setMask({ x })}
+              />
+              <Slider
+                label={tr('Vertical center')}
+                value={clip.mask.y}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(y) => setMask({ y })}
+              />
               {clip.mask.shape !== 'linear' && (
                 <>
                   <Slider
-                    label={tr('Genişlik')}
+                    label={tr('Width')}
                     value={clip.mask.width}
                     min={0.05}
                     max={1.5}
@@ -288,7 +304,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                     onChange={(width) => setMask({ width })}
                   />
                   <Slider
-                    label={tr('Yükseklik')}
+                    label={tr('Height')}
                     value={clip.mask.height}
                     min={0.05}
                     max={1.5}
@@ -299,7 +315,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 </>
               )}
               <Slider
-                label={tr('Yumuşaklık')}
+                label={tr('Feather')}
                 value={clip.mask.feather}
                 min={0}
                 max={0.5}
@@ -307,23 +323,23 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 onCommit={checkpoint}
                 onChange={(feather) => setMask({ feather })}
               />
-              <Toggle label={tr('Ters çevir')} on={clip.mask.invert} onChange={(invert) => setMask({ invert })} />
+              <Toggle label={tr('Reverse')} on={clip.mask.invert} onChange={(invert) => setMask({ invert })} />
             </>
           )}
         </Section>
       )}
 
       {visual && (
-        <Section title={tr('Yeşil perde (chroma key)')} open={!!clip.chroma}>
+        <Section title={tr('Green screen (chroma key)')} open={!!clip.chroma}>
           <Toggle
-            label={tr('Renk anahtarını aç')}
+            label={tr('Enable color key')}
             on={!!clip.chroma}
             onChange={(on) => update({ chroma: on ? { color: '#00ff00', similarity: 0.4, smoothness: 0.2 } : undefined }, true)}
           />
           {clip.chroma && (
             <>
               <div className="toggle">
-                <span>{tr('Silinecek renk')}</span>
+                <span>{tr('Key color')}</span>
                 <input
                   type="color"
                   value={clip.chroma.color}
@@ -332,7 +348,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 />
               </div>
               <Slider
-                label={tr('Benzerlik')}
+                label={tr('Similarity')}
                 value={clip.chroma.similarity}
                 min={0}
                 max={1}
@@ -341,7 +357,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 onChange={(similarity) => update({ chroma: { ...clip.chroma!, similarity } })}
               />
               <Slider
-                label={tr('Kenar yumuşaklığı')}
+                label={tr('Edge softness')}
                 value={clip.chroma.smoothness}
                 min={0}
                 max={1}
@@ -355,18 +371,18 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
       )}
 
       {visual && (
-        <Section title={tr('Yapay zeka')}>
-          <Toggle label={tr('Arka planı kaldır')} on={clip.removeBackground} onChange={(removeBackground) => update({ removeBackground }, true)} />
-          {clip.reframe && <Toggle label={tr('Akıllı çerçeveleme')} on onChange={() => update({ reframe: undefined }, true)} />}
+        <Section title={tr('AI')}>
+          <Toggle label={tr('Remove background')} on={clip.removeBackground} onChange={(removeBackground) => update({ removeBackground }, true)} />
+          {clip.reframe && <Toggle label={tr('Smart reframe')} on onChange={() => update({ reframe: undefined }, true)} />}
           <button className="btn block" onClick={() => useUi.getState().openObjectEditor(clip.id)}>
-            <Icon name="wand" size={16} /> {tr('Nesne seç ve sil')}
+            <Icon name="wand" size={16} /> {tr('Select & remove object')}
           </button>
         </Section>
       )}
 
       <div style={{ marginTop: 16 }}>
         <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
-          <Icon name="trash" size={16} /> {tr('Klibi sil')}
+          <Icon name="trash" size={16} /> {tr('Delete clip')}
         </button>
       </div>
     </>

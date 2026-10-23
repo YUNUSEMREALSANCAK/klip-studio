@@ -2,14 +2,14 @@ import { sourceSpan } from '../core/timeline';
 import type { Asset, Clip, MediaClip, Word } from '../core/types';
 import { decodeAssetAudio, encodeWav, mixTimelineAudio, toMono } from '../media/audio';
 
-// RNNoise: CapCut'ın da paketlediği (rnnoise_v2.0.model) ses gürültüsü temizleme ağı.
+// RNNoise: the noise suppression network CapCut also ships (rnnoise_v2.0.model).
 export async function denoiseClip(clip: MediaClip, asset: Asset, onProgress: (p: number) => void): Promise<Blob> {
   const RATE = 48000; // RNNoise 48 kHz bekler
   const buffer = await decodeAssetAudio(asset);
   const full = await toMono(buffer, RATE);
   const samples = full.slice(Math.floor(clip.in * RATE), Math.floor((clip.in + sourceSpan(clip)) * RATE));
 
-  // 4,8 MB'lık wasm yalnızca bu özellik kullanılınca yüklenir.
+  // The 4.8 MB wasm is loaded only when this feature is used.
   const { Rnnoise } = await import('@shiguredo/rnnoise-wasm');
   const rnnoise = await Rnnoise.load();
   const state = rnnoise.createDenoiseState();
@@ -18,7 +18,7 @@ export async function denoiseClip(clip: MediaClip, asset: Asset, onProgress: (p:
   for (let offset = 0; offset < samples.length; offset += rnnoise.frameSize) {
     frame.fill(0);
     frame.set(samples.subarray(offset, offset + rnnoise.frameSize));
-    for (let i = 0; i < frame.length; i++) frame[i] *= 32768; // 16 bit PCM ölçeği
+    for (let i = 0; i < frame.length; i++) frame[i] *= 32768; // 16-bit PCM scale
     state.processFrame(frame);
     const count = Math.min(rnnoise.frameSize, samples.length - offset);
     for (let i = 0; i < count; i++) output[offset + i] = frame[i] / 32768;
@@ -28,7 +28,7 @@ export async function denoiseClip(clip: MediaClip, asset: Asset, onProgress: (p:
   return encodeWav(output, RATE);
 }
 
-// Sessiz aralıkları RMS enerjisine göre bulur. Dönen aralıklar zaman çizelgesi saniyesidir.
+// Finds silent ranges by RMS energy. Returned ranges are in timeline seconds.
 export async function detectSilences(
   clips: Clip[],
   assets: Record<string, Asset>,
@@ -64,13 +64,13 @@ function pushRange(ranges: [number, number][], start: number, end: number, o: { 
 
 export const FILLER_WORDS = ['ııı', 'ıı', 'ee', 'eee', 'hmm', 'şey', 'yani', 'um', 'uh', 'uhm', 'erm', 'hani'];
 
-// Dolgu kelimelerini (eee, şey, um…) transkriptten bulur.
+// Finds filler words (um, uh, eee, şey…) in the transcript.
 export function fillerRanges(words: Word[], fillers: string[]): [number, number][] {
   const set = new Set(fillers.map((f) => f.toLocaleLowerCase('tr')));
   return words.filter((w) => set.has(w.text.toLocaleLowerCase('tr').replace(/[.,!?…]/g, ''))).map((w) => [w.start, w.end]);
 }
 
-// Basit vuruş (beat) tespiti: enerji akışındaki ani artışları bulur.
+// Simple beat detection: finds sudden jumps in the energy flux.
 export async function detectBeats(clip: MediaClip, asset: Asset): Promise<number[]> {
   const RATE = 22050;
   const mono = await toMono(await decodeAssetAudio(asset), RATE);

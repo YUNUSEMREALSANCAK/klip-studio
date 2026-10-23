@@ -8,7 +8,7 @@ export interface VisualSource {
   source: TexImageSource;
   width: number;
   height: number;
-  blend?: { source: TexImageSource; weight: number }; // akıcı yavaş çekim için sonraki kare
+  blend?: { source: TexImageSource; weight: number }; // next frame, for smooth slow motion
 }
 
 export interface FrameInputs {
@@ -22,8 +22,7 @@ export interface VisibleClips {
   overlays: MediaClip[];
 }
 
-const isVisual = (clip: Clip, assets: Record<string, Asset>): clip is MediaClip =>
-  clip.type === 'media' && assets[clip.assetId]?.kind !== 'audio';
+const isVisual = (clip: Clip, assets: Record<string, Asset>): clip is MediaClip => clip.type === 'media' && assets[clip.assetId]?.kind !== 'audio';
 
 export function visibleClips(clips: Clip[], assets: Record<string, Asset>, t: number): VisibleClips {
   const transition = transitionAt(clips, t);
@@ -32,7 +31,7 @@ export function visibleClips(clips: Clip[], assets: Record<string, Asset>, t: nu
   return { transition, main, overlays };
 }
 
-// O anda çizilmesi gereken tüm klipler (geçişte iki ana klip birden).
+// All clips to draw at that moment (two main clips during a transition).
 export function clipsToDraw(visible: VisibleClips): MediaClip[] {
   const main = visible.transition ? [visible.transition.from, visible.transition.to] : visible.main ? [visible.main] : [];
   return [...main, ...visible.overlays];
@@ -84,7 +83,7 @@ function drawMedia(
   const mode = isOverlay ? 'overlay' : focusX !== undefined ? 'cover' : 'contain';
   const state = animatedState(clip, t);
 
-  // Bulanık tuval: ana videonun dolduran, bulanık ve hafif karartılmış kopyası arkaya çizilir.
+  // Blurred canvas: a filled, blurred and slightly darkened copy of the main video is drawn behind it.
   if (!isOverlay && project.backgroundBlur && mode === 'contain') {
     compositor.drawLayer(
       {
@@ -114,7 +113,7 @@ function drawMedia(
     target,
   );
 
-  // Kare harmanlama: sonraki kare, iki kare arasındaki konuma göre saydamlıkla üstüne çizilir.
+  // Frame blending: the next frame is drawn on top with opacity based on the position between frames.
   if (visual.blend && visual.blend.weight > 0.01) {
     compositor.drawLayer(
       {
@@ -154,13 +153,7 @@ export function composeFrame(
   for (const overlay of visible.overlays) drawMedia(compositor, project, overlay, t, assets, inputs, 'screen');
 }
 
-export function drawTexts(
-  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
-  clips: Clip[],
-  t: number,
-  width: number,
-  height: number,
-) {
+export function drawTexts(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, clips: Clip[], t: number, width: number, height: number) {
   for (const clip of sortedTrack<TextClip>(clips, 'text')) {
     if (isActiveAt(clip, t)) drawText(ctx, clip, t, width, height);
   }

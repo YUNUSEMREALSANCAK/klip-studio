@@ -2,7 +2,7 @@ import type { Mask } from '../render/compositor';
 import type { MatteMessage, MatteRequest } from './matte.worker';
 import { BackgroundRemover } from './vision';
 
-// Dışa aktarma için kişi ayırıcı: worker'da çalışır; worker kurulamazsa ana iş parçacığına düşer.
+// Person segmenter for export: runs in a worker, falls back to the main thread if the worker can't start.
 export class WorkerBackgroundRemover {
   private worker = new Worker(new URL('./matte.worker.ts', import.meta.url), { type: 'module' });
   private nextId = 1;
@@ -14,7 +14,7 @@ export class WorkerBackgroundRemover {
       const job = this.pending.get(data.id);
       if (!job) return;
       this.pending.delete(data.id);
-      if (data.error || !data.mask) job.reject(new Error(data.error ?? 'Maske üretilemedi'));
+      if (data.error || !data.mask) job.reject(new Error(data.error ?? 'Could not generate mask'));
       else job.resolve({ data: data.mask, width: data.width!, height: data.height! });
     };
   }
@@ -30,7 +30,7 @@ export class WorkerBackgroundRemover {
         this.worker.postMessage(request, [frame]);
       });
     } catch (error) {
-      console.warn("Kişi ayırma worker'da başlatılamadı; ana iş parçacığında devam ediliyor.", error);
+      console.warn('Person segmentation could not start in a worker; continuing on the main thread.', error);
       this.dispose();
       this.fallback = new BackgroundRemover();
       return this.fallback.segment(source, width, height);

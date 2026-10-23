@@ -32,6 +32,7 @@
     "@shiguredo/rnnoise-wasm": "^2025.1.5",
     "fflate": "^0.8.3",
     "mediabunny": "^1.62.1",
+    "onnxruntime-web": "^1.31.0-dev.20260914-8d85527a0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "zustand": "^5.0.16"

@@ -336,6 +336,13 @@ export const EN: Record<string, string> = {
   'Sahne tespiti': 'Scene detection',
 
   'Hız eğrisi': 'Speed curve',
+  'Doldurma kalitesi': 'Fill quality',
+  Hızlı: 'Fast',
+  'Yüksek (LaMa)': 'High (LaMa)',
+  'İlk kullanımda ~200 MB model indirilir': 'Downloads a ~200 MB model on first use',
+  'LaMa modeli indiriliyor': 'Downloading LaMa model',
+  'İşlemcide yeniden deneniyor': 'Retrying on the CPU',
+  'LaMa modeli indirilemedi': 'Could not download LaMa model',
   Montaj: 'Montage',
   'Kahraman anı': 'Hero moment',
   'Mermi zamanı': 'Bullet time',

@@ -16,7 +16,8 @@ import { sourceSpan } from '../core/timeline';
 import type { Asset, MediaClip } from '../core/types';
 import { decodeAssetAudio } from '../media/audio';
 import { createAsset } from '../media/importMedia';
-import { dilate, inpaint, type BinaryMask, type SamClient, type SamPoint } from './objectTools';
+import { inpaintLama } from './lama';
+import { dilate, inpaint, type BinaryMask, type FillQuality, type SamClient, type SamPoint } from './objectTools';
 
 const MAX_WIDTH = 1280;
 const SAMPLE_FPS = 6; // nesne takibi için saniyede kaç karede SAM çalışır
@@ -77,6 +78,7 @@ export async function removeObjectFromVideo(
   referenceMask: BinaryMask,
   referenceTime: number, // kaynak saniyesi
   onProgress: (message: string, progress: number) => void,
+  quality: FillQuality = 'fast',
 ): Promise<Asset> {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
   const track = await input.getPrimaryVideoTrack();
@@ -130,7 +132,8 @@ export async function removeObjectFromVideo(
   for await (const frame of sink.canvases(from, to)) {
     ctx.drawImage(frame.canvas, 0, 0, width, height);
     const index = Math.min(times.length - 1, Math.max(0, Math.round((frame.timestamp - from) * SAMPLE_FPS)));
-    const cleaned = inpaint(ctx.getImageData(0, 0, width, height), grown[index]);
+    const pixels = ctx.getImageData(0, 0, width, height);
+    const cleaned = quality === 'lama' ? await inpaintLama(pixels, masks[index]) : inpaint(pixels, grown[index]);
     ctx.putImageData(cleaned, 0, 0);
     await videoSource.add(frame.timestamp - from, frame.duration);
     onProgress('Kareler temizleniyor', 0.5 + ((frame.timestamp - from) / (to - from)) * 0.5);

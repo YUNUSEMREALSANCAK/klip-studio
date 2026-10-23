@@ -48,6 +48,24 @@ test.describe('yerel yapay zeka modelleri @models', () => {
     await expect(page.locator('.inspector h3')).toContainText('arka plansız');
   });
 
+  test('LaMa ile fırçayla işaretlenen bölge doldurulur', async ({ page }) => {
+    await importMedia(page, 'square.png');
+    await addToMain(page, 0);
+    await seek(page, 1);
+    await page.locator('.inspector button', { hasText: 'Nesne seç ve sil' }).click();
+    await expect(page.locator('.modal .progress')).toHaveCount(0, { timeout: 300_000 });
+    await page.locator('.modal .chip', { hasText: 'Fırça' }).click();
+    const box = (await page.locator('.object-canvas canvas').boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.5, { steps: 8 });
+    await page.mouse.up();
+    await page.locator('.modal .chip', { hasText: 'Yüksek (LaMa)' }).click();
+    await page.locator('.modal button', { hasText: 'Nesneyi sil' }).click();
+    await expect(page.locator('.modal')).toHaveCount(0, { timeout: 500_000 });
+    await expect(page.locator('.inspector h3')).toContainText('temizlenmiş');
+  });
+
   test('videoda nesne tüm klip boyunca silinir (SlimSAM)', async ({ page }) => {
     await importMedia(page, 'gradient.webm');
     await addToMain(page, 0);

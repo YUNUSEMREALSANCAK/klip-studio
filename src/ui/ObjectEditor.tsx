@@ -2,7 +2,8 @@ import { tr, trMessage } from '../i18n';
 import { ALL_FORMATS, BlobSource, CanvasSink, Input } from 'mediabunny';
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { matteImage } from '../ai/models';
-import { applyAlpha, cutout, imageDataToBlob, inpaint, SamClient, type BinaryMask, type SamPoint } from '../ai/objectTools';
+import { applyAlpha, cutout, imageDataToBlob, inpaint, SamClient, type BinaryMask, type FillQuality, type SamPoint } from '../ai/objectTools';
+import { inpaintLama } from '../ai/lama';
 import { removeObjectFromVideo } from '../ai/videoInpaint';
 import { useEditor } from '../core/store';
 import { createMediaClip } from '../core/timeline';
@@ -59,6 +60,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
   const [samMask, setSamMask] = useState<BinaryMask | null>(null);
   const [mode, setMode] = useState<'click' | 'brush'>('click');
   const [brushSize, setBrushSize] = useState(24);
+  const [quality, setQuality] = useState<FillQuality>('fast');
   const [revision, setRevision] = useState(0); // fırça boyandıkça yeniden çiz
 
   // Kareyi yükle ve SAM gömmesini (embedding) hesapla.
@@ -180,27 +182,28 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     close();
   };
 
-  const removeObject = async () => {
-    const mask = finalMask();
-    if (!image || !mask) return;
-    setStatus({ message: 'Nesne siliniyor', progress: -1 });
-    await new Promise((r) => setTimeout(r, 30)); // durum mesajı ekrana çizilsin
-    const cleaned = inpaint(image, mask);
-    await addResult(await imageDataToBlob(cleaned), `${asset?.name ?? 'kare'} (temizlenmiş).png`, true);
-  };
-
-  const cutObject = async () => {
-    const mask = finalMask();
-    if (!image || !mask) return;
-    await addResult(await cutout(image, mask), `${asset?.name ?? 'nesne'} (kesilmiş).png`, false);
-  };
-
   const busy = async (work: () => Promise<void>) => {
     try {
       await work();
     } catch (error) {
       setStatus({ message: `Hata: ${(error as Error).message}`, progress: 0 });
     }
+  };
+
+  const removeObject = () =>
+    busy(async () => {
+      const mask = finalMask();
+      if (!image || !mask) return;
+      setStatus({ message: 'Nesne siliniyor', progress: -1 });
+      await new Promise((r) => setTimeout(r, 30)); // durum mesajı ekrana çizilsin
+      const cleaned = quality === 'lama' ? await inpaintLama(image, mask, (message, progress) => setStatus({ message, progress })) : inpaint(image, mask);
+      await addResult(await imageDataToBlob(cleaned), `${asset?.name ?? 'kare'} (temizlenmiş).png`, true);
+    });
+
+  const cutObject = async () => {
+    const mask = finalMask();
+    if (!image || !mask) return;
+    await addResult(await cutout(image, mask), `${asset?.name ?? 'nesne'} (kesilmiş).png`, false);
   };
 
   // BiRefNet ile ön plandaki nesneyi tek tıkla seç (her tür nesne).
@@ -223,8 +226,14 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
     busy(async () => {
       const mask = finalMask();
       if (!clip || !asset || !mask) return;
-      const result = await removeObjectFromVideo(clip, asset, samRef.current!, mask, frameTime.current, (message, progress) =>
-        setStatus({ message, progress }),
+      const result = await removeObjectFromVideo(
+        clip,
+        asset,
+        samRef.current!,
+        mask,
+        frameTime.current,
+        (message, progress) => setStatus({ message, progress }),
+        quality,
       );
       const s = useEditor.getState();
       s.addAsset(result);
@@ -284,6 +293,21 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
             <button className="btn block" disabled={!ready} onClick={() => void autoSelect()}>
               {tr('Ön planı otomatik seç (BiRefNet / MODNet)')}
             </button>
+            <div className="field-label" style={{ marginTop: 12 }}>
+              {tr('Doldurma kalitesi')}
+            </div>
+            <div className="chips" style={{ marginTop: 6 }}>
+              <button className={`chip ${quality === 'fast' ? 'active' : ''}`} onClick={() => setQuality('fast')}>
+                {tr('Hızlı')}
+              </button>
+              <button
+                className={`chip ${quality === 'lama' ? 'active' : ''}`}
+                onClick={() => setQuality('lama')}
+                title={tr('İlk kullanımda ~200 MB model indirilir')}
+              >
+                {tr('Yüksek (LaMa)')}
+              </button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               {asset.kind === 'video' && (
                 <button className="btn primary block" disabled={!hasSelection} onClick={() => void removeFromVideo()}>

@@ -54,7 +54,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 ### Faz 3: Yapay zeka derinliği → v0.4
 
 - [x] **Videoda nesne silme** (L): SlimSAM ile kare kare takip + çok ölçekli doldurma (deneysel)
-- [ ] **Daha iyi doldurma** (M): LaMa ONNX ile büyük nesnelerde bulanıklığı azaltma
+- [x] **Daha iyi doldurma** (M): LaMa (big-lama ONNX) ile "Yüksek" doldurma kalitesi; görsel ve videoda
 - [x] **Genel nesne ayırma** (M): BiRefNet (yeterli GPU'da) / MODNet ile görsellerde tek tıkla ön plan seçimi
 - [ ] **Videoda genel nesne matting** (M): Robust Video Matting ile insan dışı nesneler, titremesiz
 - [x] **Altyazı çevirisi** (M): opus-mt, diğer diller için NLLB; iki dilli altyazı

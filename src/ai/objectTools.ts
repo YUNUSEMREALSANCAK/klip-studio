@@ -6,6 +6,9 @@ export interface SamPoint {
   positive: boolean;
 }
 
+// Doldurma yöntemi: hızlı (push-pull, anında) veya LaMa (yapay zeka, ~200 MB model).
+export type FillQuality = 'fast' | 'lama';
+
 export interface BinaryMask {
   data: Uint8Array; // 1 = seçili
   width: number;

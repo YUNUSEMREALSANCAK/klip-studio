@@ -1,4 +1,5 @@
 import { ALL_FORMATS, BlobSource, CanvasSink, Input } from 'mediabunny';
+import { sourceSpan } from '../core/timeline';
 import type { Asset, FilterSettings, MediaClip, ReframeTrack } from '../core/types';
 import { getFaceDetector } from './vision';
 
@@ -18,11 +19,12 @@ async function sampleFrames(
   if (!track) throw new Error('Video izi bulunamadı');
   const sink = new CanvasSink(track, { ...size, fit: 'fill', poolSize: 1 });
   let next = clip.in;
-  const end = clip.in + clip.duration;
+  const span = sourceSpan(clip);
+  const end = clip.in + span;
   for await (const frame of sink.canvases(clip.in, end)) {
     if (frame.timestamp + 1e-3 < next) continue;
     await onFrame(frame.canvas, frame.timestamp);
-    onProgress?.((frame.timestamp - clip.in) / clip.duration);
+    onProgress?.((frame.timestamp - clip.in) / span);
     next = frame.timestamp + every;
   }
 }
@@ -53,7 +55,7 @@ export async function detectScenes(asset: Asset, clip: MediaClip, onProgress: (p
         const recent = history.slice(-10);
         const mean = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : diff;
         const lastCut = cuts[cuts.length - 1] ?? -Infinity;
-        const timelineTime = clip.start + (time - clip.in);
+        const timelineTime = clip.start + (time - clip.in) / clip.speed;
         if (diff > 30 && diff > mean * 2.5 && timelineTime - lastCut > 0.8) cuts.push(timelineTime);
         history.push(diff);
       }
@@ -124,7 +126,7 @@ export async function autoEnhance(asset: Asset, clip: MediaClip): Promise<Partia
     canvas.getContext('2d')!.drawImage(image, 0, 0, 96, 54);
     capture(pixels(canvas));
   } else {
-    const middle = { ...clip, in: clip.in + clip.duration / 2, duration: 0.2 };
+    const middle = { ...clip, in: clip.in + sourceSpan(clip) / 2, duration: 0.2, speed: 1 };
     await sampleFrames(asset, middle, 1, { width: 96, height: 54 }, (canvas) => capture(new Uint8ClampedArray(pixels(canvas))));
   }
   const clamp = (v: number) => Math.round(Math.max(-0.5, Math.min(0.5, v)) * 100) / 100;

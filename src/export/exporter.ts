@@ -16,7 +16,8 @@ import {
 } from 'mediabunny';
 import { BackgroundRemover } from '../ai/vision';
 import { clipEnd, projectDuration } from '../core/timeline';
-import type { Asset, MediaClip, Project } from '../core/types';
+import type { Asset, MediaClip, Project, TextClip } from '../core/types';
+import { ensureFonts } from '../render/fonts';
 import { mixTimelineAudio } from '../media/audio';
 import { Compositor, type Mask } from '../render/compositor';
 import { clipSourceTime, clipsToDraw, composeFrame, drawTexts, visibleClips, type VisualSource } from '../render/composeFrame';
@@ -70,6 +71,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   if (!videoCodec) throw new Error('Tarayıcınız video kodlamayı desteklemiyor (WebCodecs)');
   const audioCodec = await getFirstEncodableAudioCodec(['aac', 'opus'], { numberOfChannels: 2, sampleRate: 48000 });
 
+  await ensureFonts(project.clips.filter((c): c is TextClip => c.type === 'text'));
   const glCanvas = new OffscreenCanvas(width, height);
   const compositor = new Compositor(glCanvas, width, height);
   const frameCanvas = new OffscreenCanvas(width, height);

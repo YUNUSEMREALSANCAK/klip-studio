@@ -196,3 +196,18 @@ input[type='color'] { width: 32px; height: 26px; border: none; background: none;
 .object-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; }
 .object-canvas { position: relative; background: #000; border-radius: 8px; overflow: hidden; display: grid; place-items: center; }
 .object-canvas canvas { max-width: 100%; max-height: 62vh; cursor: crosshair; display: block; }
+
+/* Açılır-kapanır bölümler ve anahtar kare düğmesi */
+.section { border-top: 1px solid var(--line); padding: 2px 0 6px; }
+.section:first-of-type { border-top: none; }
+.section > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px; }
+.section > summary::-webkit-details-marker { display: none; }
+.section > summary::after { content: '▾'; color: var(--muted); transition: transform .15s; }
+.section:not([open]) > summary::after { transform: rotate(-90deg); }
+.section-body .row { margin-top: 6px; }
+.label-main { display: inline-flex; align-items: center; gap: 6px; }
+.key-toggle { width: 18px; height: 18px; padding: 0; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 11px; line-height: 1; opacity: .55; }
+.key-toggle:hover { opacity: 1; color: var(--text); }
+.key-toggle.animated { opacity: 1; color: #fbbf24; }
+.key-toggle.on { opacity: 1; color: var(--accent); }
+.kf-dot { position: absolute; top: 3px; width: 7px; height: 7px; margin-left: -3.5px; background: #fbbf24; transform: rotate(45deg); z-index: 2; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,.6); }

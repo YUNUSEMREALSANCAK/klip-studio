@@ -25,6 +25,8 @@ export interface FilterSettings {
   vignette: number; // 0..1
   sharpen: number; // 0..1
   grayscale: boolean;
+  lutId?: string;
+  lutIntensity: number; // 0..1
 }
 
 export interface Transition {
@@ -50,6 +52,38 @@ export interface Transform {
   x: number; // merkez, 0..1
   y: number; // merkez, 0..1
   scale: number; // tuvale göre genişlik oranı
+  rotation: number; // derece
+}
+
+export type KeyframeProp = 'x' | 'y' | 'scale' | 'rotation' | 'opacity' | 'volume';
+
+export interface Keyframe {
+  prop: KeyframeProp;
+  time: number; // klibin başından itibaren saniye
+  value: number;
+}
+
+export interface MaskSettings {
+  shape: 'rect' | 'ellipse' | 'linear';
+  x: number; // katman içinde merkez, 0..1
+  y: number;
+  width: number; // katmana oran
+  height: number;
+  feather: number; // 0..0.5
+  invert: boolean;
+}
+
+export interface ChromaSettings {
+  color: string;
+  similarity: number; // 0..1
+  smoothness: number; // 0..1
+}
+
+export interface Lut {
+  id: string;
+  name: string;
+  size: number;
+  data: string; // base64, size³ × RGB bayt
 }
 
 // Otomatik çerçeveleme: zamana göre yatay odak noktası (kaynak saniyesi → 0..1)
@@ -73,6 +107,14 @@ export interface MediaClip {
   removeBackground: boolean;
   transform: Transform;
   reframe?: ReframeTrack;
+  speed: number; // 0.25..4
+  opacity: number; // 0..1
+  keyframes: Keyframe[];
+  mask?: MaskSettings;
+  chroma?: ChromaSettings;
+  fadeIn: number; // sn
+  fadeOut: number; // sn
+  duck: boolean; // konuşma olduğunda sesi kıs
 }
 
 export type TextStylePreset = 'classic' | 'box' | 'karaoke' | 'neon' | 'title';
@@ -96,6 +138,7 @@ export interface TextClip {
   color: string;
   highlight: string;
   fontSize: number; // tuval yüksekliğine oran
+  font?: string; // Google Fonts ailesi
   y: number; // 0..1
   words?: Word[];
 }
@@ -108,8 +151,10 @@ export interface Project {
   aspect: AspectRatio;
   fps: number;
   background: string;
+  backgroundBlur: boolean; // boşlukları videonun bulanık hâliyle doldur
   clips: Clip[];
   markers: number[];
+  luts: Record<string, Lut>;
 }
 
 export const DEFAULT_FILTER: FilterSettings = {
@@ -120,7 +165,10 @@ export const DEFAULT_FILTER: FilterSettings = {
   vignette: 0,
   sharpen: 0,
   grayscale: false,
+  lutIntensity: 1,
 };
+
+export const DEFAULT_TRANSFORM: Transform = { x: 0.5, y: 0.5, scale: 1, rotation: 0 };
 
 export const ASPECT_SIZES: Record<AspectRatio, { width: number; height: number }> = {
   '16:9': { width: 1920, height: 1080 },

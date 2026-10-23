@@ -85,6 +85,8 @@ export function Timeline() {
     const s = useEditor.getState();
     const asset = original.type === 'media' ? s.assets[original.assetId] : null;
     const maxSource = asset && asset.kind !== 'image' ? asset.duration : Infinity;
+    const speed = original.type === 'media' ? original.speed : 1;
+    const sourceIn = original.type === 'media' ? original.in : 0;
 
     let patch: Partial<Clip> = {};
     if (mode === 'move') {
@@ -93,15 +95,15 @@ export function Timeline() {
       const snappedEnd = snap(start + original.duration, original.id);
       patch.start = snappedStart !== start ? snappedStart : snappedEnd - original.duration;
     } else if (mode === 'trim-start') {
-      const sourceIn = original.type === 'media' ? original.in : 0;
-      const minDelta = asset && asset.kind !== 'image' ? -sourceIn : -original.start;
-      const d = Math.min(Math.max(snap(original.start + delta, original.id) - original.start, minDelta, -original.start), original.duration - 0.1);
+      // Kaynağın başından öteye uzatılamaz; ana iz dışında zaman çizelgesinin başından da öteye.
+      const sourceLimit = asset && asset.kind !== 'image' ? -sourceIn / speed : -Infinity;
+      const minDelta = original.track === 'main' ? sourceLimit : Math.max(sourceLimit, -original.start);
+      const d = Math.min(Math.max(snap(original.start + delta, original.id) - original.start, minDelta), original.duration - 0.1);
       patch = { start: original.start + d, duration: original.duration - d };
-      if (original.type === 'media') (patch as Partial<MediaClip>).in = original.in + d;
+      if (original.type === 'media') (patch as Partial<MediaClip>).in = original.in + d * speed;
     } else {
-      const sourceIn = original.type === 'media' ? original.in : 0;
       const end = snap(clipEnd(original) + delta, original.id);
-      patch.duration = Math.min(Math.max(end - original.start, 0.1), maxSource - sourceIn);
+      patch.duration = Math.min(Math.max(end - original.start, 0.1), (maxSource - sourceIn) / speed);
     }
     s.updateClip(original.id, patch, false);
   };
@@ -283,6 +285,8 @@ function TimelineClip({ clip, zoom, top, height, selected, assets, onDragStart }
       title={label}
     >
       {asset && asset.hasAudio && clip.type === 'media' && <Waveform clip={clip} width={width} compact={asset.kind !== 'audio'} />}
+      {clip.type === 'media' &&
+        [...new Set(clip.keyframes.map((k) => k.time))].map((time) => <span key={time} className="kf-dot" style={{ left: time * zoom }} />)}
       <div className="handle left" onPointerDown={(e) => onDragStart(e, clip, 'trim-start')} />
       <span className="clip-label">
         {clip.type === 'media' && clip.removeBackground ? '✂ ' : ''}
@@ -340,13 +344,13 @@ function Waveform({ clip, width, compact }: { clip: MediaClip; width: number; co
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#fff';
     const from = clip.in * PEAKS_PER_SECOND;
-    const span = clip.duration * PEAKS_PER_SECOND;
+    const span = clip.duration * clip.speed * PEAKS_PER_SECOND;
     for (let x = 0; x < w; x++) {
       const value = peaks[Math.floor(from + (x / w) * span)] ?? 0;
       const bar = Math.max(1, value * h);
       ctx.fillRect(x, (h - bar) / 2, 1, bar);
     }
-  }, [peaks, width, clip.in, clip.duration]);
+  }, [peaks, width, clip.in, clip.duration, clip.speed]);
 
   return <canvas ref={ref} className={`wave ${compact ? 'compact' : ''}`} />;
 }

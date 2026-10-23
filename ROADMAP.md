@@ -45,13 +45,13 @@ Amaç: kullanıcı işini kaybetmesin, her değişiklik testle korunsun.
 
 Amaç: CapCut'ın günlük kullanılan kurgu araçları.
 
-- [ ] **Hız** (M): 0.25×–4×, ses perdesi korunarak; hız eğrileri
-- [ ] **Anahtar kare animasyonu** (L): konum, ölçek, döndürme, opaklık, ses düzeyi
-- [ ] **Bulanık tuval arka planı** (S): 16:9 videoyu 9:16'ya koyunca boşluklar bulanık dolsun
-- [ ] **Maske ve chroma key** (M): dikdörtgen/daire/çizgi maskeleri, yeşil perde
-- [ ] **Ses araçları** (M): fade in/out, müzik ducking, video kliplerinde dalga formu
-- [ ] **Metin şablonları ve fontlar** (M): hazır animasyonlu başlıklar, Google Fonts seçici
-- [ ] **LUT (.cube) içe aktarma** (S): filtre shader'ına 3D LUT dokusu
+- [x] **Hız** (M): 0.25×–4×, ses perdesi korunarak; hız eğrileri
+- [x] **Anahtar kare animasyonu** (L): konum, ölçek, döndürme, opaklık, ses düzeyi
+- [x] **Bulanık tuval arka planı** (S): 16:9 videoyu 9:16'ya koyunca boşluklar bulanık dolsun
+- [x] **Maske ve chroma key** (M): dikdörtgen/daire/çizgi maskeleri, yeşil perde
+- [x] **Ses araçları** (M): fade in/out, müzik ducking, video kliplerinde dalga formu
+- [x] **Metin şablonları ve fontlar** (M): hazır animasyonlu başlıklar, Google Fonts seçici
+- [x] **LUT (.cube) içe aktarma** (S): filtre shader'ına 3D LUT dokusu
 
 ### Faz 3: Yapay zeka derinliği → v0.4
 

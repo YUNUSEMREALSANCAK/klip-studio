@@ -70,7 +70,7 @@ export function denoise(clipId: string) {
     const wav = await denoiseClip(clip, asset, (p) => report('RNNoise ile temizleniyor', p));
     const cleaned = await createAsset(wav, `${asset.name} (temiz ses).wav`);
     editor().addAsset(cleaned);
-    const audioClip = { ...createMediaClip(cleaned, 'audio', clip.start), duration: clip.duration };
+    const audioClip = { ...createMediaClip(cleaned, 'audio', clip.start), duration: clip.duration, speed: clip.speed };
     editor().mutate((clips) => [...clips.map((c) => (c.id === clip.id ? { ...c, muted: true } : c)), audioClip]);
   });
 }

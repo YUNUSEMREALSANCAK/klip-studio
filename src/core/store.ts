@@ -49,7 +49,15 @@ interface EditorState {
 
 const HISTORY_LIMIT = 80;
 
-export const emptyProject = (): Project => ({ aspect: '16:9', fps: 30, background: '#000000', clips: [], markers: [] });
+export const emptyProject = (): Project => ({
+  aspect: '16:9',
+  fps: 30,
+  background: '#000000',
+  backgroundBlur: false,
+  clips: [],
+  markers: [],
+  luts: {},
+});
 
 export const useEditor = create<EditorState>((set, get) => ({
   project: emptyProject(),

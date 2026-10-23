@@ -9,15 +9,19 @@ void main() {
   gl_Position = vec4(aPosition, 0.0, 1.0);
 }`;
 
-// Katman shader'ı: kaynak + renk ayarları + keskinleştirme + vinyet + arka plan maskesi.
+// Katman shader'ı: kaynak + bulanıklık + renk ayarları + LUT + keskinleştirme + vinyet
+// + arka plan maskesi + şekil maskesi + yeşil perde.
 export const LAYER_FRAGMENT = /* glsl */ `#version 300 es
 precision highp float;
+precision mediump sampler3D;
 in vec2 vUv;
 out vec4 outColor;
 uniform sampler2D uSource;
-uniform sampler2D uMask;
-uniform bool uUseMask;
+uniform sampler2D uMatte;
+uniform mediump sampler3D uLut;
+uniform bool uUseMatte;
 uniform vec2 uTexel;
+uniform float uBlur;
 uniform float uBrightness;
 uniform float uContrast;
 uniform float uSaturation;
@@ -25,10 +29,45 @@ uniform float uTemperature;
 uniform float uVignette;
 uniform float uSharpen;
 uniform bool uGrayscale;
+uniform float uLutIntensity;
+uniform float uLutSize;
 uniform float uOpacity;
+uniform int uShape;
+uniform vec4 uShapeRect;
+uniform float uFeather;
+uniform bool uShapeInvert;
+uniform bool uChroma;
+uniform vec2 uKey;
+uniform float uSimilarity;
+uniform float uSmoothness;
+
+vec2 chromaOf(vec3 c) {
+  return vec2(-0.1687 * c.r - 0.3313 * c.g + 0.5 * c.b, 0.5 * c.r - 0.4187 * c.g - 0.0813 * c.b);
+}
+
+float shapeAlpha(vec2 uv) {
+  if (uShape == 0) return 1.0;
+  vec2 p = uv - uShapeRect.xy;
+  vec2 half_ = max(uShapeRect.zw * 0.5, vec2(1e-4));
+  float f = max(uFeather, 0.001);
+  float a;
+  if (uShape == 1) a = 1.0 - smoothstep(1.0 - f, 1.0 + f, max(abs(p.x) / half_.x, abs(p.y) / half_.y));
+  else if (uShape == 2) a = 1.0 - smoothstep(1.0 - f, 1.0 + f, length(p / half_));
+  else a = smoothstep(-f * 0.5, f * 0.5, p.y);
+  return uShapeInvert ? 1.0 - a : a;
+}
 
 void main() {
-  vec4 color = texture(uSource, vUv);
+  vec4 color;
+  if (uBlur > 0.0) {
+    color = vec4(0.0);
+    for (int x = -3; x <= 3; x++) {
+      for (int y = -3; y <= 3; y++) color += texture(uSource, vUv + vec2(float(x), float(y)) * uTexel * uBlur);
+    }
+    color /= 49.0;
+  } else {
+    color = texture(uSource, vUv);
+  }
   if (uSharpen > 0.0) {
     vec3 blur = texture(uSource, vUv + vec2(uTexel.x, 0.0)).rgb
       + texture(uSource, vUv - vec2(uTexel.x, 0.0)).rgb
@@ -36,16 +75,25 @@ void main() {
       + texture(uSource, vUv - vec2(0.0, uTexel.y)).rgb;
     color.rgb += (color.rgb - blur * 0.25) * uSharpen * 1.5;
   }
+  float alpha = color.a * uOpacity;
+  if (uChroma) {
+    float d = distance(chromaOf(color.rgb), uKey);
+    alpha *= smoothstep(uSimilarity, uSimilarity + uSmoothness, d);
+  }
   vec3 c = color.rgb + uBrightness * 0.3;
   c = (c - 0.5) * (1.0 + uContrast) + 0.5;
   float luma = dot(c, vec3(0.299, 0.587, 0.114));
   c = mix(vec3(luma), c, 1.0 + uSaturation);
   c += vec3(uTemperature * 0.08, uTemperature * 0.02, -uTemperature * 0.08);
+  if (uLutIntensity > 0.0) {
+    vec3 coord = clamp(c, 0.0, 1.0) * (uLutSize - 1.0) / uLutSize + 0.5 / uLutSize;
+    c = mix(c, texture(uLut, coord).rgb, uLutIntensity);
+  }
   if (uGrayscale) c = vec3(dot(c, vec3(0.299, 0.587, 0.114)));
   float dist = distance(vUv, vec2(0.5));
   c *= 1.0 - uVignette * smoothstep(0.3, 0.75, dist);
-  float alpha = color.a * uOpacity;
-  if (uUseMask) alpha *= smoothstep(0.35, 0.65, texture(uMask, vUv).r);
+  if (uUseMatte) alpha *= smoothstep(0.35, 0.65, texture(uMatte, vUv).r);
+  alpha *= shapeAlpha(vUv);
   outColor = vec4(clamp(c, 0.0, 1.0), alpha);
 }`;
 

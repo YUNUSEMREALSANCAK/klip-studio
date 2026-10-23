@@ -1,3 +1,4 @@
+import { sourceSpan } from '../core/timeline';
 import type { Asset, Clip, MediaClip, Word } from '../core/types';
 import { decodeAssetAudio, encodeWav, mixTimelineAudio, toMono } from '../media/audio';
 
@@ -6,7 +7,7 @@ export async function denoiseClip(clip: MediaClip, asset: Asset, onProgress: (p:
   const RATE = 48000; // RNNoise 48 kHz bekler
   const buffer = await decodeAssetAudio(asset);
   const full = await toMono(buffer, RATE);
-  const samples = full.slice(Math.floor(clip.in * RATE), Math.floor((clip.in + clip.duration) * RATE));
+  const samples = full.slice(Math.floor(clip.in * RATE), Math.floor((clip.in + sourceSpan(clip)) * RATE));
 
   // 4,8 MB'lık wasm yalnızca bu özellik kullanılınca yüklenir.
   const { Rnnoise } = await import('@shiguredo/rnnoise-wasm');
@@ -78,7 +79,7 @@ export async function detectBeats(clip: MediaClip, asset: Asset): Promise<number
   const hop = 512;
   const energies: number[] = [];
   const from = Math.floor(clip.in * RATE);
-  const to = Math.min(mono.length, Math.floor((clip.in + clip.duration) * RATE));
+  const to = Math.min(mono.length, Math.floor((clip.in + sourceSpan(clip)) * RATE));
   for (let i = from; i < to; i += hop) {
     let sum = 0;
     for (let j = i; j < Math.min(i + hop, to); j++) sum += mono[j] * mono[j];
@@ -94,7 +95,7 @@ export async function detectBeats(clip: MediaClip, asset: Asset): Promise<number
     const t = (i * hop) / RATE;
     const isPeak = flux[i] > mean * 1.8 && flux[i] >= (flux[i - 1] ?? 0) && flux[i] >= (flux[i + 1] ?? 0);
     if (isPeak && t - last > 0.25) {
-      beats.push(clip.start + t);
+      beats.push(clip.start + t / clip.speed);
       last = t;
     }
   }

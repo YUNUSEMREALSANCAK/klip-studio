@@ -1,6 +1,8 @@
 import { ALL_FORMATS, AudioBufferSink, BlobSource, Input } from 'mediabunny';
 import { clipEnd, projectDuration } from '../core/timeline';
+import { fadeGain, valueAt } from '../core/animation';
 import type { Asset, Clip, MediaClip } from '../core/types';
+import { timeStretch } from './timeStretch';
 
 const decoded = new Map<string, Promise<AudioBuffer>>();
 
@@ -44,7 +46,21 @@ async function decodeWithMediabunny(asset: Asset): Promise<AudioBuffer> {
 const audible = (clip: Clip, assets: Record<string, Asset>): clip is MediaClip =>
   clip.type === 'media' && !clip.muted && clip.volume > 0 && !!assets[clip.assetId]?.hasAudio;
 
+const GAIN_RATE = 50; // ses düzeyi eğrisi örnek/sn
+
+// Kaynaktaki [from, from + length) aralığını keser (gerekirse sessizlikle tamamlar).
+function slice(buffer: AudioBuffer, from: number, length: number): AudioBuffer {
+  const start = Math.max(0, Math.floor(from * buffer.sampleRate));
+  const frames = Math.max(1, Math.floor(length * buffer.sampleRate));
+  const out = new AudioBuffer({ length: frames, sampleRate: buffer.sampleRate, numberOfChannels: buffer.numberOfChannels });
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    out.copyToChannel(buffer.getChannelData(ch).subarray(start, start + frames), ch);
+  }
+  return out;
+}
+
 // Zaman çizelgesindeki tüm sesleri tek bir AudioBuffer'a karıştırır.
+// Hız (perde korunarak), ses düzeyi anahtar kareleri, fade ve müzik kısma uygulanır.
 export async function mixTimelineAudio(
   clips: Clip[],
   assets: Record<string, Asset>,
@@ -55,17 +71,30 @@ export async function mixTimelineAudio(
   const [from, to] = range;
   const length = Math.max(1, Math.ceil((to - from) * sampleRate));
   const context = new OfflineAudioContext({ numberOfChannels: channels, length, sampleRate });
+  const needsDuck = clips.some((c) => c.type === 'media' && c.duck && audible(c, assets));
+  const { computeDuckEnvelope, envelopeAt } = await import('./ducking');
+  const envelope = needsDuck ? await computeDuckEnvelope(clips, assets) : null;
 
   for (const clip of clips) {
     if (!audible(clip, assets) || clipEnd(clip) <= from || clip.start >= to) continue;
-    const buffer = await decodeAssetAudio(assets[clip.assetId]);
-    const source = context.createBufferSource();
-    source.buffer = buffer;
-    const gain = context.createGain();
-    gain.gain.value = clip.volume;
-    source.connect(gain).connect(context.destination);
+    const decoded = await decodeAssetAudio(assets[clip.assetId]);
     const skip = Math.max(0, from - clip.start);
-    source.start(Math.max(0, clip.start - from), clip.in + skip, clip.duration - skip);
+    const playLength = Math.min(clip.duration - skip, to - Math.max(clip.start, from));
+    const segment = timeStretch(slice(decoded, clip.in + skip * clip.speed, playLength * clip.speed), clip.speed);
+    const source = context.createBufferSource();
+    source.buffer = segment;
+
+    // Ses düzeyi eğrisi: temel/anahtar kare × fade × kısma
+    const gain = context.createGain();
+    const steps = Math.max(2, Math.ceil(playLength * GAIN_RATE));
+    const curve = Float32Array.from({ length: steps }, (_, i) => {
+      const t = clip.start + skip + (i / (steps - 1)) * playLength;
+      return valueAt(clip, 'volume', t) * fadeGain(clip, t) * (clip.duck ? envelopeAt(envelope, t) : 1);
+    });
+    const when = Math.max(0, clip.start - from);
+    gain.gain.setValueCurveAtTime(curve, when, playLength);
+    source.connect(gain).connect(context.destination);
+    source.start(when);
   }
   return context.startRendering();
 }

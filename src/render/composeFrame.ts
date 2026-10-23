@@ -1,6 +1,7 @@
 import { isActiveAt, sortedTrack, sourceTime, transitionAt, type TransitionState } from '../core/timeline';
-import type { Asset, Clip, MediaClip, Project, ReframeTrack, TextClip } from '../core/types';
-import type { Compositor, Mask } from './compositor';
+import { animatedState } from '../core/animation';
+import { DEFAULT_TRANSFORM, type Asset, type Clip, type MediaClip, type Project, type ReframeTrack, type TextClip } from '../core/types';
+import type { Compositor, LutData, Mask } from './compositor';
 import { drawText } from './text';
 
 export interface VisualSource {
@@ -54,8 +55,21 @@ export function focusAt(reframe: ReframeTrack | undefined, time: number) {
   return centers[centers.length - 1];
 }
 
+const lutCache = new Map<string, LutData>();
+
+function lutFor(project: Project, id: string | undefined): LutData | null {
+  const lut = id ? project.luts[id] : undefined;
+  if (!lut) return null;
+  if (!lutCache.has(lut.id)) {
+    const bytes = Uint8Array.from(atob(lut.data), (c) => c.charCodeAt(0));
+    lutCache.set(lut.id, { id: lut.id, size: lut.size, data: bytes });
+  }
+  return lutCache.get(lut.id)!;
+}
+
 function drawMedia(
   compositor: Compositor,
+  project: Project,
   clip: MediaClip,
   t: number,
   assets: Record<string, Asset>,
@@ -66,14 +80,35 @@ function drawMedia(
   if (!visual) return;
   const isOverlay = clip.track === 'overlay';
   const focusX = focusAt(clip.reframe, clipSourceTime(clip, t, assets));
+  const mode = isOverlay ? 'overlay' : focusX !== undefined ? 'cover' : 'contain';
+  const state = animatedState(clip, t);
+
+  // Bulanık tuval: ana videonun dolduran, bulanık ve hafif karartılmış kopyası arkaya çizilir.
+  if (!isOverlay && project.backgroundBlur && mode === 'contain') {
+    compositor.drawLayer(
+      {
+        ...visual,
+        filter: { ...clip.filter, brightness: clip.filter.brightness - 0.15, vignette: 0, sharpen: 0 },
+        transform: DEFAULT_TRANSFORM,
+        mode: 'cover',
+        blur: Math.max(visual.width, visual.height) / 120,
+      },
+      target,
+    );
+  }
+
   compositor.drawLayer(
     {
       ...visual,
       filter: clip.filter,
-      transform: clip.transform,
-      mode: isOverlay ? 'overlay' : focusX !== undefined ? 'cover' : 'contain',
+      transform: state.transform,
+      opacity: state.opacity,
+      mode,
       focusX,
-      mask: clip.removeBackground ? inputs.mask(clip) : null,
+      matte: clip.removeBackground ? inputs.mask(clip) : null,
+      shape: clip.mask,
+      chroma: clip.chroma,
+      lut: lutFor(project, clip.filter.lutId),
     },
     target,
   );
@@ -90,13 +125,13 @@ export function composeFrame(
   compositor.begin(project.background);
   if (visible.transition) {
     const { from, to, progress } = visible.transition;
-    drawMedia(compositor, from, t, assets, inputs, 'from');
-    drawMedia(compositor, to, t, assets, inputs, 'to');
+    drawMedia(compositor, project, from, t, assets, inputs, 'from');
+    drawMedia(compositor, project, to, t, assets, inputs, 'to');
     compositor.drawTransition(to.transition!.type, progress);
   } else if (visible.main) {
-    drawMedia(compositor, visible.main, t, assets, inputs, 'screen');
+    drawMedia(compositor, project, visible.main, t, assets, inputs, 'screen');
   }
-  for (const overlay of visible.overlays) drawMedia(compositor, overlay, t, assets, inputs, 'screen');
+  for (const overlay of visible.overlays) drawMedia(compositor, project, overlay, t, assets, inputs, 'screen');
 }
 
 export function drawTexts(

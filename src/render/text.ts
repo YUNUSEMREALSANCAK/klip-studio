@@ -1,4 +1,5 @@
 import type { TextClip } from '../core/types';
+import { ensureFont, familyOf } from './fonts';
 
 const IN_DURATION = 0.3;
 
@@ -38,7 +39,10 @@ function animate(clip: TextClip, t: number): Animated {
 const easeOut = (x: number) => 1 - (1 - x) ** 3;
 
 export function fontFor(clip: TextClip, size: number) {
-  return clip.preset === 'title' ? `${size * 1.3}px "Bebas Neue", Inter, sans-serif` : `800 ${size}px Inter, sans-serif`;
+  const family = familyOf(clip);
+  // Bebas Neue tek ağırlıklı ve dar bir yazı tipi; aynı görünür boy için büyütülür.
+  if (family === 'Bebas Neue') return `${size * 1.3}px "Bebas Neue", Inter, sans-serif`;
+  return `${family === 'Inter' ? 800 : 700} ${size}px "${family}", Inter, sans-serif`;
 }
 
 export function wrapWords(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, words: string[], maxWidth: number) {
@@ -56,6 +60,7 @@ type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
 // Bir metin klibini tuvale çizer. Karaoke stilinde o an söylenen kelimeyi vurgular.
 export function drawText(ctx: Ctx, clip: TextClip, t: number, W: number, H: number) {
+  void ensureFont(familyOf(clip)); // yüklenene kadar yedek yazı tipiyle çizilir
   const anim = animate(clip, t);
   const size = clip.fontSize * H;
   ctx.save();

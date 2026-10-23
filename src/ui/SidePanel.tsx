@@ -1,11 +1,13 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
 import type { MediaClip, TextAnimation, TextStylePreset } from '../core/types';
 import { importFile, thumbnailOf } from '../media/importMedia';
 import { FILTER_PRESETS } from '../render/filterPresets';
+import { ensureFont, FONTS } from '../render/fonts';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { AiPanel } from './AiPanel';
+import { importLut } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 
@@ -115,28 +117,48 @@ function MediaTab() {
   );
 }
 
-const TEXT_PRESETS: { label: string; text: string; preset: TextStylePreset; animation: TextAnimation; y: number; fontSize: number }[] = [
+interface TextTemplate {
+  label: string;
+  text: string;
+  preset: TextStylePreset;
+  animation: TextAnimation;
+  y: number;
+  fontSize: number;
+  font?: string;
+  color?: string;
+  highlight?: string;
+}
+
+const TEXT_PRESETS: TextTemplate[] = [
   { label: 'Başlık', text: 'BAŞLIK', preset: 'title', animation: 'pop', y: 0.45, fontSize: 0.12 },
   { label: 'Alt yazı', text: 'Alt yazı metni', preset: 'classic', animation: 'fade', y: 0.82, fontSize: 0.055 },
   { label: 'Kutulu', text: 'Kutulu metin', preset: 'box', animation: 'slideup', y: 0.8, fontSize: 0.05 },
-  { label: 'Neon', text: 'NEON', preset: 'neon', animation: 'pop', y: 0.5, fontSize: 0.09 },
-  { label: 'Daktilo', text: 'Harf harf yazılan metin', preset: 'classic', animation: 'typewriter', y: 0.5, fontSize: 0.06 },
+  { label: 'Neon', text: 'NEON', preset: 'neon', animation: 'pop', y: 0.5, fontSize: 0.09, color: '#22d3ee' },
+  { label: 'Daktilo', text: 'Harf harf yazılan metin', preset: 'classic', animation: 'typewriter', y: 0.5, fontSize: 0.06, font: 'Roboto Mono' },
   { label: 'Karaoke', text: 'Kelime kelime vurgulu', preset: 'karaoke', animation: 'none', y: 0.8, fontSize: 0.06 },
+  { label: 'Vlog', text: 'günlük vlog', preset: 'classic', animation: 'pop', y: 0.3, fontSize: 0.09, font: 'Pacifico', color: '#fde68a' },
+  { label: 'Haber bandı', text: 'SON DAKİKA', preset: 'box', animation: 'slideup', y: 0.88, fontSize: 0.05, font: 'Oswald' },
+  { label: 'Sinema', text: 'Bir zamanlar…', preset: 'classic', animation: 'fade', y: 0.5, fontSize: 0.07, font: 'Playfair Display' },
+  { label: 'Güçlü', text: 'ŞİMDİ İZLE', preset: 'title', animation: 'pop', y: 0.5, fontSize: 0.1, font: 'Anton', color: '#facc15' },
+  { label: 'Retro', text: 'Retro', preset: 'neon', animation: 'fade', y: 0.45, fontSize: 0.11, font: 'Lobster', color: '#f472b6' },
+  { label: 'Modern', text: 'Modern başlık', preset: 'classic', animation: 'slideup', y: 0.5, fontSize: 0.07, font: 'Montserrat' },
 ];
 
 function TextTab() {
+  // Şablon kutucukları kendi yazı tipiyle görünsün diye fontları önceden yükle.
+  useEffect(() => FONTS.forEach((f) => void ensureFont(f)), []);
   const add = (p: (typeof TEXT_PRESETS)[number]) => {
     const s = useEditor.getState();
     s.addText(p.text);
     const id = useEditor.getState().selectedId!;
-    s.updateClip(id, { preset: p.preset, animation: p.animation, y: p.y, fontSize: p.fontSize, color: p.preset === 'neon' ? '#22d3ee' : '#ffffff' }, false);
+    s.updateClip(id, { preset: p.preset, animation: p.animation, y: p.y, fontSize: p.fontSize, font: p.font, color: p.color ?? '#ffffff', highlight: p.highlight ?? '#ffd400' }, false);
   };
   return (
     <>
       <h3>Metin ekle</h3>
       <div className="tile-grid">
         {TEXT_PRESETS.map((p) => (
-          <button key={p.label} className="tile" onClick={() => add(p)}>
+          <button key={p.label} className="tile" onClick={() => add(p)} style={{ fontFamily: p.font ? `"${p.font}", Inter` : undefined }}>
             <b>{p.label}</b>
           </button>
         ))}
@@ -213,7 +235,9 @@ function TransitionTab() {
 
 function FilterTab() {
   const selected = useEditor(selectedClip);
+  const luts = useEditor((s) => s.project.luts);
   const media = selected?.type === 'media' ? selected : null;
+  const lutInput = useRef<HTMLInputElement>(null);
   return (
     <>
       <h3>Filtreler</h3>
@@ -231,6 +255,24 @@ function FilterTab() {
           </button>
         ))}
       </div>
+      <div className="section-title" style={{ marginTop: 18 }}>LUT (renk tabloları)</div>
+      <p className="hint">Adobe, DaVinci Resolve vb. araçlardan .cube dosyası yükleyin.</p>
+      <div className="tile-grid" style={{ marginTop: 8 }}>
+        {Object.values(luts).map((lut) => (
+          <button
+            key={lut.id}
+            className={`tile ${media?.filter.lutId === lut.id ? 'active' : ''}`}
+            disabled={!media}
+            onClick={() => media && useEditor.getState().updateClip(media.id, { filter: { ...media.filter, lutId: lut.id } } as Partial<MediaClip>)}
+          >
+            {lut.name}
+          </button>
+        ))}
+        <button className="tile" onClick={() => lutInput.current?.click()}>
+          + .cube yükle
+        </button>
+      </div>
+      <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], media ?? undefined)} />
     </>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { cutout, imageDataToBlob, inpaint, SamClient, type BinaryMask, type SamPoint } from '../ai/objectTools';
 import { useEditor } from '../core/store';
 import { createMediaClip } from '../core/timeline';
-import type { Asset, MediaClip } from '../core/types';
+import { DEFAULT_TRANSFORM, type Asset, type MediaClip } from '../core/types';
 import { createAsset } from '../media/importMedia';
 import { clipSourceTime } from '../render/composeFrame';
 import { Icon } from './icons';
@@ -169,7 +169,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
       s.updateClip(clip.id, { assetId: created.id } as Partial<MediaClip>);
     } else {
       const overlay = createMediaClip(created, 'overlay', Math.max(s.time, clip.start));
-      const fullFrame = replace ? { transform: { x: 0.5, y: 0.5, scale: 1 } } : {};
+      const fullFrame = replace ? { transform: { ...DEFAULT_TRANSFORM } } : {};
       s.mutate((clips) => [...clips, { ...overlay, duration: Math.min(4, clip.duration), ...fullFrame }]);
     }
     close();

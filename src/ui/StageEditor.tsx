@@ -2,6 +2,7 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { useEditor } from '../core/store';
 import { isActiveAt } from '../core/timeline';
 import { ASPECT_SIZES, type Asset, type Clip, type MediaClip, type TextClip } from '../core/types';
+import { animatedState, setValue, valueAt } from '../core/animation';
 import { clipSourceTime, focusAt } from '../render/composeFrame';
 import { fitRect, overlayRect, textRect, type Rect } from '../render/layout';
 
@@ -29,9 +30,10 @@ function rectFor(clip: Editable, assets: Record<string, Asset>, W: number, H: nu
   if (clip.type === 'text') return textRect(clip, W, H);
   const asset = assets[clip.assetId];
   if (!asset?.width || !asset.height) return null;
-  if (clip.track === 'overlay') return overlayRect(clip.transform, asset.width, asset.height, W, H);
+  const { transform } = animatedState(clip, time);
+  if (clip.track === 'overlay') return overlayRect(transform, asset.width, asset.height, W, H);
   const focusX = focusAt(clip.reframe, clipSourceTime(clip, time, assets));
-  return fitRect(clip.transform, asset.width, asset.height, W, H, focusX !== undefined ? 'cover' : 'contain', focusX);
+  return fitRect(transform, asset.width, asset.height, W, H, focusX !== undefined ? 'cover' : 'contain', focusX);
 }
 
 const contains = (r: Rect, x: number, y: number) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
@@ -78,7 +80,10 @@ export function StageEditor({ width, height }: { width: number; height: number }
       const distance = Math.hypot(p.x - state.center.x, p.y - state.center.y);
       const ratio = distance / Math.max(state.startDistance, 1);
       if (clip.type === 'text') s.updateClip(clip.id, { fontSize: clamp(clip.fontSize * ratio, 0.02, 0.25) }, false);
-      else s.updateClip(clip.id, { transform: { ...clip.transform, scale: clamp(clip.transform.scale * ratio, 0.05, 2) } } as Partial<MediaClip>, false);
+      else {
+        const scale = clamp(valueAt(clip, 'scale', s.time) * ratio, 0.05, 2);
+        s.updateClip(clip.id, setValue(clip, 'scale', scale, s.time) as Partial<MediaClip>, false);
+      }
       return;
     }
 
@@ -91,9 +96,11 @@ export function StageEditor({ width, height }: { width: number; height: number }
       const y = snap(clamp(clip.y + dy, 0.05, 0.95), (on) => (horizontal = on));
       s.updateClip(clip.id, { y }, false);
     } else {
-      const x = snap(clamp(clip.transform.x + dx, 0, 1), (on) => (vertical = on));
-      const y = snap(clamp(clip.transform.y + dy, 0, 1), (on) => (horizontal = on));
-      s.updateClip(clip.id, { transform: { ...clip.transform, x, y } } as Partial<MediaClip>, false);
+      // Anahtar kare varsa oynatma çizgisindeki kare güncellenir, yoksa temel konum.
+      const x = snap(clamp(valueAt(clip, 'x', s.time) + dx, 0, 1), (on) => (vertical = on));
+      const y = snap(clamp(valueAt(clip, 'y', s.time) + dy, 0, 1), (on) => (horizontal = on));
+      const withX = { ...clip, ...setValue(clip, 'x', x, s.time) } as MediaClip;
+      s.updateClip(clip.id, { ...setValue(clip, 'x', x, s.time), ...setValue(withX, 'y', y, s.time) } as Partial<MediaClip>, false);
     }
     setGuides({ vertical, horizontal });
   };
@@ -131,11 +138,13 @@ export function StageEditor({ width, height }: { width: number; height: number }
     if (hit) startDrag(event, hit, 'move');
   };
 
+  const rotation = selected?.type === 'media' ? animatedState(selected, time).transform.rotation : 0;
   const box = selectedRect && {
     left: selectedRect.x * scale,
     top: selectedRect.y * scale,
     width: selectedRect.w * scale,
     height: selectedRect.h * scale,
+    transform: rotation ? `rotate(${rotation}deg)` : undefined,
   };
 
   return (

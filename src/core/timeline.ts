@@ -1,8 +1,15 @@
-import { DEFAULT_FILTER, type Asset, type Clip, type MediaClip, type TextClip, type TrackId, type Word } from './types';
+import { DEFAULT_FILTER, DEFAULT_TRANSFORM, type Asset, type Clip, type MediaClip, type TextClip, type TrackId, type Word } from './types';
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export const clipEnd = (clip: Clip) => clip.start + clip.duration;
+
+// Klibin kaynakta kapladığı süre (hız 2× ise zaman çizelgesindeki sürenin iki katı).
+export const sourceSpan = (clip: MediaClip) => clip.duration * clip.speed;
+
+// Bölünen klibin sağ parçası için anahtar kareleri sola kaydırır.
+const shiftKeyframes = (clip: MediaClip, offset: number) =>
+  clip.keyframes.length ? clip.keyframes.map((k) => ({ ...k, time: k.time - offset })) : clip.keyframes;
 
 export const projectDuration = (clips: Clip[]) => clips.reduce((max, c) => Math.max(max, clipEnd(c)), 0);
 
@@ -60,7 +67,13 @@ export function createMediaClip(asset: Asset, track: MediaClip['track'], start: 
     muted: false,
     filter: { ...DEFAULT_FILTER },
     removeBackground: false,
-    transform: { x: 0.5, y: 0.5, scale: track === 'overlay' ? 0.4 : 1 },
+    transform: { ...DEFAULT_TRANSFORM, scale: track === 'overlay' ? 0.4 : 1 },
+    speed: 1,
+    opacity: 1,
+    keyframes: [],
+    fadeIn: 0,
+    fadeOut: 0,
+    duck: false,
   };
 }
 
@@ -88,8 +101,12 @@ export function splitClip(clip: Clip, t: number): [Clip, Clip] | null {
   const left = { ...clip, duration: offset } as Clip;
   const right = { ...clip, id: uid(), start: t, duration: clip.duration - offset } as Clip;
   if (right.type === 'media') {
-    right.in = (clip as MediaClip).in + offset;
+    const media = clip as MediaClip;
+    right.in = media.in + offset * media.speed;
     right.transition = undefined;
+    right.keyframes = shiftKeyframes(media, offset);
+    right.fadeIn = 0;
+    (left as MediaClip).fadeOut = 0;
   }
   if (clip.type === 'text' && clip.words) {
     (left as TextClip).words = clip.words.filter((w) => w.start < t);
@@ -138,7 +155,9 @@ export function rippleDelete(clips: Clip[], start: number, end: number): Clip[] 
       if (e > end) {
         let right = { ...clip, id: s < start ? uid() : clip.id, start: end, duration: e - end } as Clip;
         if (right.type === 'media') {
-          right.in = (clip as MediaClip).in + (end - s);
+          const media = clip as MediaClip;
+          right.in = media.in + (end - s) * media.speed;
+          right.keyframes = shiftKeyframes(media, end - s);
           if (s < start) right.transition = undefined;
         }
         if (right.type === 'text' && right.words) {
@@ -193,7 +212,7 @@ export function transitionAt(clips: Clip[], t: number): TransitionState | null {
 
 // Klibin kaynak zamanı; geçiş taşmalarında kaynak sınırlarına sıkıştırılır.
 export function sourceTime(clip: MediaClip, t: number, assetDuration: number) {
-  const time = clip.in + (t - clip.start);
+  const time = clip.in + (t - clip.start) * clip.speed;
   return Math.min(Math.max(time, 0), Math.max(assetDuration - 0.04, 0));
 }
 

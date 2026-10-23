@@ -1,5 +1,7 @@
 import { BackgroundRemover } from '../ai/vision';
+import { fadeGain, valueAt } from '../core/animation';
 import { isActiveAt } from '../core/timeline';
+import { envelopeAt, previewDuckEnvelope } from '../media/ducking';
 import type { Asset, MediaClip, Project } from '../core/types';
 import { Compositor, type Mask } from './compositor';
 import { clipSourceTime, clipsToDraw, composeFrame, drawTexts, visibleClips, type VisualSource } from './composeFrame';
@@ -65,6 +67,7 @@ export class PreviewEngine {
 
   private syncMedia(project: Project, assets: Record<string, Asset>, t: number, playing: boolean, drawn: MediaClip[]) {
     const active = this.mediaClipsAt(project, assets, t, drawn).sort((a, b) => a.start - b.start);
+    const duck = previewDuckEnvelope(project.clips, assets);
     const used = new Set<HTMLVideoElement>();
     this.assigned.clear();
 
@@ -79,7 +82,8 @@ export class PreviewEngine {
         const element = pool[i];
         this.assigned.set(clip.id, element);
         used.add(element);
-        syncElement(element, clip, clipSourceTime(clip, t, assets), playing);
+        const volume = valueAt(clip, 'volume', t) * fadeGain(clip, t) * (clip.duck ? envelopeAt(duck, t) : 1);
+        syncElement(element, clip, clipSourceTime(clip, t, assets), playing, volume);
       });
     }
 
@@ -146,15 +150,17 @@ function disposeVideo(video: HTMLVideoElement) {
   video.load();
 }
 
-function syncElement(element: HTMLVideoElement, clip: MediaClip, expected: number, playing: boolean) {
+function syncElement(element: HTMLVideoElement, clip: MediaClip, expected: number, playing: boolean, volume: number) {
   element.muted = clip.muted;
-  element.volume = Math.min(Math.max(clip.volume, 0), 1);
+  element.volume = Math.min(Math.max(volume, 0), 1);
+  element.preservesPitch = true;
+  if (element.playbackRate !== clip.speed) element.playbackRate = clip.speed;
   const drift = Math.abs(element.currentTime - expected);
   if (playing) {
     if (element.paused) {
       element.currentTime = expected;
       void element.play().catch(() => {});
-    } else if (drift > DRIFT_PLAYING) {
+    } else if (drift > DRIFT_PLAYING * clip.speed) {
       element.currentTime = expected;
     }
     return;

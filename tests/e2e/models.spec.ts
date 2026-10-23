@@ -93,3 +93,24 @@ test.describe('yerel yapay zeka modelleri @models', () => {
     await expect(page.locator('.inspector h3')).toContainText('nesne silindi');
   });
 });
+
+test.describe('video nesne ayırma @models', () => {
+  test.setTimeout(600_000);
+
+  test('nesne videoda ayrılır ve klibe yeşil perde uygulanır (SlimSAM)', async ({ page }) => {
+    await openEditor(page);
+    await importMedia(page, 'gradient.webm');
+    await addToMain(page, 0);
+    await seek(page, 1);
+    await page.locator('.inspector button', { hasText: 'Nesne seç ve sil' }).click();
+    await expect(page.locator('.modal .progress')).toHaveCount(0, { timeout: 300_000 });
+    const box = (await page.locator('.object-canvas canvas').boundingBox())!;
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.5);
+    const isolate = page.locator('.modal button', { hasText: 'Nesneyi videoda ayır' });
+    await expect(isolate).toBeEnabled({ timeout: 60_000 });
+    await isolate.click();
+    await expect(page.locator('.modal')).toHaveCount(0, { timeout: 500_000 });
+    await expect(page.locator('.inspector h3')).toContainText('nesne ayrıldı');
+    await expect(page.locator('.inspector details', { hasText: 'Yeşil perde' }).locator('.switch.on')).toHaveCount(1);
+  });
+});

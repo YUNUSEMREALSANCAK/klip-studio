@@ -56,10 +56,10 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 - [x] **Videoda nesne silme** (L): SlimSAM ile kare kare takip + çok ölçekli doldurma (deneysel)
 - [x] **Daha iyi doldurma** (M): LaMa (big-lama ONNX) ile "Yüksek" doldurma kalitesi; görsel ve videoda
 - [x] **Genel nesne ayırma** (M): BiRefNet (yeterli GPU'da) / MODNet ile görsellerde tek tıkla ön plan seçimi
-- [ ] **Videoda genel nesne matting** (M): Robust Video Matting ile insan dışı nesneler, titremesiz
+- [x] **Videoda genel nesne ayırma** (M): SlimSAM takibiyle her türlü nesne; arka plan anahtar renge boyanıp yeşil perde uygulanır (deneysel)
 - [x] **Altyazı çevirisi** (M): opus-mt, diğer diller için NLLB; iki dilli altyazı
 - [x] **Seslendirme (TTS)** (M): MMS-TTS ile 11 dil
-- [ ] **Türkçe seslendirme** (M): tarayıcıda çalışan Türkçe bir TTS modeli bulunduğunda
+- [ ] **Türkçe seslendirme** (M): `facebook/mms-tts-tur` ONNX'e dönüştürülüp barındırılırsa eklenebilir (Piper sesleri GPL espeak-ng gerektiriyor)
 - [x] **Ağır AI işleri worker'da** (M): dışa aktarmada kişi ayırma ayrı worker'da (kurulamazsa ana iş parçacığına düşer)
 - [x] **Akıcı yavaş çekim** (M): kare harmanlama (dışa aktarmada)
 - [ ] **Yapay zeka ile ara kare** (L): RIFE ile optik akış tabanlı yavaş çekim
@@ -82,7 +82,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 ## Bilinen sorunlar
 
 - Videoda nesne silme deneysel: hızlı hareket eden nesnelerde takip kayabilir, büyük nesnelerde doldurma bulanık.
-- Videoda gerçek zamanlı arka plan kaldırma yalnızca insanlarda çalışıyor.
+- Videoda gerçek zamanlı arka plan kaldırma yalnızca insanlarda çalışıyor; diğer nesneler için "Nesneyi videoda ayır" (önceden işlenir).
 - BiRefNet zayıf GPU'larda çalışmaz; o zaman MODNet devreye girer (en iyi sonucu insanlarda verir).
 - Türkçe seslendirme modeli yok.
 - NLLB-200 ve MMS-TTS modelleri ticari olmayan kullanım lisanslı.

@@ -69,13 +69,20 @@ async function frameImage(sink: CanvasSink, time: number, width: number, height:
 }
 
 // Seçilen nesneyi klibin tamamında takip edip siler; sonuç yeni bir video varlığıdır.
-export async function removeObjectFromVideo(
+// Ayırma modunda arka plan bu renge boyanır; klibe aynı renkte yeşil perde uygulanır.
+export const KEY_COLOR = '#00ff00';
+
+// remove: nesneyi her karede siler · isolate: nesne dışını yeşile boyar (her türlü nesne için video matting).
+export type VideoObjectMode = 'remove' | 'isolate';
+
+export async function processVideoObject(
   clip: MediaClip,
   asset: Asset,
   sam: SamClient,
   referenceMask: BinaryMask,
   referenceTime: number, // kaynak saniyesi
   onProgress: (message: string, progress: number) => void,
+  mode: VideoObjectMode = 'remove',
   quality: FillQuality = 'fast',
 ): Promise<Asset> {
   const input = new Input({ source: new BlobSource(asset.file), formats: ALL_FORMATS });
@@ -131,10 +138,11 @@ export async function removeObjectFromVideo(
     ctx.drawImage(frame.canvas, 0, 0, width, height);
     const index = Math.min(times.length - 1, Math.max(0, Math.round((frame.timestamp - from) * SAMPLE_FPS)));
     const pixels = ctx.getImageData(0, 0, width, height);
-    const cleaned = quality === 'lama' ? await inpaintLama(pixels, masks[index]) : inpaint(pixels, grown[index]);
-    ctx.putImageData(cleaned, 0, 0);
+    const result =
+      mode === 'isolate' ? isolate(pixels, masks[index]) : quality === 'lama' ? await inpaintLama(pixels, masks[index]) : inpaint(pixels, grown[index]);
+    ctx.putImageData(result, 0, 0);
     await videoSource.add(frame.timestamp - from, frame.duration);
-    onProgress('Kareler temizleniyor', 0.5 + ((frame.timestamp - from) / (to - from)) * 0.5);
+    onProgress(mode === 'isolate' ? 'Kareler ayrılıyor' : 'Kareler temizleniyor', 0.5 + ((frame.timestamp - from) / (to - from)) * 0.5);
   }
 
   if (audioSource) {
@@ -146,5 +154,17 @@ export async function removeObjectFromVideo(
     await audioSource.add(segment);
   }
   await output.finalize();
-  return createAsset(new Blob([target.buffer!], { type: 'video/mp4' }), `${asset.name} (nesne silindi).mp4`);
+  const suffix = mode === 'isolate' ? 'nesne ayrıldı' : 'nesne silindi';
+  return createAsset(new Blob([target.buffer!], { type: 'video/mp4' }), `${asset.name} (${suffix}).mp4`);
+}
+
+// Maskenin dışını anahtar renge boyar.
+function isolate(image: ImageData, mask: BinaryMask): ImageData {
+  for (let i = 0; i < mask.data.length; i++) {
+    if (mask.data[i]) continue;
+    image.data[i * 4] = 0;
+    image.data[i * 4 + 1] = 255;
+    image.data[i * 4 + 2] = 0;
+  }
+  return image;
 }

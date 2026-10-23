@@ -337,6 +337,8 @@ export const EN: Record<string, string> = {
 
   'Hız eğrisi': 'Speed curve',
   'Doldurma kalitesi': 'Fill quality',
+  'Nesneyi videoda ayır, arka planı kaldır (deneysel)': 'Isolate object in video, remove background (experimental)',
+  'Kareler ayrılıyor': 'Isolating frames',
   Hızlı: 'Fast',
   'Yüksek (LaMa)': 'High (LaMa)',
   'İlk kullanımda ~200 MB model indirilir': 'Downloads a ~200 MB model on first use',

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { matteImage } from '../ai/models';
 import { applyAlpha, cutout, imageDataToBlob, inpaint, SamClient, type BinaryMask, type FillQuality, type SamPoint } from '../ai/objectTools';
 import { inpaintLama } from '../ai/lama';
-import { removeObjectFromVideo } from '../ai/videoInpaint';
+import { KEY_COLOR, processVideoObject, type VideoObjectMode } from '../ai/videoInpaint';
 import { useEditor } from '../core/store';
 import { createMediaClip } from '../core/timeline';
 import { DEFAULT_TRANSFORM, type Asset, type MediaClip } from '../core/types';
@@ -222,22 +222,25 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
       await addResult(await imageDataToBlob(applyAlpha(image, mask)), `${asset?.name ?? 'görsel'} (arka plansız).png`, true);
     });
 
-  const removeFromVideo = () =>
+  const processVideo = (mode: VideoObjectMode) =>
     busy(async () => {
       const mask = finalMask();
       if (!clip || !asset || !mask) return;
-      const result = await removeObjectFromVideo(
+      const result = await processVideoObject(
         clip,
         asset,
         samRef.current!,
         mask,
         frameTime.current,
         (message, progress) => setStatus({ message, progress }),
+        mode,
         quality,
       );
       const s = useEditor.getState();
       s.addAsset(result);
-      s.updateClip(clip.id, { assetId: result.id, in: 0, reframe: undefined } as Partial<MediaClip>);
+      // Ayırmada arka plan yeşile boyandı; yeşil perde onu saydam yapar.
+      const chroma = mode === 'isolate' ? { color: KEY_COLOR, similarity: 0.35, smoothness: 0.1 } : clip.chroma;
+      s.updateClip(clip.id, { assetId: result.id, in: 0, reframe: undefined, chroma } as Partial<MediaClip>);
       close();
     });
 
@@ -310,9 +313,14 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               {asset.kind === 'video' && (
-                <button className="btn primary block" disabled={!hasSelection} onClick={() => void removeFromVideo()}>
-                  {tr('Videonun tamamında sil (deneysel)')}
-                </button>
+                <>
+                  <button className="btn primary block" disabled={!hasSelection} onClick={() => void processVideo('remove')}>
+                    {tr('Videonun tamamında sil (deneysel)')}
+                  </button>
+                  <button className="btn block" disabled={!hasSelection} onClick={() => void processVideo('isolate')}>
+                    {tr('Nesneyi videoda ayır, arka planı kaldır (deneysel)')}
+                  </button>
+                </>
               )}
               <button className={`btn block ${asset.kind === 'image' ? 'primary' : ''}`} disabled={!hasSelection} onClick={() => void removeObject()}>
                 {asset.kind === 'image' ? tr('Nesneyi sil (görseli temizle)') : tr('Yalnız bu kareyi temizle')}

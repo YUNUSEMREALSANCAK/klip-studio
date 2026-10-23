@@ -75,7 +75,7 @@ Efor: **S** ≈ 2–6 saat · **M** ≈ 1–3 gün · **L** ≈ 1–2 hafta (tek
 
 - [x] **PWA** (S): yüklenebilir, çevrimdışı açılan uygulama
 - [x] **İngilizce arayüz ve README** (M): TR/EN arayüz, `README.en.md`
-- [ ] **Hata ve görev mesajlarının çevirisi** (S): yapay zeka ve içe aktarma hata mesajları şu an yalnız Türkçe
+- [x] **Hata ve görev mesajlarının çevirisi** (S): görev, ilerleme ve hata mesajları İngilizce modda çevrilir
 - [x] **Performans bütçeleri** (M): `npm run perf`; önizleme ≥ 30 fps, 1 dk 1080p dışa aktarma < 60 sn
 - [x] **Masaüstü paketi** (M): PWA olarak yüklenebilir; macOS için çift tıklanan başlatıcı yerelde mevcut
 

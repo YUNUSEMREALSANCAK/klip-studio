@@ -1,4 +1,4 @@
-import { tr } from '../i18n';
+import { tr, trMessage } from '../i18n';
 import { useEffect, useRef, useState } from 'react';
 import type { AssistantEvent, Message } from '../agent/assistant';
 
@@ -76,7 +76,7 @@ export function AssistantPanel() {
         )}
         {entries.map((entry, i) => (
           <div key={i} className={`chat-entry ${entry.role} ${entry.kind}`}>
-            {entry.kind === 'tool' ? `⚙ ${entry.text}` : entry.text}
+            {entry.kind === 'tool' ? `⚙ ${entry.text}` : entry.kind === 'error' ? trMessage(entry.text) : entry.text}
           </div>
         ))}
         {busy && <div className="chat-entry assistant tool">{tr('Çalışıyor…')}</div>}

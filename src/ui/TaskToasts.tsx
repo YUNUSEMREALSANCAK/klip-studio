@@ -1,4 +1,4 @@
-import { tr } from '../i18n';
+import { tr, trMessage } from '../i18n';
 import { useEditor } from '../core/store';
 
 export function TaskToasts() {
@@ -9,7 +9,7 @@ export function TaskToasts() {
       {tasks.map((task) => (
         <div key={task.id} className={`task ${task.error ? 'error' : ''}`}>
           <div className="task-title">{tr(task.label)}</div>
-          <div className="task-msg">{task.error ?? task.message ?? tr('Hazırlanıyor…')}</div>
+          <div className="task-msg">{trMessage(task.error ?? task.message ?? 'Hazırlanıyor…')}</div>
           {!task.error && (
             <div className={`progress ${task.progress < 0 ? 'indeterminate' : ''}`}>
               <div style={{ width: `${Math.max(task.progress, 0) * 100}%` }} />

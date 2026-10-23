@@ -1,4 +1,4 @@
-import { tr } from '../i18n';
+import { tr, trMessage } from '../i18n';
 import { ALL_FORMATS, BlobSource, CanvasSink, Input } from 'mediabunny';
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { matteImage } from '../ai/models';
@@ -275,7 +275,7 @@ export function ObjectEditor({ clipId }: { clipId: string }) {
             )}
             {status && (
               <div style={{ margin: '12px 0' }}>
-                <div className="task-msg">{status.message}</div>
+                <div className="task-msg">{trMessage(status.message)}</div>
                 <div className={`progress ${status.progress < 0 ? 'indeterminate' : ''}`}>
                   <div style={{ width: `${Math.max(status.progress, 0) * 100}%` }} />
                 </div>

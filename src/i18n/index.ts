@@ -38,3 +38,13 @@ export const useLang = create<{ lang: Lang; setLang: (lang: Lang) => void }>((se
 export function tr(text: string): string {
   return useLang.getState().lang === 'en' ? (EN[text] ?? text) : text;
 }
+
+// Önekli dinamik mesajları da çevirir: "Hata: …", "İçe aktarılıyor: dosya.mp4".
+export function trMessage(text: string): string {
+  if (useLang.getState().lang !== 'en' || EN[text]) return tr(text);
+  const split = text.indexOf(': ');
+  if (split < 0) return text;
+  const head = text.slice(0, split);
+  const translatedHead = EN[head] ?? EN[`${head}:`]?.replace(/:$/, '') ?? head;
+  return `${translatedHead}: ${trMessage(text.slice(split + 2))}`;
+}

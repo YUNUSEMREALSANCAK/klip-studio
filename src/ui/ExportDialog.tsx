@@ -1,4 +1,4 @@
-import { tr } from '../i18n';
+import { tr, trMessage } from '../i18n';
 import { useRef, useState } from 'react';
 import { useEditor } from '../core/store';
 import { ASPECT_SIZES } from '../core/types';
@@ -87,7 +87,7 @@ export function ExportDialog() {
               </div>
             </div>
           )}
-          {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
+          {error && <p style={{ color: 'var(--danger)' }}>{trMessage(error)}</p>}
           {result && <video src={result} controls style={{ width: '100%', marginTop: 16, borderRadius: 8, background: '#000' }} />}
         </div>
         <footer>

@@ -1,0 +1,28 @@
+name: Hata bildirimi
+description: Bir şey beklendiği gibi çalışmıyor
+labels: [hata]
+body:
+  - type: textarea
+    id: ne-oldu
+    attributes:
+      label: Ne oldu?
+      description: Ne bekliyordunuz, ne oldu?
+    validations:
+      required: true
+  - type: textarea
+    id: adimlar
+    attributes:
+      label: Yeniden üretme adımları
+      placeholder: "1. Video içe aktar\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: tarayici
+    attributes:
+      label: Tarayıcı ve işletim sistemi
+      placeholder: Chrome 141, macOS 15
+  - type: textarea
+    id: konsol
+    attributes:
+      label: Konsol hataları (varsa)
+      render: text

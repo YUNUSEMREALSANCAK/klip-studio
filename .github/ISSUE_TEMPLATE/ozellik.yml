@@ -1,0 +1,18 @@
+name: Özellik önerisi
+description: Yeni bir özellik veya iyileştirme önerin
+labels: [öneri]
+body:
+  - type: textarea
+    id: ihtiyac
+    attributes:
+      label: Hangi sorunu çözüyor?
+    validations:
+      required: true
+  - type: textarea
+    id: oneri
+    attributes:
+      label: Önerilen çözüm
+  - type: input
+    id: ornek
+    attributes:
+      label: Başka bir editörde örneği (CapCut, Premiere vb.)

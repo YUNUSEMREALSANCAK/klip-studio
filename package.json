@@ -1,0 +1,39 @@
+{
+  "name": "klip-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tarayıcıda çalışan, yapay zekalı, açık kaynak video editörü. Tüm AI özellikleri yerelde çalışır.",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YUNUSEMREALSANCAK/klip-studio.git"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-mediapipe.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-mediapipe.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1",
+    "@mediapipe/tasks-vision": "^1.1.1",
+    "@shiguredo/rnnoise-wasm": "^2025.1.5",
+    "mediabunny": "^1.62.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

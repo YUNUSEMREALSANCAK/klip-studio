@@ -27,7 +27,7 @@ The interface is available in **Turkish and English** (switch in the top bar).
 
 - **Editing:** magnetic main track, automatic lanes for overlapping clips, drag & drop, trim, split, undo/redo
 - **Keyframes** for position, size, rotation, opacity and volume
-- **Speed** 0.25×–4× with pitch preserved, freeze frame, reverse
+- **Speed** 0.25×–4× and speed curves with pitch preserved, freeze frame, reverse
 - **Look:** 12 transitions, color controls, 9 filter presets, `.cube` LUT import, shape masks, chroma key, blurred canvas background
 - **Text:** 5 styles, 5 animations, 10 fonts, 12 templates, karaoke captions
 - **Audio:** fade in/out, music ducking under speech
@@ -44,11 +44,14 @@ The interface is available in **Turkish and English** (switch in the top bar).
 | Cut silences and filler words | RMS energy + Whisper |
 | Real-time background removal (video) | MediaPipe Selfie Segmenter |
 | One-click foreground selection (images) | BiRefNet (capable GPU) / MODNet |
-| Select & remove objects — from images or a whole video (experimental) | SlimSAM + tracking + inpainting |
+| Select & remove objects — from images or a whole video (experimental), fast or high-quality fill | SlimSAM + tracking + LaMa |
+| Isolate any object in a video (experimental) | SlimSAM tracking + automatic chroma key |
+| Smooth slow motion with AI in-between frames | RIFE 4.22 lite ² |
 | Noise reduction | RNNoise |
 | Scene detection, smart 9:16 reframing, beat markers, auto color | frame differencing, MediaPipe Face Detector, spectral flux |
 
 ¹ NLLB-200 and MMS-TTS are licensed for non-commercial use (CC-BY-NC 4.0).
+² RIFE code is MIT-licensed; the ONNX conversion used does not state a license.
 
 ## Built for agents
 

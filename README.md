@@ -82,7 +82,7 @@
         <li>Manyetik ana iz, üst üste binen klipler için otomatik şeritler</li>
         <li>Sürükle-bırak, kırpma, bölme (S), geri al/yinele</li>
         <li><b>Anahtar kareler:</b> konum, boyut, döndürme, opaklık, ses düzeyi</li>
-        <li><b>Hız</b> 0.25×–4× (perde korunur), kareyi dondur, ters çevir</li>
+        <li><b>Hız</b> 0.25×–4× ve <b>hız eğrileri</b> (perde korunur), kareyi dondur, ters çevir</li>
         <li>Ses fade in/out, konuşmada müziği kısma (ducking)</li>
         <li>10 yazı tipi, 12 metin şablonu, karaoke altyazı</li>
       </ul>
@@ -102,12 +102,15 @@
 | Akıllı kesim | Sessizlikleri ve "eee, şey, um" gibi dolgu kelimelerini keser | RMS enerji + Whisper kelime zamanları |
 | Arka planı kaldır (video) | Kişiyi gerçek zamanlı ayırır | MediaPipe Selfie Segmenter |
 | Ön planı seç (görsel) | Her türlü nesneyi tek tıkla ayırır | [BiRefNet](https://huggingface.co/onnx-community/BiRefNet_lite-ONNX) (güçlü GPU) / [MODNet](https://huggingface.co/Xenova/modnet) |
-| Nesne seç ve sil | Tıklanan nesneyi görselden veya **videonun tamamından** siler (deneysel) | [SlimSAM](https://huggingface.co/Xenova/slimsam-77-uniform) + takip + çok ölçekli doldurma |
+| Nesne seç ve sil | Tıklanan nesneyi görselden veya **videonun tamamından** siler (deneysel); hızlı veya yüksek kaliteli doldurma | [SlimSAM](https://huggingface.co/Xenova/slimsam-77-uniform) + takip + [LaMa](https://huggingface.co/Carve/LaMa-ONNX) |
+| Nesneyi videoda ayır | Her türlü nesneyi videoda takip edip arka planını kaldırır (deneysel) | SlimSAM takibi + otomatik yeşil perde |
+| Akıcı yavaş çekim | Yavaşlatılmış kliplerde yapay zekayla ara kare üretir | [RIFE 4.22 lite](https://huggingface.co/square-zero-labs/rife-onnx) ² |
 | Gürültü azaltma | Uğultu ve arka plan gürültüsünü temizler | RNNoise (WebAssembly) |
 | Sahne tespiti · Akıllı çerçeveleme · Ritim · Otomatik renk | Videoyu sahnelerden böler, 9:16 için yüzü takip eder, müzikte vuruşları işaretler, rengi dengeler | Kare farkı · MediaPipe Face Detector · spectral flux · görüntü istatistikleri |
 
 Modeller ilk kullanımda indirilir ve tarayıcı önbelleğinde kalır.
 ¹ NLLB-200 ve MMS-TTS modellerinin lisansı ticari olmayan kullanıma izin verir (CC-BY-NC 4.0); ticari projelerde bu iki özelliği kullanmadan önce lisansı kontrol edin.
+² RIFE kodu MIT lisanslıdır; kullanılan ONNX dönüşümünün deposunda lisans belirtilmemiş.
 
 ## Ajanlar için
 
@@ -146,7 +149,7 @@ mcp/        MCP sunucusu (Node)
 
 - **Önizleme = dışa aktarma:** ikisi de `render/composeFrame.ts` ile aynı kareyi kurar.
 - **Tek geometri kaynağı:** önizleme, seçim kutusu ve dışa aktarma `render/layout.ts`'i paylaşır.
-- **Ağır işler worker'da:** Whisper, SAM, çeviri, seslendirme ve ayırma modelleri ayrı Web Worker'larda çalışır.
+- **Ağır işler worker'da:** Whisper, SAM, LaMa, RIFE, çeviri, seslendirme ve dışa aktarmadaki kişi ayırma ayrı Web Worker'larda çalışır.
 
 Ayrıntı: [docs/architecture.md](docs/architecture.md).
 

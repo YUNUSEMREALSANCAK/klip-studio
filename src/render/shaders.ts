@@ -43,6 +43,8 @@ uniform vec2 uKey;
 uniform float uSimilarity;
 uniform float uSmoothness;
 uniform float uEffectAmount;
+uniform int uBlendMode;
+uniform vec4 uCrop;
 uniform float time;
 uniform vec2 resolution;
 
@@ -102,11 +104,14 @@ void main() {
     c = mix(c, texture(uLut, coord).rgb, uLutIntensity);
   }
   if (uGrayscale) c = vec3(dot(c, vec3(0.299, 0.587, 0.114)));
-  float dist = distance(vUv, vec2(0.5));
-  c *= 1.0 - uVignette * smoothstep(0.3, 0.75, dist);
+  vec2 local = (vUv - uCrop.xy) / uCrop.zw;
+  c *= 1.0 - uVignette * smoothstep(0.3, 0.75, distance(local, vec2(0.5)));
   if (uUseMatte) alpha *= smoothstep(0.35, 0.65, texture(uMatte, vUv).r);
-  alpha *= klipShape(vUv);
-  outColor = vec4(clamp(c, 0.0, 1.0), alpha);
+  alpha *= klipShape(local);
+  c = clamp(c, 0.0, 1.0);
+  if (uBlendMode == 1 || uBlendMode == 5) outColor = vec4(mix(vec3(1.0), c, alpha), 1.0);
+  else if (uBlendMode > 1) outColor = vec4(c * alpha, 1.0);
+  else outColor = vec4(c, alpha);
 }`;
 
 export const TRANSITION_TYPES: { type: TransitionType; label: string }[] = [

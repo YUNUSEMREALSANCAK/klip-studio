@@ -4,14 +4,15 @@ import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
 import type { MediaClip, TextAnimation, TextStylePreset } from '../core/types';
 import { importFile, thumbnailOf } from '../media/importMedia';
+import { SOUND_EFFECTS } from '../media/soundEffects';
 import { FILTER_PRESETS } from '../render/filterPresets';
 import { ensureFont, FONTS } from '../render/fonts';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { AiPanel } from './AiPanel';
 import { AssistantPanel } from './AssistantPanel';
-import { applyFilterEffect } from './customActions';
-import { CustomEffects, CustomFonts } from './CustomLibrary';
-import { importLut } from './editActions';
+import { applyFilterEffect, resolveEffect } from './customActions';
+import { CustomEffects, CustomFonts, LibraryEffects } from './CustomLibrary';
+import { addSoundEffect, importLut } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 
@@ -47,6 +48,24 @@ export function SidePanel() {
         {tab === 'assistant' && <AssistantPanel />}
       </div>
     </aside>
+  );
+}
+
+// Synthesized sound effects, added to the audio track at the playhead.
+function SoundEffects() {
+  return (
+    <>
+      <div className="section-title" style={{ marginTop: 18 }}>
+        {tr('Sound effects')}
+      </div>
+      <div className="tile-grid" style={{ marginTop: 8 }}>
+        {SOUND_EFFECTS.map((effect) => (
+          <button key={effect.id} className="tile" title={tr('Adds it at the playhead')} onClick={() => void addSoundEffect(effect.id)}>
+            {tr(effect.label)}
+          </button>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -123,6 +142,7 @@ function MediaTab() {
           </div>
         ))}
       </div>
+      <SoundEffects />
     </>
   );
 }
@@ -238,6 +258,12 @@ function TransitionTab() {
             {tr(t.label)}
           </button>
         ))}
+        <LibraryEffects
+          kind="transition"
+          activeId={current?.effectId}
+          disabled={false}
+          onApply={(id) => applyTransition(cut, 'fade', undefined, resolveEffect(id, 'transition'))}
+        />
       </div>
       {current && (
         <div className="field" style={{ marginTop: 14 }}>
@@ -287,6 +313,12 @@ function FilterTab() {
             {tr(p.name)}
           </button>
         ))}
+      </div>
+      <div className="section-title" style={{ marginTop: 18 }}>
+        {tr('Effects')}
+      </div>
+      <div className="tile-grid" style={{ marginTop: 8 }}>
+        <LibraryEffects kind="filter" activeId={media?.filter.effectId} disabled={!media} onApply={(id) => media && applyFilterEffect(media.id, id)} />
       </div>
       <div className="section-title" style={{ marginTop: 18 }}>
         {tr('LUTs (color tables)')}

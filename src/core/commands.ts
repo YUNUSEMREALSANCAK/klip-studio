@@ -1,9 +1,23 @@
 import { SPEED_CURVES } from './speed';
 import { useEditor } from './store';
 import { clipEnd, createMediaClip, createTextClip, formatTime, projectDuration, rippleDelete, sortedTrack, splitClip } from './timeline';
+import { EFFECT_LIBRARY, libraryId } from '../render/effectLibrary';
 import { FILTER_API, TRANSITION_API } from '../render/effects';
 import { fontFamilies } from '../render/fonts';
-import type { AspectRatio, Clip, CustomEffect, MediaClip, TextClip, TransitionType } from './types';
+import { SOUND_EFFECTS, type SoundEffect } from '../media/soundEffects';
+import { VOICE_PRESETS, type VoicePreset } from '../media/voice';
+import {
+  DEFAULT_CHROMA,
+  DEFAULT_MASK,
+  FULL_CROP,
+  type AspectRatio,
+  type Clip,
+  type CustomEffect,
+  type KeyframeProp,
+  type MediaClip,
+  type TextClip,
+  type TransitionType,
+} from './types';
 
 // Command layer: every edit is a typed JSON command. It is the single entry point for driving
 // the editor from outside the UI (browser API, MCP server, natural-language panel).
@@ -33,6 +47,12 @@ export type Command =
   | { name: 'delete_effect'; effectId: string }
   | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number }
   | { name: 'add_font'; family: string }
+  | { name: 'set_keyframe'; clipId: string; prop: KeyframeProp; time: number; value: number }
+  | { name: 'clear_keyframes'; clipId: string; prop?: KeyframeProp }
+  | { name: 'freeze_frame'; clipId: string; time: number }
+  | { name: 'reverse_clip'; clipId: string }
+  | { name: 'voice_effect'; clipId: string; preset: VoicePreset }
+  | { name: 'add_sound_effect'; effect: SoundEffect; start?: number }
   | { name: 'set_speed'; clipId: string; speed?: number; curve?: string | null }
   | { name: 'set_aspect'; aspect: AspectRatio }
   | { name: 'set_background_blur'; enabled: boolean }
@@ -53,6 +73,11 @@ export interface CommandSpec {
 const TRANSITIONS = ['fade', 'fadeblack', 'slideleft', 'slideright', 'slideup', 'wipeleft', 'wiperight', 'circleopen', 'zoomin', 'pixelize', 'radial', 'blur'];
 
 // Command catalog shown to agents (Claude tools and MCP share these definitions).
+const libraryIds = (kind: 'transition' | 'filter') =>
+  EFFECT_LIBRARY.filter((e) => e.kind === kind)
+    .map((e) => `${libraryId(e)} (${e.name})`)
+    .join(', ');
+
 export const COMMAND_SPECS: CommandSpec[] = [
   { name: 'get_state', description: 'Returns a project summary: assets, clips (id, track, start, duration), total duration, aspect ratio.', parameters: {} },
   {
@@ -83,7 +108,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'update_clip',
     description:
-      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground, slowMotion, transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}. Text: text, preset, animation, color, fontSize, y, font. Both: start, duration.',
+      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground (people), slowMotion ("blend" | "ai"), transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}, crop {x,y,width,height} (0–1 of the source from the top left), blend (overlays: normal|multiply|screen|add|lighten|darken), mask {shape: rect|ellipse|linear, x, y, width, height, feather, invert}, chroma {color "#00ff00", similarity, smoothness} (green screen). Text: text, preset, animation, color, highlight, fontSize, y, font, outlineColor, outlineWidth (0–0.3), shadow, boxColor, letterSpacing. Both: start, duration. Use null to remove crop, mask or chroma.',
     parameters: { clipId: { type: 'string' }, changes: { type: 'object' } },
     required: ['clipId', 'changes'],
   },
@@ -107,7 +132,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
     parameters: {
       toClipId: { type: 'string' },
       type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] },
-      effectId: { type: 'string', description: 'custom transition id' },
+      effectId: { type: 'string', description: `custom transition id, or a built-in one: ${libraryIds('transition')}` },
       duration: { type: 'number' },
     },
     required: ['toClipId'],
@@ -136,9 +161,51 @@ export const COMMAND_SPECS: CommandSpec[] = [
   },
   {
     name: 'set_filter',
-    description: 'Applies a custom filter (effectId from create_effect) to a video or image clip, or removes it with null. amount 0–1 (default 1).',
+    description: `Applies a video effect to a video or image clip, or removes it with null. effectId comes from create_effect or is a built-in animated effect: ${libraryIds('filter')}. amount 0–1 (default 1).`,
     parameters: { clipId: { type: 'string' }, effectId: { type: ['string', 'null'] }, amount: { type: 'number' } },
     required: ['clipId', 'effectId'],
+  },
+  {
+    name: 'set_keyframe',
+    description:
+      'Adds or replaces a keyframe on a media clip; values ease between keyframes. time is in timeline seconds. Props: x, y (0–1), scale (width fraction), rotation (degrees), opacity (0–1), volume (0–2).',
+    parameters: {
+      clipId: { type: 'string' },
+      prop: { type: 'string', enum: ['x', 'y', 'scale', 'rotation', 'opacity', 'volume'] },
+      time: { type: 'number' },
+      value: { type: 'number' },
+    },
+    required: ['clipId', 'prop', 'time', 'value'],
+  },
+  {
+    name: 'clear_keyframes',
+    description: 'Removes the keyframes of one prop, or all of them without prop.',
+    parameters: { clipId: { type: 'string' }, prop: { type: 'string', enum: ['x', 'y', 'scale', 'rotation', 'opacity', 'volume'] } },
+    required: ['clipId'],
+  },
+  {
+    name: 'freeze_frame',
+    description: 'Splits a video clip at time (timeline seconds) and inserts that frame as a 2 s still.',
+    parameters: { clipId: { type: 'string' }, time: { type: 'number' } },
+    required: ['clipId', 'time'],
+  },
+  {
+    name: 'reverse_clip',
+    description: 'Makes a video clip play backwards (renders a reversed copy).',
+    parameters: { clipId: { type: 'string' } },
+    required: ['clipId'],
+  },
+  {
+    name: 'voice_effect',
+    description: `Renders the clip's voice through an effect into a new audio clip and mutes the original. Presets: ${VOICE_PRESETS.map((p) => p.id).join(', ')}.`,
+    parameters: { clipId: { type: 'string' }, preset: { type: 'string', enum: VOICE_PRESETS.map((p) => p.id) } },
+    required: ['clipId', 'preset'],
+  },
+  {
+    name: 'add_sound_effect',
+    description: 'Adds a synthesized sound effect on the audio track at start (default: playhead).',
+    parameters: { effect: { type: 'string', enum: SOUND_EFFECTS.map((s) => s.id) }, start: { type: 'number' } },
+    required: ['effect'],
   },
   {
     name: 'add_font',
@@ -208,23 +275,72 @@ function summarize() {
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
+function taskResult(error: string | null) {
+  if (error) throw new Error(error);
+  return summarize();
+}
+
+function requireMedia(id: string): MediaClip {
+  const clip = requireClip(id);
+  if (clip.type !== 'media') throw new Error(`Not a video, image or audio clip: ${id}`);
+  return clip;
+}
+
 function requireClip(id: string): Clip {
   const clip = editor().project.clips.find((c) => c.id === id);
   if (!clip) throw new Error(`Clip not found: ${id}`);
   return clip;
 }
 
+// Starting values when an agent sets only part of an optional object.
+const FIELD_DEFAULTS: Record<string, object> = { mask: DEFAULT_MASK, chroma: DEFAULT_CHROMA, crop: FULL_CROP };
+
 // Merges allowed fields; nested objects (transform, filter) are partially updated.
 function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Clip> {
   const allowed =
     clip.type === 'text'
-      ? ['start', 'duration', 'text', 'preset', 'animation', 'color', 'highlight', 'fontSize', 'y', 'font']
-      : ['start', 'duration', 'volume', 'muted', 'speed', 'opacity', 'fadeIn', 'fadeOut', 'duck', 'removeBackground', 'transform', 'filter', 'slowMotion'];
+      ? [
+          'start',
+          'duration',
+          'text',
+          'preset',
+          'animation',
+          'color',
+          'highlight',
+          'fontSize',
+          'y',
+          'font',
+          'outlineColor',
+          'outlineWidth',
+          'shadow',
+          'boxColor',
+          'letterSpacing',
+        ]
+      : [
+          'start',
+          'duration',
+          'volume',
+          'muted',
+          'speed',
+          'opacity',
+          'fadeIn',
+          'fadeOut',
+          'duck',
+          'removeBackground',
+          'transform',
+          'filter',
+          'slowMotion',
+          'crop',
+          'blend',
+          'mask',
+          'chroma',
+        ];
   const patch: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(changes)) {
     if (!allowed.includes(key)) throw new Error(`Field cannot be changed: ${key}`);
     const current = (clip as unknown as Record<string, unknown>)[key];
-    patch[key] = value && typeof value === 'object' && current && typeof current === 'object' ? { ...current, ...value } : value;
+    const base = current ?? FIELD_DEFAULTS[key];
+    patch[key] = value === null ? undefined : value && typeof value === 'object' && base && typeof base === 'object' ? { ...base, ...value } : value;
   }
   if (clip.type === 'text' && 'text' in patch) patch.words = undefined;
   return patch as Partial<Clip>;
@@ -282,7 +398,7 @@ export async function execute(command: Command): Promise<unknown> {
       const index = main.findIndex((c) => c.id === clip.id);
       if (index < 1) throw new Error('Transitions go on main-track clips other than the first');
       const duration = Math.min(command.duration ?? clip.transition?.duration ?? 0.8, main[index - 1].duration, clip.duration);
-      if (command.effectId && s.project.effects[command.effectId]?.kind !== 'transition') throw new Error(`Custom transition not found: ${command.effectId}`);
+      if (command.effectId) (await import('../ui/customActions')).resolveEffect(command.effectId, 'transition');
       const type = command.type ?? (command.effectId ? 'fade' : null);
       s.updateClip(clip.id, {
         transition: type ? { type, duration, ...(command.effectId && { effectId: command.effectId }) } : undefined,
@@ -309,6 +425,32 @@ export async function execute(command: Command): Promise<unknown> {
       const { applyFilterEffect } = await import('../ui/customActions');
       applyFilterEffect(command.clipId, command.effectId, command.amount);
       return { ok: true };
+    }
+    case 'set_keyframe': {
+      const clip = requireMedia(command.clipId);
+      const time = Math.min(Math.max(command.time - clip.start, 0), clip.duration);
+      const others = clip.keyframes.filter((k) => !(k.prop === command.prop && Math.abs(k.time - time) < 1 / 60));
+      const keyframes = [...others, { prop: command.prop, time, value: command.value }].sort((a, b) => a.time - b.time);
+      s.updateClip(clip.id, { keyframes });
+      return { ok: true };
+    }
+    case 'clear_keyframes': {
+      const clip = requireMedia(command.clipId);
+      s.updateClip(clip.id, { keyframes: command.prop ? clip.keyframes.filter((k) => k.prop !== command.prop) : [] });
+      return { ok: true };
+    }
+    case 'freeze_frame': {
+      const clip = requireMedia(command.clipId);
+      s.setTime(command.time);
+      return taskResult(await (await import('../ui/editActions')).freezeFrame(clip));
+    }
+    case 'reverse_clip':
+      return taskResult(await (await import('../ui/editActions')).reverse(requireMedia(command.clipId)));
+    case 'voice_effect':
+      return taskResult(await (await import('../ui/editActions')).voiceEffect(requireMedia(command.clipId), command.preset));
+    case 'add_sound_effect': {
+      const { addSoundEffect } = await import('../ui/editActions');
+      return { clipId: await addSoundEffect(command.effect, command.start) };
     }
     case 'add_font': {
       const { addGoogleFont } = await import('../ui/customActions');

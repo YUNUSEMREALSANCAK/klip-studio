@@ -46,7 +46,7 @@ Working from a clone of this repo instead? Use `node /full/path/to/klip-studio/m
 | --- | --- |
 | `klip_state` | Project summary: assets, clips, duration, aspect ratio, playhead |
 | `klip_commands` | Every editor command with its parameter schema |
-| `klip_execute` | Runs a command (split, add_text, set_transition, set_speed, run_ai, undo, …) |
+| `klip_execute` | Runs a command (split, add_text, set_transition, set_filter, set_speed, set_keyframe, freeze_frame, reverse_clip, voice_effect, add_sound_effect, run_ai, undo, …) |
 | `klip_screenshot` | The current preview frame as an image |
 | `klip_import_file` | Adds a local video, audio or image file to the media library |
 | `klip_export` | Renders the timeline and saves an MP4 to a local path |
@@ -68,7 +68,7 @@ When you describe an effect that isn't built in, the AI writes it as a small GLS
 | `add_font` | `{ family }` adds any Google Fonts family by name |
 | `klip_import_file` | With a `.ttf`, `.otf`, `.woff` or `.woff2` path, adds the font file to the project |
 
-The GLSL API is in each command's description (`klip_commands`). Transitions follow the [gl-transitions](https://gl-transitions.com) format, so most of that library works as is. Effects, fonts and their use are saved in the project and `.klip` files, render identically in preview and export, and can also be written or edited by hand in the Transition and Filter tabs.
+Built-in effects work the same way: `set_filter` with `lib_glitch`, `lib_vhs`, `lib_old_film`… and `set_transition` with `lib_t_swirl`, `lib_t_burn`… (full list in `klip_commands`). The GLSL API is in each command's description. Transitions follow the [gl-transitions](https://gl-transitions.com) format, so most of that library works as is. Effects, fonts and their use are saved in the project and `.klip` files, render identically in preview and export, and can also be written or edited by hand in the Transition and Filter tabs.
 
 ## Several apps at once
 

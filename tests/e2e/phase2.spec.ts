@@ -71,7 +71,7 @@ test('a LUT is imported and changes colors', async ({ page }) => {
   await seek(page, 1);
   const before = await pixelAt(page, 0.5, 0.5);
   await page.setInputFiles('.inspector input[accept=".cube"]', fixture('invert.cube'));
-  await expect(section(page, 'Color').locator('select')).toHaveValue(/.+/);
+  await expect(section(page, 'Color').locator('.field', { hasText: 'LUT (color table)' }).locator('select')).toHaveValue(/.+/);
   await expect.poll(() => pixelAt(page, 0.5, 0.5).then((p) => Math.abs(p[1] - before[1]))).toBeGreaterThan(100);
 });
 

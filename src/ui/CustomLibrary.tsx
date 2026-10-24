@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useEditor } from '../core/store';
 import type { CustomEffect } from '../core/types';
 import { tr, trMessage } from '../i18n';
+import { EFFECT_LIBRARY, isLibraryId, libraryId } from '../render/effectLibrary';
 import { FONT_FILE_TYPES } from '../render/fonts';
 import { addFontFile, addGoogleFont, removeFont } from './customActions';
 import { EffectEditor } from './EffectEditor';
@@ -26,7 +27,7 @@ export function CustomEffects({
 }) {
   const effects = useEditor((s) => s.project.effects);
   const [editing, setEditing] = useState<CustomEffect | 'new' | null>(null);
-  const list = Object.values(effects).filter((e) => e.kind === kind);
+  const list = Object.values(effects).filter((e) => e.kind === kind && !isLibraryId(e.id));
   return (
     <>
       <div className="section-title" style={{ marginTop: 18 }}>
@@ -56,6 +57,32 @@ export function CustomEffects({
           onSaved={(id) => editing === 'new' && !disabled && onApply(id)}
         />
       )}
+    </>
+  );
+}
+
+// Built-in animated effects or extra transitions; picking one copies it into the project (see effectLibrary.ts).
+export function LibraryEffects({
+  kind,
+  activeId,
+  disabled,
+  onApply,
+}: {
+  kind: CustomEffect['kind'];
+  activeId?: string;
+  disabled: boolean;
+  onApply: (id: string) => void;
+}) {
+  return (
+    <>
+      {EFFECT_LIBRARY.filter((e) => e.kind === kind).map((effect) => {
+        const id = libraryId(effect);
+        return (
+          <button key={id} className={`tile ${activeId === id ? 'active' : ''}`} disabled={disabled} onClick={() => onApply(id)}>
+            {tr(effect.name)}
+          </button>
+        );
+      })}
     </>
   );
 }

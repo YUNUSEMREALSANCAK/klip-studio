@@ -1,5 +1,5 @@
-import type { TextClip, Transform } from '../core/types';
-import { fontFor, wrapWords } from './text';
+import type { Crop, TextClip, Transform } from '../core/types';
+import { applyTextStyle, wrapWords } from './text';
 
 export interface Rect {
   x: number;
@@ -7,6 +7,10 @@ export interface Rect {
   w: number;
   h: number;
 }
+
+// Size of the visible part of a source after cropping.
+export const croppedSize = (width: number, height: number, crop?: Crop) =>
+  crop ? { width: width * crop.width, height: height * crop.height } : { width, height };
 
 // An overlay's rectangle on the canvas (pixels). Used by both rendering and preview selection.
 export function overlayRect(transform: Transform, srcWidth: number, srcHeight: number, W: number, H: number): Rect {
@@ -27,11 +31,11 @@ export function fitRect(transform: Transform, srcWidth: number, srcHeight: numbe
 
 let measureCtx: CanvasRenderingContext2D | null = null;
 
-// Metin klibinin animasyonsuz hâldeki kutusu (piksel).
+// A text clip's box without animation (pixels).
 export function textRect(clip: TextClip, W: number, H: number): Rect {
   measureCtx ??= document.createElement('canvas').getContext('2d')!;
   const size = clip.fontSize * H;
-  measureCtx.font = fontFor(clip, size);
+  applyTextStyle(measureCtx, clip, size);
   const text = clip.preset === 'title' ? clip.text.toUpperCase() : clip.text;
   const lines = wrapWords(measureCtx, text.split(/\s+/).filter(Boolean), W * 0.86);
   const width = Math.max(...lines.map((l) => measureCtx!.measureText(l.join(' ')).width), size);

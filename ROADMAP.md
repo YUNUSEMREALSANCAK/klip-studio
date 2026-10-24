@@ -10,20 +10,20 @@
 | --- | --- | --- |
 | Core editing flow | ✅ | import → cut/split → keyframes → transitions → text → export |
 | Local AI | 16 features | captions, translation, text to speech, smart cut, background removal, foreground selection, object removal (image + video, LaMa), object isolation in video, frame interpolation (RIFE), noise reduction, scenes, reframing, auto color, beats |
-| Automated tests | ✅ | 24 unit + 22 end-to-end tests on every push in CI; 8 model tests run locally (`--grep @models`) |
+| Automated tests | ✅ | 28 unit + 31 end-to-end tests on every push in CI; 8 model tests run locally (`--grep @models`) |
 | Project saving | ✅ | IndexedDB autosave + `.klip` files |
 | Performance (Apple M5, `npm run perf`) | ✅ | 60 fps preview (budget ≥ 30) · 1 min 1080p export in 9.4 s (budget < 60 s) |
-| Coverage of CapCut's core features | ~70% | weighted estimate from the table below |
+| Coverage of CapCut's core features | ~76% | weighted estimate from the table below |
 
 ### Coverage by area (vs. CapCut, estimated)
 
 | Area | Coverage | Missing |
 | --- | ---: | --- |
 | Timeline | ~80% | group selection, dragging between tracks, nested sequences |
-| Picture editing | ~75% | crop tool, blend modes, stabilization |
-| Text and captions | ~70% | per-word styling, text effects library |
-| Transitions and effects | ~55% | built-in video effects and sticker library (custom GLSL effects cover the rest) |
-| Audio | ~60% | sound effects library, voice changer, Turkish text to speech |
+| Picture editing | ~85% | stabilization, overlay/soft-light blend modes |
+| Text and captions | ~75% | per-word styling, animated text effects library |
+| Transitions and effects | ~70% | sticker library, effects on a separate track (custom GLSL effects cover the rest) |
+| Audio | ~75% | music library, more voice effects, Turkish text to speech |
 | AI | ~75% | highlight detection, real-time general object segmentation, Turkish text to speech |
 | Projects and distribution | ~70% | template sharing, cloud sync (intentionally absent: local-first) |
 
@@ -50,6 +50,10 @@ Effort: **S** ≈ 2–6 hours · **M** ≈ 1–3 days · **L** ≈ 1–2 weeks (
 - [x] **Audio tools** (M): fade in/out, music ducking under speech, waveforms on video clips
 - [x] **Text templates and fonts** (M): 12 templates, 10 Google Fonts families
 - [x] **LUT (.cube) import** (S)
+- [x] **Effects library** (M): 13 animated video effects and 9 extra transitions, built on the custom effect engine
+- [x] **Crop and blend modes** (M): per-clip crop; normal, multiply, screen, add, lighten, darken for overlays
+- [x] **Text styling** (S): outline color and width, drop shadow, box color, letter spacing
+- [x] **Voice changer and sound effects** (M): chipmunk, deep, robot, echo, telephone; whoosh, pop, ding, click, riser, boom, shutter (synthesized)
 - [x] **Custom transitions, filters and fonts** (M): GLSL effects (gl-transitions compatible) with inline compile errors, fonts from files or Google Fonts; all saved in the project
 
 ### Phase 3: AI depth → v0.4

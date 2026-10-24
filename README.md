@@ -69,9 +69,9 @@
       <br>
       <sub>Midpoint of the "Circle open" transition, with target cut and duration.</sub>
       <h3>Transitions, color and effects</h3>
-      12 transitions, added by clicking the ◆ marker on a cut and previewed automatically. Brightness, contrast, saturation, temperature, sharpen, vignette, 9 filter presets and <b>.cube LUT</b> import.
+      21 transitions, added by clicking the ◆ marker on a cut and previewed automatically. 13 animated <b>video effects</b> (glitch, shake, VHS, old film, light leak, kaleidoscope…). Brightness, contrast, saturation, temperature, sharpen, vignette, 9 filter presets and <b>.cube LUT</b> import.
       <br><br>
-      Shape masks (rectangle, ellipse, linear), <b>chroma key</b>, and a <b>blurred canvas</b> background for vertical video.
+      <b>Crop</b>, <b>blend modes</b> for overlays, shape masks (rectangle, ellipse, linear), <b>chroma key</b>, and a <b>blurred canvas</b> background for vertical video.
       <br><br>
       <b>Custom transitions and filters</b> written in GLSL (gl-transitions compatible), by you or by an AI app over MCP, and <b>custom fonts</b> from a file or Google Fonts.
     </td>
@@ -85,8 +85,8 @@
         <li>Drag and drop, trim, split (S), undo/redo</li>
         <li><b>Keyframes:</b> position, size, rotation, opacity, volume</li>
         <li><b>Speed</b> 0.25×–4× and <b>speed curves</b> (pitch preserved), freeze frame, reverse</li>
-        <li>Audio fade in/out, music ducking under speech</li>
-        <li>10 fonts, 12 text templates, karaoke captions</li>
+        <li>Audio fade in/out, music ducking under speech, <b>voice effects</b> (chipmunk, deep, robot, echo, telephone), 7 synthesized <b>sound effects</b></li>
+        <li>10 fonts plus your own, 12 text templates, karaoke captions, outline, shadow and letter spacing</li>
       </ul>
     </td>
   </tr>

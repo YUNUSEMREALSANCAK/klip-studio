@@ -1,23 +1,55 @@
 import { useEditor } from '../core/store';
-import { sourceSpan, splitClip, uid } from '../core/timeline';
+import { createMediaClip, sourceSpan, splitClip, uid } from '../core/timeline';
 import { averageSpeed } from '../core/speed';
 import type { Clip, MediaClip, SpeedCurve } from '../core/types';
 import { captureFrame, reverseClip } from '../media/clipOps';
+import { createAsset } from '../media/importMedia';
+import { SOUND_EFFECTS, synthesizeSoundEffect, type SoundEffect } from '../media/soundEffects';
+import { changeVoice, VOICE_PRESETS, type VoicePreset } from '../media/voice';
 import { parseCube } from '../media/lut';
 import { clipSourceTime } from '../render/composeFrame';
 
 const editor = () => useEditor.getState();
 
-async function withTask(label: string, work: (report: (p: number) => void) => Promise<void>) {
+// Runs a job with a task card. Returns the error message on failure (also shown on the card), otherwise null.
+async function withTask(label: string, work: (report: (p: number) => void) => Promise<void>): Promise<string | null> {
   const s = editor();
   const id = s.startTask(label);
   try {
     await work((progress) => s.updateTask(id, { progress }));
     s.endTask(id);
+    return null;
   } catch (error) {
-    s.updateTask(id, { error: (error as Error).message });
+    const message = (error as Error).message;
+    s.updateTask(id, { error: message });
     setTimeout(() => s.endTask(id), 8000);
+    return message;
   }
+}
+
+// Renders the clip's voice through an effect into a new audio clip and mutes the original, like noise reduction does.
+export function voiceEffect(clip: MediaClip, preset: VoicePreset) {
+  return withTask('Voice effect', async () => {
+    const asset = editor().assets[clip.assetId];
+    if (!asset?.hasAudio) throw new Error('This clip has no audio');
+    const label = VOICE_PRESETS.find((p) => p.id === preset)?.label;
+    if (!label) throw new Error(`Unknown voice effect: ${preset}`);
+    const processed = await createAsset(await changeVoice(clip, asset, preset), `${asset.name} (${label.toLowerCase()} voice).wav`);
+    editor().addAsset(processed);
+    const voiced = { ...createMediaClip(processed, 'audio', clip.start), duration: clip.duration, speed: clip.speed };
+    editor().mutate((clips) => [...clips.map((c) => (c.id === clip.id ? { ...c, muted: true } : c)), voiced]);
+  });
+}
+
+// Adds a synthesized sound effect on the audio track at the given time (default: the playhead).
+export async function addSoundEffect(id: SoundEffect, start = editor().time): Promise<string> {
+  const effect = SOUND_EFFECTS.find((s) => s.id === id);
+  if (!effect) throw new Error(`Unknown sound effect: ${id}`);
+  const asset = await createAsset(await synthesizeSoundEffect(id), `${effect.label}.wav`);
+  editor().addAsset(asset);
+  const clip = createMediaClip(asset, 'audio', start);
+  editor().mutate((clips) => [...clips, clip]);
+  return clip.id;
 }
 
 // Changes speed; the clip's source range stays fixed, duration and keyframes are scaled.

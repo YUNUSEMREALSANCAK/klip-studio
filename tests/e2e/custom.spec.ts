@@ -110,3 +110,26 @@ test('fonts are added from a file or from Google Fonts by name', async ({ page }
   await expect(page.locator('.save-status')).toHaveText('Saved');
   await expect.poll(() => fontLoaded(page, 'bungee')).toBe(true);
 });
+
+test('every built-in effect and transition in the library compiles and renders', async ({ page }) => {
+  const errors = await page.evaluate(async () => {
+    const { EFFECT_LIBRARY } = await import('/src/render/effectLibrary.ts');
+    const { validateEffect } = await import('/src/render/effects.ts');
+    return EFFECT_LIBRARY.map((e: { key: string; kind: 'transition' | 'filter'; code: string }) => [e.kind, e.key, validateEffect(e)]).filter(
+      ([, , error]) => error,
+    );
+  });
+  expect(errors).toEqual([]);
+
+  await importMedia(page, 'gradient.webm');
+  await addToMain(page, 0);
+  await addToMain(page, 0);
+  const { clips } = await page.evaluate(() => (window as unknown as { klip: Klip }).klip.state());
+  expect((await run(page, { name: 'set_filter', clipId: clips[0].id, effectId: 'lib_glitch' })).error).toBeUndefined();
+  expect((await run(page, { name: 'set_transition', toClipId: clips[1].id, effectId: 'lib_t_swirl' })).error).toBeUndefined();
+  const state = await page.evaluate(() => (window as unknown as { klip: Klip }).klip.state());
+  expect(JSON.stringify(state)).toContain('"transition":"lib_t_swirl"');
+  await page.locator('.clip.main').first().click();
+  await page.locator('.side-tab', { hasText: 'Filter' }).click();
+  await expect(page.locator('.tile.active', { hasText: 'Glitch' })).toBeVisible();
+});

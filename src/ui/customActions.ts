@@ -1,6 +1,7 @@
 import { useEditor } from '../core/store';
 import { uid } from '../core/timeline';
 import type { Clip, CustomEffect, Project } from '../core/types';
+import { libraryEffect, libraryId } from '../render/effectLibrary';
 import { validateEffect } from '../render/effects';
 import { checkGoogleFont, FONTS, registerFontFile } from '../render/fonts';
 
@@ -42,10 +43,23 @@ export function deleteEffect(id: string) {
   });
 }
 
+// Returns the project's effect with this id; a built-in library effect is copied into the project on first use.
+export function resolveEffect(id: string, kind: CustomEffect['kind']): string {
+  const existing = editor().project.effects[id];
+  if (existing?.kind === kind) return id;
+  const builtIn = libraryEffect(id);
+  if (!existing && builtIn?.kind === kind) {
+    const effect: CustomEffect = { id: libraryId(builtIn), name: builtIn.name, kind, code: builtIn.code };
+    useEditor.setState((s) => ({ project: { ...s.project, effects: { ...s.project.effects, [effect.id]: effect } } }));
+    return effect.id;
+  }
+  throw new Error(`${kind === 'filter' ? 'Filter' : 'Custom transition'} not found: ${id}`);
+}
+
 export function applyFilterEffect(clipId: string, effectId: string | null, amount?: number) {
   const clip = editor().project.clips.find((c) => c.id === clipId);
   if (!clip || clip.type !== 'media') throw new Error(`Clip not found: ${clipId}`);
-  if (effectId && editor().project.effects[effectId]?.kind !== 'filter') throw new Error(`Filter not found: ${effectId}`);
+  if (effectId) resolveEffect(effectId, 'filter');
   const effectAmount = Math.min(Math.max(amount ?? clip.filter.effectAmount ?? 1, 0), 1);
   editor().updateClip(clip.id, { filter: { ...clip.filter, effectId: effectId ?? undefined, effectAmount } });
 }

@@ -4,7 +4,7 @@ import { decodeAssetAudio, encodeWav, mixTimelineAudio, toMono } from '../media/
 
 // RNNoise: the noise suppression network CapCut also ships (rnnoise_v2.0.model).
 export async function denoiseClip(clip: MediaClip, asset: Asset, onProgress: (p: number) => void): Promise<Blob> {
-  const RATE = 48000; // RNNoise 48 kHz bekler
+  const RATE = 48000; // RNNoise expects 48 kHz
   const buffer = await decodeAssetAudio(asset);
   const full = await toMono(buffer, RATE);
   const samples = full.slice(Math.floor(clip.in * RATE), Math.floor((clip.in + sourceSpan(clip)) * RATE));

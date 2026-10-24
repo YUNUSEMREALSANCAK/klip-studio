@@ -3,24 +3,66 @@ import { useRef } from 'react';
 import { useEditor } from '../core/store';
 import { SPEED_CURVES } from '../core/speed';
 import { formatTime } from '../core/timeline';
-import { DEFAULT_FILTER, DEFAULT_TRANSFORM, type FilterSettings, type MaskSettings, type MediaClip, type TransitionType } from '../core/types';
+import {
+  DEFAULT_CHROMA,
+  DEFAULT_FILTER,
+  DEFAULT_MASK,
+  DEFAULT_TRANSFORM,
+  FULL_CROP,
+  type BlendMode,
+  type Crop,
+  type FilterSettings,
+  type MaskSettings,
+  type MediaClip,
+  type TransitionType,
+} from '../core/types';
+import { VOICE_PRESETS } from '../media/voice';
+import { EFFECT_LIBRARY, isLibraryId, libraryId } from '../render/effectLibrary';
 import { TRANSITION_TYPES } from '../render/shaders';
+import { applyFilterEffect, resolveEffect } from './customActions';
 import { KeySlider, Section, Slider, Toggle } from './controls';
-import { freezeFrame, importLut, reverse, setSpeed, setSpeedCurve } from './editActions';
+import { freezeFrame, importLut, reverse, setSpeed, setSpeedCurve, voiceEffect } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 import { useUi } from './uiStore';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
-const DEFAULT_MASK: MaskSettings = { shape: 'ellipse', x: 0.5, y: 0.5, width: 0.6, height: 0.6, feather: 0.1, invert: false };
 const percent = (v: number) => `${Math.round(v * 100)}%`;
+
+const BLEND_MODES: [BlendMode, string][] = [
+  ['normal', 'Normal'],
+  ['multiply', 'Multiply'],
+  ['screen', 'Screen'],
+  ['add', 'Add'],
+  ['lighten', 'Lighten'],
+  ['darken', 'Darken'],
+];
+
+type CropSides = { left: number; right: number; top: number; bottom: number };
+const CROP_SIDES: [keyof CropSides, string][] = [
+  ['left', 'Left'],
+  ['right', 'Right'],
+  ['top', 'Top'],
+  ['bottom', 'Bottom'],
+];
+const cropSides = (crop: Crop = FULL_CROP): CropSides => ({
+  left: crop.x,
+  right: 1 - crop.x - crop.width,
+  top: crop.y,
+  bottom: 1 - crop.y - crop.height,
+});
+const cropFromSides = ({ left, right, top, bottom }: CropSides): Crop | undefined =>
+  left + right + top + bottom === 0 ? undefined : { x: left, y: top, width: 1 - left - right, height: 1 - top - bottom };
 const seconds = (v: number) => `${v.toFixed(1)} s`;
 
 export function MediaInspector({ clip }: { clip: MediaClip }) {
   const asset = useEditor((s) => s.assets[clip.assetId]);
   const luts = useEditor((s) => s.project.luts);
   const effectMap = useEditor((s) => s.project.effects);
-  const effects = Object.values(effectMap);
+  const effectOptions = (kind: 'transition' | 'filter') => [
+    ...EFFECT_LIBRARY.filter((e) => e.kind === kind).map((e) => ({ id: libraryId(e), name: tr(e.name) })),
+    ...Object.values(effectMap).filter((e) => e.kind === kind && !isLibraryId(e.id)),
+  ];
   useEditor((s) => s.project.clips); // recompute when cuts change
   const lutInput = useRef<HTMLInputElement>(null);
   const cut = clip.track === 'main' ? targetCut() : null;
@@ -126,9 +168,41 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
               </button>
             )}
           </div>
+          {clip.track === 'overlay' && (
+            <div className="field" style={{ marginTop: 10 }}>
+              <label htmlFor="blend-mode">{tr('Blend')}</label>
+              <select id="blend-mode" value={clip.blend ?? 'normal'} onChange={(e) => update({ blend: e.target.value as BlendMode }, true)}>
+                {BLEND_MODES.map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {tr(label)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="hint" style={{ marginTop: 8 }}>
             {tr('Add a keyframe at the playhead with ◆; values ease smoothly between keyframes.')}
           </div>
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Crop')} open={!!clip.crop}>
+          {CROP_SIDES.map(([side, label]) => (
+            <Slider
+              key={side}
+              label={tr(label)}
+              value={cropSides(clip.crop)[side]}
+              min={0}
+              max={0.45}
+              format={percent}
+              onCommit={checkpoint}
+              onChange={(value) => update({ crop: cropFromSides({ ...cropSides(clip.crop), [side]: value }) })}
+            />
+          ))}
+          <button className="btn small" onClick={() => update({ crop: undefined }, true)}>
+            {tr('Reset')}
+          </button>
         </Section>
       )}
 
@@ -157,6 +231,16 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             onChange={(fadeOut) => update({ fadeOut })}
           />
           <Toggle label={tr('Duck music under speech')} on={clip.duck} onChange={(duck) => update({ duck }, true)} />
+          <div className="field-label" style={{ marginTop: 10 }}>
+            {tr('Voice effect')}
+          </div>
+          <div className="chips" style={{ marginTop: 4 }}>
+            {VOICE_PRESETS.map((p) => (
+              <button key={p.id} className="chip" onClick={() => void voiceEffect(clip, p.id)}>
+                {tr(p.label)}
+              </button>
+            ))}
+          </div>
         </Section>
       )}
 
@@ -166,7 +250,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             value={cut.to.transition ? (cut.to.transition.effectId ?? cut.to.transition.type) : ''}
             onChange={(e) => {
               const value = e.target.value;
-              if (effects.some((fx) => fx.id === value)) applyTransition(cut, 'fade', undefined, value);
+              if (effectOptions('transition').some((fx) => fx.id === value)) applyTransition(cut, 'fade', undefined, resolveEffect(value, 'transition'));
               else applyTransition(cut, (value || null) as TransitionType | null);
             }}
             style={{ width: '100%', marginBottom: 10 }}
@@ -177,13 +261,11 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 {tr(t.label)}
               </option>
             ))}
-            {effects
-              .filter((fx) => fx.kind === 'transition')
-              .map((fx) => (
-                <option key={fx.id} value={fx.id}>
-                  {fx.name}
-                </option>
-              ))}
+            {effectOptions('transition').map((fx) => (
+              <option key={fx.id} value={fx.id}>
+                {fx.name}
+              </option>
+            ))}
           </select>
           {cut.to.transition && (
             <Slider
@@ -248,24 +330,20 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             </div>
             <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], clip)} />
           </div>
-          {effects.some((fx) => fx.kind === 'filter') && (
-            <div className="field">
-              <label>{tr('Custom filter')}</label>
-              <select value={clip.filter.effectId ?? ''} onChange={(e) => update({ filter: { ...clip.filter, effectId: e.target.value || undefined } }, true)}>
-                <option value="">{tr('None')}</option>
-                {effects
-                  .filter((fx) => fx.kind === 'filter')
-                  .map((fx) => (
-                    <option key={fx.id} value={fx.id}>
-                      {fx.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
+          <div className="field">
+            <label>{tr('Effect')}</label>
+            <select value={clip.filter.effectId ?? ''} onChange={(e) => applyFilterEffect(clip.id, e.target.value || null)}>
+              <option value="">{tr('None')}</option>
+              {effectOptions('filter').map((fx) => (
+                <option key={fx.id} value={fx.id}>
+                  {fx.name}
+                </option>
+              ))}
+            </select>
+          </div>
           {clip.filter.effectId && (
             <Slider
-              label={tr('Filter amount')}
+              label={tr('Effect amount')}
               value={clip.filter.effectAmount}
               min={0}
               max={1}
@@ -370,11 +448,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
 
       {visual && (
         <Section title={tr('Green screen (chroma key)')} open={!!clip.chroma}>
-          <Toggle
-            label={tr('Enable color key')}
-            on={!!clip.chroma}
-            onChange={(on) => update({ chroma: on ? { color: '#00ff00', similarity: 0.4, smoothness: 0.2 } : undefined }, true)}
-          />
+          <Toggle label={tr('Enable color key')} on={!!clip.chroma} onChange={(on) => update({ chroma: on ? { ...DEFAULT_CHROMA } : undefined }, true)} />
           {clip.chroma && (
             <>
               <div className="toggle">

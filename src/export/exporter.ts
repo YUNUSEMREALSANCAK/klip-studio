@@ -98,7 +98,7 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
   const tracks = new Map<string, Promise<InputVideoTrack | null>>();
   const readers = new Map<string, FrameReader>();
   const images = new Map<string, Promise<ImageBitmap>>();
-  const interpolation: { client?: FrameInterpolator } = {}; // ilk RIFE karesinde kurulur
+  const interpolation: { client?: FrameInterpolator } = {}; // created on the first RIFE frame
   const remover = project.clips.some((c) => c.type === 'media' && c.removeBackground) ? new WorkerBackgroundRemover() : null;
 
   const videoTrack = (asset: Asset) => {

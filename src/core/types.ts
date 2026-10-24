@@ -65,6 +65,16 @@ export interface MaskSettings {
   invert: boolean;
 }
 
+export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add' | 'lighten' | 'darken';
+
+// Visible part of the source, as fractions from the top left.
+export interface Crop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface ChromaSettings {
   color: string;
   similarity: number; // 0..1
@@ -118,6 +128,8 @@ export interface MediaClip {
   keyframes: Keyframe[];
   mask?: MaskSettings;
   chroma?: ChromaSettings;
+  crop?: Crop;
+  blend?: BlendMode; // overlays only
   fadeIn: number; // s
   fadeOut: number; // s
   duck: boolean; // lower the volume while someone speaks
@@ -154,6 +166,11 @@ export interface TextClip {
   fontSize: number; // fraction of canvas height
   font?: string; // font family
   y: number; // 0..1
+  outlineColor?: string;
+  outlineWidth?: number; // fraction of the font size; default 0.14 (0 for the box style)
+  shadow?: boolean;
+  boxColor?: string; // box style background
+  letterSpacing?: number; // fraction of the font size
   words?: Word[];
 }
 
@@ -186,6 +203,12 @@ export const DEFAULT_FILTER: FilterSettings = {
 };
 
 export const DEFAULT_TRANSFORM: Transform = { x: 0.5, y: 0.5, scale: 1, rotation: 0 };
+
+export const DEFAULT_MASK: MaskSettings = { shape: 'ellipse', x: 0.5, y: 0.5, width: 0.6, height: 0.6, feather: 0.1, invert: false };
+
+export const DEFAULT_CHROMA: ChromaSettings = { color: '#00ff00', similarity: 0.4, smoothness: 0.2 };
+
+export const FULL_CROP: Crop = { x: 0, y: 0, width: 1, height: 1 };
 
 export const ASPECT_SIZES: Record<AspectRatio, { width: number; height: number }> = {
   '16:9': { width: 1920, height: 1080 },

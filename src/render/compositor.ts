@@ -1,5 +1,5 @@
-import type { FilterSettings, MaskSettings, Transform, TransitionType } from '../core/types';
-import { fitRect, overlayRect } from './layout';
+import type { BlendMode, Crop, FilterSettings, MaskSettings, Transform, TransitionType } from '../core/types';
+import { croppedSize, fitRect, overlayRect } from './layout';
 import { filterFragment, transitionFragment } from './effects';
 import { layerFragment, QUAD_VERTEX, TRANSITION_FRAGMENT, TRANSITION_INDEX } from './shaders';
 
@@ -30,7 +30,11 @@ export interface Layer {
   blur?: number; // sample spacing (source pixels)
   opacity?: number;
   effect?: { code: string; amount: number; time: number }; // custom filter
+  crop?: Crop;
+  blendMode?: BlendMode;
 }
+
+const BLEND_MODES: BlendMode[] = ['normal', 'multiply', 'screen', 'add', 'lighten', 'darken'];
 
 type Target = 'screen' | 'from' | 'to';
 
@@ -92,7 +96,7 @@ export class Compositor {
     this.bindTarget(target);
     gl.useProgram(program);
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    this.setBlend(layer.blendMode ?? 'normal');
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.sourceTexture);
@@ -145,9 +149,25 @@ export class Compositor {
     gl.uniform1f(u('uEffectAmount'), program === this.layerProgram ? 0 : effect!.amount);
     gl.uniform1f(u('time'), effect?.time ?? 0);
     gl.uniform2f(u('resolution'), layer.width, layer.height);
+    gl.uniform1i(u('uBlendMode'), BLEND_MODES.indexOf(layer.blendMode ?? 'normal'));
+    const crop = layer.crop ?? { x: 0, y: 0, width: 1, height: 1 };
+    // Texture rows are flipped on upload, so v runs from the bottom of the image.
+    const uv: [number, number, number, number] = [crop.x, 1 - crop.y - crop.height, crop.x + crop.width, 1 - crop.y];
+    gl.uniform4f(u('uCrop'), uv[0], uv[1], crop.width, crop.height);
 
-    this.drawQuad(program, this.layerRect(layer), layer.transform.rotation);
+    this.drawQuad(program, this.layerRect(layer), layer.transform.rotation, uv);
+    this.setBlend('normal');
     gl.disable(gl.BLEND);
+  }
+
+  // Multiply and darken pair with a shader output of mix(1, color, alpha); the others with color × alpha.
+  private setBlend(mode: BlendMode) {
+    const { gl } = this;
+    gl.blendEquation(mode === 'lighten' ? gl.MAX : mode === 'darken' ? gl.MIN : gl.FUNC_ADD);
+    if (mode === 'multiply') gl.blendFunc(gl.DST_COLOR, gl.ZERO);
+    else if (mode === 'screen') gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR);
+    else if (mode === 'add') gl.blendFunc(gl.ONE, gl.ONE);
+    else gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   }
 
   // A custom transition (GLSL code) replaces the built-in type; if it doesn't compile, the type is used.
@@ -197,7 +217,8 @@ export class Compositor {
   // The layer's rectangle on the canvas: [x, y, width, height] in pixels from the top left.
   private layerRect(layer: Layer): [number, number, number, number] {
     const { width: W, height: H } = this;
-    const { width: w, height: h, transform } = layer;
+    const { transform } = layer;
+    const { width: w, height: h } = croppedSize(layer.width, layer.height, layer.crop);
     if (layer.mode === 'overlay') {
       const r = overlayRect(transform, w, h, W, H);
       return [r.x, r.y, r.w, r.h];
@@ -207,7 +228,7 @@ export class Compositor {
   }
 
   // Draws the rectangle (pixels from the top left), optionally rotated around its center.
-  private drawQuad(program: WebGLProgram, [x, y, w, h]: [number, number, number, number], rotation = 0) {
+  private drawQuad(program: WebGLProgram, [x, y, w, h]: [number, number, number, number], rotation = 0, [u0, v0, u1, v1] = [0, 0, 1, 1]) {
     const { gl } = this;
     // Without rotation, snap to whole pixels so subpixel shifts don't shimmer at the edges.
     const snap = rotation ? (v: number) => v : Math.round;
@@ -224,7 +245,7 @@ export class Compositor {
       return [(snap(rx) / this.width) * 2 - 1, 1 - (snap(ry) / this.height) * 2, u, v];
     };
     // position (x, y) + uv (u, v); bottom-left uv is (0,0)
-    const data = new Float32Array([...corner(x, y + h, 0, 0), ...corner(x + w, y + h, 1, 0), ...corner(x, y, 0, 1), ...corner(x + w, y, 1, 1)]);
+    const data = new Float32Array([...corner(x, y + h, u0, v0), ...corner(x + w, y + h, u1, v0), ...corner(x, y, u0, v1), ...corner(x + w, y, u1, v1)]);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
     const position = gl.getAttribLocation(program, 'aPosition');

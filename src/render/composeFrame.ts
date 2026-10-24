@@ -96,6 +96,7 @@ function drawMedia(
         filter: { ...clip.filter, brightness: clip.filter.brightness - 0.15, vignette: 0, sharpen: 0 },
         transform: DEFAULT_TRANSFORM,
         mode: 'cover',
+        crop: clip.crop,
         blur: Math.max(visual.width, visual.height) / 120,
       },
       target,
@@ -115,6 +116,8 @@ function drawMedia(
       chroma: clip.chroma,
       lut: lutFor(project, clip.filter.lutId),
       effect: effectFor(project, clip, t),
+      crop: clip.crop,
+      blendMode: isOverlay ? clip.blend : undefined,
     },
     target,
   );
@@ -134,6 +137,8 @@ function drawMedia(
         chroma: clip.chroma,
         lut: lutFor(project, clip.filter.lutId),
         effect: effectFor(project, clip, t),
+        crop: clip.crop,
+        blendMode: isOverlay ? clip.blend : undefined,
       },
       target,
     );

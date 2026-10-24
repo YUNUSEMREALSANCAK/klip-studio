@@ -140,7 +140,40 @@ function TextInspector({ clip }: { clip: TextClip }) {
           onChange={(fontSize) => update({ fontSize })}
         />
         <Slider label={tr('Vertical position')} value={clip.y} min={0.05} max={0.95} onCommit={checkpoint} onChange={(y) => update({ y })} />
+        <Slider
+          label={tr('Letter spacing')}
+          value={clip.letterSpacing ?? 0}
+          min={-0.05}
+          max={0.5}
+          step={0.01}
+          onCommit={checkpoint}
+          onChange={(letterSpacing) => update({ letterSpacing })}
+        />
       </Section>
+      {clip.preset !== 'neon' && (
+        <Section title={tr('Outline & shadow')}>
+          <div className="toggle">
+            <span>{tr('Outline color')}</span>
+            <input type="color" value={clip.outlineColor ?? '#000000'} onFocus={checkpoint} onChange={(e) => update({ outlineColor: e.target.value })} />
+          </div>
+          <Slider
+            label={tr('Outline width')}
+            value={clip.outlineWidth ?? (clip.preset === 'box' ? 0 : 0.14)}
+            min={0}
+            max={0.3}
+            step={0.01}
+            onCommit={checkpoint}
+            onChange={(outlineWidth) => update({ outlineWidth })}
+          />
+          <Toggle label={tr('Drop shadow')} on={!!clip.shadow} onChange={(shadow) => update({ shadow }, true)} />
+          {clip.preset === 'box' && (
+            <div className="toggle">
+              <span>{tr('Box color')}</span>
+              <input type="color" value={clip.boxColor ?? '#000000'} onFocus={checkpoint} onChange={(e) => update({ boxColor: e.target.value })} />
+            </div>
+          )}
+        </Section>
+      )}
       <div style={{ marginTop: 16 }}>
         <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
           <Icon name="trash" size={16} /> {tr('Delete text')}

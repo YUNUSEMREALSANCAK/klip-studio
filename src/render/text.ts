@@ -45,6 +45,12 @@ export function fontFor(clip: TextClip, size: number) {
   return `${family === 'Inter' ? 800 : 700} ${size}px "${family}", Inter, sans-serif`;
 }
 
+// Font and letter spacing for a text clip; shared by drawing and measuring so both wrap the same way.
+export function applyTextStyle(ctx: Ctx, clip: TextClip, size: number) {
+  ctx.font = fontFor(clip, size);
+  ctx.letterSpacing = `${(clip.letterSpacing ?? 0) * size}px`;
+}
+
 export function wrapWords(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, words: string[], maxWidth: number) {
   const lines: string[][] = [[]];
   for (const word of words) {
@@ -64,7 +70,7 @@ export function drawText(ctx: Ctx, clip: TextClip, t: number, W: number, H: numb
   const anim = animate(clip, t);
   const size = clip.fontSize * H;
   ctx.save();
-  ctx.font = fontFor(clip, size);
+  applyTextStyle(ctx, clip, size);
   ctx.textBaseline = 'middle';
   ctx.globalAlpha = anim.alpha;
 
@@ -92,7 +98,8 @@ export function drawText(ctx: Ctx, clip: TextClip, t: number, W: number, H: numb
 
     if (clip.preset === 'box') {
       const pad = size * 0.3;
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = withAlpha(clip.boxColor ?? '#000000', 0.65);
       roundRect(ctx, x - pad, y - lineHeight / 2, width + pad * 2, lineHeight, size * 0.25);
       ctx.fill();
     }
@@ -121,10 +128,17 @@ function drawWord(ctx: Ctx, clip: TextClip, word: string, x: number, y: number, 
     ctx.shadowBlur = 0;
     return;
   }
-  if (clip.preset !== 'box') {
-    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-    ctx.lineWidth = size * 0.14;
+  if (clip.shadow) {
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = size * 0.15;
+    ctx.shadowOffsetY = size * 0.06;
+  }
+  const outline = clip.outlineWidth ?? (clip.preset === 'box' ? 0 : 0.14);
+  if (outline > 0) {
+    ctx.strokeStyle = clip.outlineColor ?? 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = size * outline;
     ctx.strokeText(word, x, y);
+    ctx.shadowColor = 'transparent';
   }
   if (active) {
     ctx.save();
@@ -139,6 +153,11 @@ function drawWord(ctx: Ctx, clip: TextClip, word: string, x: number, y: number, 
   }
   ctx.fillStyle = color;
   ctx.fillText(word, x, y);
+}
+
+function withAlpha(hex: string, alpha: number) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
 }
 
 function roundRect(ctx: Ctx, x: number, y: number, w: number, h: number, r: number) {

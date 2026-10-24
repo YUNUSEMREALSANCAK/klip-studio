@@ -69,9 +69,9 @@
       <br>
       <sub>"Daire aç" geçişinin tam ortası; hedef kesim ve süre ayarı.</sub>
       <h3>Geçişler, renk ve efektler</h3>
-      12 geçiş, kesimdeki ◆ işaretine tıklayarak eklenir ve otomatik önizlenir. Parlaklık, kontrast, doygunluk, sıcaklık, keskinlik, vinyet, 9 filtre ön ayarı ve <b>.cube LUT</b> içe aktarma.
+      21 geçiş, kesimdeki ◆ işaretine tıklayarak eklenir ve otomatik önizlenir. 13 hareketli <b>video efekti</b> (glitch, sarsıntı, VHS, eski film, ışık sızıntısı, kaleydoskop…). Parlaklık, kontrast, doygunluk, sıcaklık, keskinlik, vinyet, 9 filtre ön ayarı ve <b>.cube LUT</b> içe aktarma.
       <br><br>
-      Şekil maskeleri (dikdörtgen, elips, doğrusal), <b>yeşil perde</b> (chroma key) ve dikey videolar için <b>bulanık tuval</b> arka planı.
+      <b>Kırpma</b>, üst katmanlar için <b>karışım modları</b>, şekil maskeleri (dikdörtgen, elips, doğrusal), <b>yeşil perde</b> (chroma key) ve dikey videolar için <b>bulanık tuval</b> arka planı.
       <br><br>
       GLSL ile yazılan <b>özel geçişler ve filtreler</b> (gl-transitions uyumlu; sizin ya da MCP üzerinden bir yapay zekanın yazdığı) ve dosyadan ya da Google Fonts'tan <b>özel yazı tipleri</b>.
     </td>
@@ -85,8 +85,8 @@
         <li>Sürükle-bırak, kırpma, bölme (S), geri al/yinele</li>
         <li><b>Anahtar kareler:</b> konum, boyut, döndürme, opaklık, ses düzeyi</li>
         <li><b>Hız</b> 0.25×–4× ve <b>hız eğrileri</b> (perde korunur), kareyi dondur, ters çevir</li>
-        <li>Ses fade in/out, konuşmada müziği kısma (ducking)</li>
-        <li>10 yazı tipi, 12 metin şablonu, karaoke altyazı</li>
+        <li>Ses fade in/out, konuşmada müziği kısma (ducking), <b>ses değiştirici</b> (sincap, kalın, robot, yankı, telefon), kodla üretilen 7 <b>ses efekti</b></li>
+        <li>10 yazı tipi ve kendi yazı tipleriniz, 12 metin şablonu, karaoke altyazı, kontur, gölge ve harf aralığı</li>
       </ul>
     </td>
   </tr>

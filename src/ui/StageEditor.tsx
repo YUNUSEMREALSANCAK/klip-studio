@@ -4,7 +4,7 @@ import { isActiveAt } from '../core/timeline';
 import { ASPECT_SIZES, type Asset, type Clip, type MediaClip, type TextClip } from '../core/types';
 import { animatedState, setValue, valueAt } from '../core/animation';
 import { clipSourceTime, focusAt } from '../render/composeFrame';
-import { fitRect, overlayRect, textRect, type Rect } from '../render/layout';
+import { croppedSize, fitRect, overlayRect, textRect, type Rect } from '../render/layout';
 
 const SNAP = 0.015; // snap-to-center threshold (fraction of canvas)
 const HANDLES = ['nw', 'ne', 'sw', 'se'] as const;
@@ -31,9 +31,10 @@ function rectFor(clip: Editable, assets: Record<string, Asset>, W: number, H: nu
   const asset = assets[clip.assetId];
   if (!asset?.width || !asset.height) return null;
   const { transform } = animatedState(clip, time);
-  if (clip.track === 'overlay') return overlayRect(transform, asset.width, asset.height, W, H);
+  const { width, height } = croppedSize(asset.width, asset.height, clip.crop);
+  if (clip.track === 'overlay') return overlayRect(transform, width, height, W, H);
   const focusX = focusAt(clip.reframe, clipSourceTime(clip, time, assets));
-  return fitRect(transform, asset.width, asset.height, W, H, focusX !== undefined ? 'cover' : 'contain', focusX);
+  return fitRect(transform, width, height, W, H, focusX !== undefined ? 'cover' : 'contain', focusX);
 }
 
 const contains = (r: Rect, x: number, y: number) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;

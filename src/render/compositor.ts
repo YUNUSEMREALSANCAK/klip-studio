@@ -1,6 +1,7 @@
 import type { FilterSettings, MaskSettings, Transform, TransitionType } from '../core/types';
 import { fitRect, overlayRect } from './layout';
-import { LAYER_FRAGMENT, QUAD_VERTEX, TRANSITION_FRAGMENT, TRANSITION_INDEX } from './shaders';
+import { filterFragment, transitionFragment } from './effects';
+import { layerFragment, QUAD_VERTEX, TRANSITION_FRAGMENT, TRANSITION_INDEX } from './shaders';
 
 export interface Mask {
   data: Uint8Array; // rows top to bottom, single channel
@@ -21,13 +22,14 @@ export interface Layer {
   filter: FilterSettings;
   transform: Transform;
   mode: 'contain' | 'cover' | 'overlay';
-  focusX?: number; // cover modunda yatay odak (0..1)
+  focusX?: number; // horizontal focus in cover mode (0..1)
   matte?: Mask | null; // background removal matte
   shape?: MaskSettings; // shape mask
   chroma?: { color: string; similarity: number; smoothness: number };
   lut?: LutData | null;
   blur?: number; // sample spacing (source pixels)
   opacity?: number;
+  effect?: { code: string; amount: number; time: number }; // custom filter
 }
 
 type Target = 'screen' | 'from' | 'to';
@@ -44,6 +46,7 @@ export class Compositor {
   private maskTexture: WebGLTexture;
   private identityLut: WebGLTexture;
   private lutTextures = new Map<string, WebGLTexture>();
+  private effectPrograms = new Map<string, WebGLProgram | null>();
   private targets: Record<'from' | 'to', { fb: WebGLFramebuffer; texture: WebGLTexture }>;
   private background: [number, number, number] = [0, 0, 0];
 
@@ -55,7 +58,7 @@ export class Compositor {
     this.height = height;
     canvas.width = width;
     canvas.height = height;
-    this.layerProgram = this.createProgram(QUAD_VERTEX, LAYER_FRAGMENT);
+    this.layerProgram = this.createProgram(QUAD_VERTEX, layerFragment());
     this.transitionProgram = this.createProgram(QUAD_VERTEX, TRANSITION_FRAGMENT);
     this.quad = this.gl.createBuffer()!;
     this.sourceTexture = this.createTexture();
@@ -84,8 +87,10 @@ export class Compositor {
 
   drawLayer(layer: Layer, target: Target = 'screen') {
     const { gl } = this;
+    const effect = layer.effect && layer.effect.amount > 0 ? layer.effect : undefined;
+    const program = (effect && this.effectProgram('filter', effect.code)) || this.layerProgram;
     this.bindTarget(target);
-    gl.useProgram(this.layerProgram);
+    gl.useProgram(program);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -107,7 +112,7 @@ export class Compositor {
     gl.bindTexture(gl.TEXTURE_3D, layer.lut ? this.lutTexture(layer.lut) : this.identityLut);
 
     const f = layer.filter;
-    const u = (name: string) => gl.getUniformLocation(this.layerProgram, name);
+    const u = (name: string) => gl.getUniformLocation(program, name);
     gl.uniform1i(u('uSource'), 0);
     gl.uniform1i(u('uMatte'), 1);
     gl.uniform1i(u('uLut'), 2);
@@ -137,19 +142,34 @@ export class Compositor {
     gl.uniform1f(u('uSharpen'), f.sharpen);
     gl.uniform1i(u('uGrayscale'), f.grayscale ? 1 : 0);
     gl.uniform1f(u('uOpacity'), layer.opacity ?? 1);
+    gl.uniform1f(u('uEffectAmount'), program === this.layerProgram ? 0 : effect!.amount);
+    gl.uniform1f(u('time'), effect?.time ?? 0);
+    gl.uniform2f(u('resolution'), layer.width, layer.height);
 
-    this.drawQuad(this.layerProgram, this.layerRect(layer), layer.transform.rotation);
+    this.drawQuad(program, this.layerRect(layer), layer.transform.rotation);
     gl.disable(gl.BLEND);
   }
 
-  drawTransition(type: TransitionType, progress: number) {
+  // A custom transition (GLSL code) replaces the built-in type; if it doesn't compile, the type is used.
+  drawTransition(type: TransitionType, progress: number, code?: string) {
     const { gl } = this;
+    const custom = code ? this.effectProgram('transition', code) : null;
     this.bindTarget('screen');
-    gl.useProgram(this.transitionProgram);
+    gl.useProgram(custom ?? this.transitionProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.targets.from.texture);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.targets.to.texture);
+    if (custom) {
+      const u = (name: string) => gl.getUniformLocation(custom, name);
+      gl.uniform1i(u('uFrom'), 0);
+      gl.uniform1i(u('uTo'), 1);
+      gl.uniform1f(u('progress'), Math.min(Math.max(progress, 0), 1));
+      gl.uniform1f(u('ratio'), this.width / this.height);
+      gl.uniform2f(u('resolution'), this.width, this.height);
+      this.drawQuad(custom, [0, 0, this.width, this.height]);
+      return;
+    }
     const u = (name: string) => gl.getUniformLocation(this.transitionProgram, name);
     gl.uniform1i(u('uFrom'), 0);
     gl.uniform1i(u('uTo'), 1);
@@ -157,6 +177,21 @@ export class Compositor {
     gl.uniform1i(u('uType'), TRANSITION_INDEX[type]);
     gl.uniform2f(u('uResolution'), this.width, this.height);
     this.drawQuad(this.transitionProgram, [0, 0, this.width, this.height]);
+  }
+
+  // Compiled once per code; null when it fails, so callers fall back to the built-in program.
+  private effectProgram(kind: 'transition' | 'filter', code: string) {
+    const key = `${kind}\n${code}`;
+    if (!this.effectPrograms.has(key)) {
+      let program: WebGLProgram | null = null;
+      try {
+        program = this.createProgram(QUAD_VERTEX, kind === 'transition' ? transitionFragment(code) : filterFragment(code));
+      } catch (error) {
+        console.warn(`Custom ${kind} failed to compile; using the built-in effect.`, error);
+      }
+      this.effectPrograms.set(key, program);
+    }
+    return this.effectPrograms.get(key)!;
   }
 
   // The layer's rectangle on the canvas: [x, y, width, height] in pixels from the top left.
@@ -188,7 +223,7 @@ export class Compositor {
       const ry = cy + dx * sin + dy * cos;
       return [(snap(rx) / this.width) * 2 - 1, 1 - (snap(ry) / this.height) * 2, u, v];
     };
-    // konum (x, y) + uv (u, v); alt-sol uv (0,0)
+    // position (x, y) + uv (u, v); bottom-left uv is (0,0)
     const data = new Float32Array([...corner(x, y + h, 0, 0), ...corner(x + w, y + h, 1, 0), ...corner(x, y, 0, 1), ...corner(x + w, y, 1, 1)]);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quad);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);

@@ -1,7 +1,9 @@
 import { SPEED_CURVES } from './speed';
 import { useEditor } from './store';
 import { clipEnd, createMediaClip, createTextClip, formatTime, projectDuration, rippleDelete, sortedTrack, splitClip } from './timeline';
-import type { AspectRatio, Clip, MediaClip, TextClip, TransitionType } from './types';
+import { FILTER_API, TRANSITION_API } from '../render/effects';
+import { fontFamilies } from '../render/fonts';
+import type { AspectRatio, Clip, CustomEffect, MediaClip, TextClip, TransitionType } from './types';
 
 // Command layer: every edit is a typed JSON command. It is the single entry point for driving
 // the editor from outside the UI (browser API, MCP server, natural-language panel).
@@ -25,7 +27,12 @@ export type Command =
   | { name: 'remove_clip'; clipId: string }
   | { name: 'split'; time: number; clipId?: string }
   | { name: 'delete_range'; start: number; end: number }
-  | { name: 'set_transition'; toClipId: string; type: TransitionType | null; duration?: number }
+  | { name: 'set_transition'; toClipId: string; type?: TransitionType | null; effectId?: string; duration?: number }
+  | { name: 'create_effect'; kind: CustomEffect['kind']; title: string; code: string }
+  | { name: 'update_effect'; effectId: string; title?: string; code?: string }
+  | { name: 'delete_effect'; effectId: string }
+  | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number }
+  | { name: 'add_font'; family: string }
   | { name: 'set_speed'; clipId: string; speed?: number; curve?: string | null }
   | { name: 'set_aspect'; aspect: AspectRatio }
   | { name: 'set_background_blur'; enabled: boolean }
@@ -54,13 +61,13 @@ export const COMMAND_SPECS: CommandSpec[] = [
     parameters: {
       assetId: { type: 'string' },
       track: { type: 'string', enum: ['main', 'overlay', 'audio'] },
-      start: { type: 'number', description: 'saniye' },
+      start: { type: 'number', description: 'seconds' },
     },
     required: ['assetId'],
   },
   {
     name: 'add_text',
-    description: 'Metin klibi ekler.',
+    description: 'Adds a text clip.',
     parameters: {
       text: { type: 'string' },
       start: { type: 'number' },
@@ -80,7 +87,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
     parameters: { clipId: { type: 'string' }, changes: { type: 'object' } },
     required: ['clipId', 'changes'],
   },
-  { name: 'remove_clip', description: 'Klibi siler.', parameters: { clipId: { type: 'string' } }, required: ['clipId'] },
+  { name: 'remove_clip', description: 'Removes a clip.', parameters: { clipId: { type: 'string' } }, required: ['clipId'] },
   {
     name: 'split',
     description: 'Splits the given clip (or every clip under the time) at the given second.',
@@ -95,9 +102,50 @@ export const COMMAND_SPECS: CommandSpec[] = [
   },
   {
     name: 'set_transition',
-    description: 'Sets the transition at the cut before main-track clip toClipId (type null removes it).',
-    parameters: { toClipId: { type: 'string' }, type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] }, duration: { type: 'number' } },
-    required: ['toClipId', 'type'],
+    description:
+      'Sets the transition at the cut before main-track clip toClipId: a built-in type, or a custom transition by effectId (from create_effect). type null removes it.',
+    parameters: {
+      toClipId: { type: 'string' },
+      type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] },
+      effectId: { type: 'string', description: 'custom transition id' },
+      duration: { type: 'number' },
+    },
+    required: ['toClipId'],
+  },
+  {
+    name: 'create_effect',
+    description: `Creates a custom transition or filter from GLSL code and returns its effectId. The code is compiled first; on a GLSL error nothing is saved and the error log (with line numbers) is returned, so fix it and call again. Apply it with set_transition {effectId} or set_filter. Transition: ${TRANSITION_API} Filter: ${FILTER_API}`,
+    parameters: {
+      kind: { type: 'string', enum: ['transition', 'filter'] },
+      title: { type: 'string', description: 'short display name' },
+      code: { type: 'string', description: 'GLSL source' },
+    },
+    required: ['kind', 'title', 'code'],
+  },
+  {
+    name: 'update_effect',
+    description: 'Changes the title or code of a custom effect; clips using it update immediately. Same GLSL rules and errors as create_effect.',
+    parameters: { effectId: { type: 'string' }, title: { type: 'string' }, code: { type: 'string' } },
+    required: ['effectId'],
+  },
+  {
+    name: 'delete_effect',
+    description: 'Deletes a custom effect. Transitions using it fall back to their built-in type; filters are removed.',
+    parameters: { effectId: { type: 'string' } },
+    required: ['effectId'],
+  },
+  {
+    name: 'set_filter',
+    description: 'Applies a custom filter (effectId from create_effect) to a video or image clip, or removes it with null. amount 0–1 (default 1).',
+    parameters: { clipId: { type: 'string' }, effectId: { type: ['string', 'null'] }, amount: { type: 'number' } },
+    required: ['clipId', 'effectId'],
+  },
+  {
+    name: 'add_font',
+    description:
+      'Adds a Google Fonts family by its exact name (e.g. "Space Grotesk") so text clips can use it via font. Font files are added with the MCP klip_import_file tool.',
+    parameters: { family: { type: 'string' } },
+    required: ['family'],
   },
   {
     name: 'set_speed',
@@ -136,7 +184,7 @@ function summarize() {
   const { project, assets, time } = editor();
   const describe = (c: Clip) =>
     c.type === 'text'
-      ? { id: c.id, track: c.track, start: round(c.start), duration: round(c.duration), text: c.text }
+      ? { id: c.id, track: c.track, start: round(c.start), duration: round(c.duration), text: c.text, font: c.font }
       : {
           id: c.id,
           track: c.track,
@@ -144,12 +192,15 @@ function summarize() {
           duration: round(c.duration),
           asset: assets[c.assetId]?.name,
           speed: c.speed,
-          transition: c.transition?.type,
+          transition: c.transition && (c.transition.effectId ?? c.transition.type),
+          filter: c.filter.effectId,
         };
   return {
     aspect: project.aspect,
     duration: round(projectDuration(project.clips)),
     playhead: round(time),
+    effects: Object.values(project.effects).map(({ id, name, kind }) => ({ id, name, kind })),
+    fonts: fontFamilies(project.fonts),
     assets: Object.values(assets).map((a) => ({ id: a.id, name: a.name, kind: a.kind, duration: Number.isFinite(a.duration) ? round(a.duration) : null })),
     clips: [...project.clips].sort((a, b) => a.start - b.start).map(describe),
   };
@@ -230,9 +281,38 @@ export async function execute(command: Command): Promise<unknown> {
       const main = sortedTrack<MediaClip>(s.project.clips, 'main');
       const index = main.findIndex((c) => c.id === clip.id);
       if (index < 1) throw new Error('Transitions go on main-track clips other than the first');
-      const duration = Math.min(command.duration ?? 0.8, main[index - 1].duration, clip.duration);
-      s.updateClip(clip.id, { transition: command.type ? { type: command.type, duration } : undefined } as Partial<MediaClip>);
+      const duration = Math.min(command.duration ?? clip.transition?.duration ?? 0.8, main[index - 1].duration, clip.duration);
+      if (command.effectId && s.project.effects[command.effectId]?.kind !== 'transition') throw new Error(`Custom transition not found: ${command.effectId}`);
+      const type = command.type ?? (command.effectId ? 'fade' : null);
+      s.updateClip(clip.id, {
+        transition: type ? { type, duration, ...(command.effectId && { effectId: command.effectId }) } : undefined,
+      } as Partial<MediaClip>);
       return { ok: true };
+    }
+    case 'create_effect': {
+      const { saveEffect } = await import('../ui/customActions');
+      return { effectId: saveEffect({ kind: command.kind, name: command.title, code: command.code }) };
+    }
+    case 'update_effect': {
+      const effect = s.project.effects[command.effectId];
+      if (!effect) throw new Error(`Effect not found: ${command.effectId}`);
+      const { saveEffect } = await import('../ui/customActions');
+      saveEffect({ ...effect, name: command.title ?? effect.name, code: command.code ?? effect.code });
+      return { ok: true };
+    }
+    case 'delete_effect': {
+      const { deleteEffect } = await import('../ui/customActions');
+      deleteEffect(command.effectId);
+      return { ok: true };
+    }
+    case 'set_filter': {
+      const { applyFilterEffect } = await import('../ui/customActions');
+      applyFilterEffect(command.clipId, command.effectId, command.amount);
+      return { ok: true };
+    }
+    case 'add_font': {
+      const { addGoogleFont } = await import('../ui/customActions');
+      return { family: await addGoogleFont(command.family) };
     }
     case 'set_speed': {
       const clip = requireClip(command.clipId);

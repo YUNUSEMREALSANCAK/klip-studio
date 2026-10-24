@@ -72,6 +72,8 @@
       12 transitions, added by clicking the ◆ marker on a cut and previewed automatically. Brightness, contrast, saturation, temperature, sharpen, vignette, 9 filter presets and <b>.cube LUT</b> import.
       <br><br>
       Shape masks (rectangle, ellipse, linear), <b>chroma key</b>, and a <b>blurred canvas</b> background for vertical video.
+      <br><br>
+      <b>Custom transitions and filters</b> written in GLSL (gl-transitions compatible), by you or by an AI app over MCP, and <b>custom fonts</b> from a file or Google Fonts.
     </td>
     <td width="50%" valign="top">
       <img src="docs/images/klip-studio-keyframes.jpg" alt="A rotated overlay with an ellipse mask selected; speed and keyframed position/size controls on the right, keyframe markers on the clip in the timeline, and the Assistant panel on the left" width="100%">
@@ -114,24 +116,24 @@ Models are downloaded on first use and stay in the browser cache.
 
 ## Built for agents
 
-Every edit in the editor is a typed JSON command (`src/core/commands.ts`). The same commands run four ways:
+**Use it from the AI app you already pay for.** Klip Studio includes an MCP server, so Claude Desktop, Claude Code, Cursor, Codex CLI, VS Code, Gemini CLI and other MCP apps can edit your project with your own subscription. No API key needed, and your media stays on your computer.
+
+```bash
+claude mcp add klip-studio -- npx -y klip-studio-mcp
+```
+
+Then turn on "Agent connection (MCP)" in the Project panel and ask: *"import ~/Movies/vlog.mp4, cut the silences, add captions, make it 9:16 and export it"*. Setup for every app: [docs/mcp.md](docs/mcp.md).
+
+**Describe an effect, get an effect.** Ask for something that isn't built in, like *"a transition where the old clip shatters into glass"* or *"a faded 70s film look with grain"*, and the AI writes it as a GLSL shader, compiles it in the editor, fixes any errors, applies it and checks the result with a screenshot. Custom effects are saved in the project and can be edited in the Transition and Filter tabs.
+
+Under the hood every edit is a typed JSON command (`src/core/commands.ts`), and the same commands run four ways:
 
 | Route | How |
 | --- | --- |
 | UI | Every button uses the same commands; all of them are undoable |
 | Browser API | `await window.klip.execute({ name: 'split', time: 3.2 })`, `window.klip.state()`, `window.klip.screenshot()` |
-| MCP server | `npm run mcp`, then turn on "Agent connection (MCP)" in the Project panel |
-| Assistant tab | Ask Claude in plain language: "cut the silences, add captions, make it 9:16" |
-
-To add the MCP server to Claude Code:
-
-```bash
-claude mcp add klip-studio -- node /full/path/to/klip-studio/mcp/server.mjs
-```
-
-Tools: `klip_state`, `klip_commands`, `klip_execute`, `klip_screenshot`, `klip_import_file`.
-
-The Assistant tab uses your own Anthropic API key, which is stored only in your browser. Claude receives a project summary and preview frames; your media files are never sent.
+| MCP server | Tools: `klip_state`, `klip_commands`, `klip_execute`, `klip_screenshot`, `klip_import_file`, `klip_export` |
+| Assistant tab | Chat with Claude inside the editor using your own Anthropic API key (stored only in your browser; only a project summary and preview frames are sent) |
 
 ## Under the hood
 
@@ -172,7 +174,7 @@ npm run dev
 | `npm test` | Unit tests (Vitest) |
 | `npm run test:e2e` | End-to-end tests (Playwright); add `--grep @models` to exercise the real models |
 | `npm run typecheck` · `npm run build` | Type check · production build |
-| `npm run mcp` | MCP server for agents |
+| `npm run mcp` | MCP server for agents (`--http` for a shared server) |
 | `npm run perf` | Performance budget check (needs ffmpeg) |
 
 **Shortcuts:** Space play/pause · <kbd>S</kbd> split · <kbd>Delete</kbd> remove · <kbd>⌘Z</kbd> / <kbd>⇧⌘Z</kbd> undo/redo · <kbd>←</kbd> <kbd>→</kbd> step one frame

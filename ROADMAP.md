@@ -22,7 +22,7 @@
 | Timeline | ~80% | group selection, dragging between tracks, nested sequences |
 | Picture editing | ~75% | crop tool, blend modes, stabilization |
 | Text and captions | ~70% | per-word styling, text effects library |
-| Transitions and effects | ~45% | video effects and sticker library |
+| Transitions and effects | ~55% | built-in video effects and sticker library (custom GLSL effects cover the rest) |
 | Audio | ~60% | sound effects library, voice changer, Turkish text to speech |
 | AI | ~75% | highlight detection, real-time general object segmentation, Turkish text to speech |
 | Projects and distribution | ~70% | template sharing, cloud sync (intentionally absent: local-first) |
@@ -50,6 +50,7 @@ Effort: **S** ≈ 2–6 hours · **M** ≈ 1–3 days · **L** ≈ 1–2 weeks (
 - [x] **Audio tools** (M): fade in/out, music ducking under speech, waveforms on video clips
 - [x] **Text templates and fonts** (M): 12 templates, 10 Google Fonts families
 - [x] **LUT (.cube) import** (S)
+- [x] **Custom transitions, filters and fonts** (M): GLSL effects (gl-transitions compatible) with inline compile errors, fonts from files or Google Fonts; all saved in the project
 
 ### Phase 3: AI depth → v0.4
 
@@ -70,6 +71,8 @@ Effort: **S** ≈ 2–6 hours · **M** ≈ 1–3 days · **L** ≈ 1–2 weeks (
 - [x] **Control channel** (M): `window.klip` API for commands, state, screenshots and import from URL
 - [x] **MCP server** (M): `npm run mcp`; tools for state, commands, screenshots and file import
 - [x] **Natural-language editing** (M): Assistant tab, Claude Opus 5.5 + command tools (user's own API key)
+- [x] **Effects by description** (M): over MCP the AI writes, compiles, fixes and applies custom GLSL transitions and filters (`create_effect`, `set_filter`, `add_font`)
+- [x] **Use from any AI app** (M): `npx -y klip-studio-mcp` for Claude Desktop/Code, Cursor, Codex, VS Code, Gemini CLI; shared HTTP mode, MP4 export tool, origin checks, in-app setup snippets
 
 ### Phase 5: Distribution and community → v1.0
 

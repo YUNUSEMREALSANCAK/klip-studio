@@ -1,6 +1,10 @@
 import { COMMAND_SPECS, execute, type Command } from '../core/commands';
 import { useEditor } from '../core/store';
+import { projectDuration } from '../core/timeline';
+import { ASPECT_SIZES } from '../core/types';
+import { exportVideo } from '../export/exporter';
 import { createAsset } from '../media/importMedia';
+import { addFontFile, toBase64 } from '../ui/customActions';
 
 // Browser side for agents: the window.klip API and the WebSocket bridge to the MCP server.
 
@@ -26,11 +30,33 @@ async function importBlob(blob: Blob, name: string) {
   return { assetId: asset.id, kind: asset.kind, duration: Number.isFinite(asset.duration) ? asset.duration : null };
 }
 
-export async function importUrl(url: string, name = url.split('/').pop() || 'medya') {
+export async function importUrl(url: string, name = url.split('/').pop() || 'media') {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Download failed: ${response.status}`);
   return importBlob(await response.blob(), name);
 }
+
+const EXPORT_SCALES = { '1080p': 1, '720p': 2 / 3, '480p': 4 / 9 };
+const even = (n: number) => Math.round(n / 2) * 2;
+
+// Renders the project to MP4 for an agent; progress shows as a task card in the editor.
+async function exportForAgent({ quality = '1080p', fps }: { quality?: keyof typeof EXPORT_SCALES; fps?: number }) {
+  const { project, assets, setPlaying, startTask, updateTask, endTask } = useEditor.getState();
+  const scale = EXPORT_SCALES[quality];
+  if (!scale) throw new Error(`Unknown quality: ${quality}`);
+  const size = ASPECT_SIZES[project.aspect];
+  const options = { width: even(size.width * scale), height: even(size.height * scale), fps: fps ?? project.fps };
+  setPlaying(false);
+  const task = startTask('Export');
+  try {
+    const blob = await exportVideo(project, assets, { ...options, onProgress: (progress) => updateTask(task, { message: 'Rendering', progress }) });
+    return { ...options, duration: round(projectDuration(project.clips)), bytes: blob.size, base64: await toBase64(blob) };
+  } finally {
+    endTask(task);
+  }
+}
+
+const round = (n: number) => Math.round(n * 100) / 100;
 
 export interface KlipApi {
   commands: typeof COMMAND_SPECS;
@@ -55,7 +81,8 @@ type BridgeRequest =
   | { id: number; method: 'execute'; params: Command }
   | { id: number; method: 'screenshot' }
   | { id: number; method: 'import'; params: { name: string; type: string; base64: string } }
-  | { id: number; method: 'commands' };
+  | { id: number; method: 'commands' }
+  | { id: number; method: 'export'; params: { quality?: keyof typeof EXPORT_SCALES; fps?: number } };
 
 async function handle(request: BridgeRequest): Promise<unknown> {
   switch (request.method) {
@@ -65,9 +92,13 @@ async function handle(request: BridgeRequest): Promise<unknown> {
       return screenshot();
     case 'commands':
       return COMMAND_SPECS;
+    case 'export':
+      return exportForAgent(request.params ?? {});
     case 'import': {
       const bytes = Uint8Array.from(atob(request.params.base64), (c) => c.charCodeAt(0));
-      return importBlob(new Blob([bytes], { type: request.params.type }), request.params.name);
+      const blob = new Blob([bytes], { type: request.params.type });
+      if (request.params.type.startsWith('font/')) return { family: await addFontFile(blob, request.params.name) };
+      return importBlob(blob, request.params.name);
     }
   }
 }

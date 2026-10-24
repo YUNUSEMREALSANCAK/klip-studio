@@ -85,7 +85,7 @@ export async function detectBeats(clip: MediaClip, asset: Asset): Promise<number
   }
   const flux = energies.map((e, i) => Math.max(0, e - (energies[i - 1] ?? e)));
   const beats: number[] = [];
-  const span = 43; // ~1 sn'lik yerel pencere
+  const span = 43; // ~1 s local window
   let last = -Infinity;
   for (let i = 0; i < flux.length; i++) {
     const local = flux.slice(Math.max(0, i - span), i + span);

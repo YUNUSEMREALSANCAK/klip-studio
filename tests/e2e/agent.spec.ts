@@ -1,6 +1,12 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { expect, test } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { mkdtemp, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { WebSocket } from 'ws';
 import { addToMain, importMedia, openEditor } from './helpers';
 
 test.beforeEach(async ({ page }) => {
@@ -44,7 +50,9 @@ test('the MCP server drives the editor via state, commands and screenshots', asy
       .toBe(true);
 
     const tools = await client.listTools();
-    expect(tools.tools.map((t) => t.name)).toEqual(expect.arrayContaining(['klip_state', 'klip_execute', 'klip_screenshot', 'klip_import_file']));
+    expect(tools.tools.map((t) => t.name)).toEqual(
+      expect.arrayContaining(['klip_state', 'klip_execute', 'klip_screenshot', 'klip_import_file', 'klip_export']),
+    );
 
     await client.callTool({ name: 'klip_execute', arguments: { command: { name: 'add_text', text: 'MCP ile eklendi' } } });
     await expect(page.locator('.clip.text')).toHaveText(/MCP ile eklendi/);
@@ -55,8 +63,67 @@ test('the MCP server drives the editor via state, commands and screenshots', asy
 
     const imported = (await client.callTool({ name: 'klip_import_file', arguments: { path: 'tests/fixtures/square.png' } })) as { content: { text: string }[] };
     expect(imported.content[0].text).toContain('assetId');
+
+    const font = (await client.callTool({ name: 'klip_import_file', arguments: { path: 'tests/fixtures/bungee.ttf' } })) as { content: { text: string }[] };
+    expect(font.content[0].text).toContain('"family": "bungee"');
+
+    const created = (await client.callTool({
+      name: 'klip_execute',
+      arguments: {
+        command: {
+          name: 'create_effect',
+          kind: 'filter',
+          title: 'Warm',
+          code: 'vec4 effect(vec4 c, vec2 uv) { return vec4(c.r * 1.2, c.g, c.b * 0.8, c.a); }',
+        },
+      },
+    })) as { content: { text: string }[] };
+    const { effectId } = JSON.parse(created.content[0].text);
+    const state = JSON.parse(((await client.callTool({ name: 'klip_state', arguments: {} })) as { content: { text: string }[] }).content[0].text);
+    const mainClip = state.clips.find((c: { track: string }) => c.track === 'main');
+    await client.callTool({ name: 'klip_execute', arguments: { command: { name: 'set_filter', clipId: mainClip.id, effectId } } });
+
+    const output = path.join(await mkdtemp(path.join(tmpdir(), 'klip-')), 'out.mp4');
+    const exported = (await client.callTool({ name: 'klip_export', arguments: { path: output, quality: '480p' } })) as { isError?: boolean };
+    expect(exported.isError).toBeFalsy();
+    expect((await stat(output)).size).toBeGreaterThan(1000);
   } finally {
     await client.close();
+  }
+});
+
+test('the shared HTTP server works and only the editor may connect to the bridge', async ({ page }) => {
+  const server = spawn('node', ['mcp/server.mjs', '--http'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.stderr.on('data', (chunk) => String(chunk).includes('ready at') && resolve());
+      server.on('exit', (code) => reject(new Error(`server exited with ${code}`)));
+    });
+
+    const foreign = await new Promise<string>((resolve) => {
+      const socket = new WebSocket('ws://127.0.0.1:5299', { origin: 'https://evil.example' });
+      socket.on('open', () => resolve('open'));
+      socket.on('error', (error) => resolve(error.message));
+    });
+    expect(foreign).toContain('401');
+    const rebind = await fetch('http://127.0.0.1:5300/mcp', { method: 'POST', headers: { origin: 'https://evil.example' }, body: '{}' });
+    expect(rebind.status).toBe(403);
+
+    await page.goto('/?bridge');
+    await expect(page.locator('.save-status')).toHaveText('Saved');
+    const client = new Client({ name: 'test', version: '1.0.0' });
+    await client.connect(new StreamableHTTPClientTransport(new URL('http://127.0.0.1:5300/mcp')));
+    try {
+      await expect
+        .poll(async () => !((await client.callTool({ name: 'klip_state', arguments: {} })) as { isError?: boolean }).isError, { timeout: 15_000 })
+        .toBe(true);
+      await client.callTool({ name: 'klip_execute', arguments: { command: { name: 'add_text', text: 'Over HTTP' } } });
+      await expect(page.locator('.clip.text')).toHaveText(/Over HTTP/);
+    } finally {
+      await client.close();
+    }
+  } finally {
+    server.kill();
   }
 });
 

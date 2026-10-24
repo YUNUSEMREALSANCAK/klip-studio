@@ -55,6 +55,11 @@ export function focusAt(reframe: ReframeTrack | undefined, time: number) {
   return centers[centers.length - 1];
 }
 
+function effectFor(project: Project, clip: MediaClip, t: number) {
+  const effect = clip.filter.effectId ? project.effects[clip.filter.effectId] : undefined;
+  return effect?.kind === 'filter' ? { code: effect.code, amount: clip.filter.effectAmount, time: t - clip.start } : undefined;
+}
+
 const lutCache = new Map<string, LutData>();
 
 function lutFor(project: Project, id: string | undefined): LutData | null {
@@ -109,6 +114,7 @@ function drawMedia(
       shape: clip.mask,
       chroma: clip.chroma,
       lut: lutFor(project, clip.filter.lutId),
+      effect: effectFor(project, clip, t),
     },
     target,
   );
@@ -127,6 +133,7 @@ function drawMedia(
         shape: clip.mask,
         chroma: clip.chroma,
         lut: lutFor(project, clip.filter.lutId),
+        effect: effectFor(project, clip, t),
       },
       target,
     );
@@ -146,7 +153,9 @@ export function composeFrame(
     const { from, to, progress } = visible.transition;
     drawMedia(compositor, project, from, t, assets, inputs, 'from');
     drawMedia(compositor, project, to, t, assets, inputs, 'to');
-    compositor.drawTransition(to.transition!.type, progress);
+    const { type, effectId } = to.transition!;
+    const effect = effectId ? project.effects[effectId] : undefined;
+    compositor.drawTransition(type, progress, effect?.kind === 'transition' ? effect.code : undefined);
   } else if (visible.main) {
     drawMedia(compositor, project, visible.main, t, assets, inputs, 'screen');
   }

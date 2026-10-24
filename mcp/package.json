@@ -1,0 +1,34 @@
+{
+  "name": "klip-studio-mcp",
+  "version": "0.2.0",
+  "description": "MCP server for Klip Studio: drive the in-browser video editor from Claude, Cursor, Codex and other MCP apps.",
+  "license": "MIT OR Apache-2.0",
+  "type": "module",
+  "bin": {
+    "klip-studio-mcp": "server.mjs"
+  },
+  "files": [
+    "server.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "video-editor",
+    "claude"
+  ],
+  "homepage": "https://github.com/YUNUSEMREALSANCAK/klip-studio/blob/main/docs/mcp.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YUNUSEMREALSANCAK/klip-studio.git",
+    "directory": "mcp"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  }
+}

@@ -7,6 +7,8 @@ export function normalizeProject(project: Project): Project {
     markers: project.markers ?? [],
     backgroundBlur: project.backgroundBlur ?? false,
     luts: project.luts ?? {},
+    effects: project.effects ?? {},
+    fonts: project.fonts ?? {},
     clips: project.clips.map(normalizeClip),
   };
 }

@@ -9,6 +9,8 @@ import { ensureFont, FONTS } from '../render/fonts';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { AiPanel } from './AiPanel';
 import { AssistantPanel } from './AssistantPanel';
+import { applyFilterEffect } from './customActions';
+import { CustomEffects, CustomFonts } from './CustomLibrary';
 import { importLut } from './editActions';
 import { Icon } from './icons';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
@@ -143,10 +145,10 @@ const TEXT_PRESETS: TextTemplate[] = [
   { label: 'Boxed', text: 'Boxed text', preset: 'box', animation: 'slideup', y: 0.8, fontSize: 0.05 },
   { label: 'Neon', text: 'NEON', preset: 'neon', animation: 'pop', y: 0.5, fontSize: 0.09, color: '#22d3ee' },
   { label: 'Typewriter', text: 'Typed letter by letter', preset: 'classic', animation: 'typewriter', y: 0.5, fontSize: 0.06, font: 'Roboto Mono' },
-  { label: 'Karaoke', text: 'Kelime kelime vurgulu', preset: 'karaoke', animation: 'none', y: 0.8, fontSize: 0.06 },
+  { label: 'Karaoke', text: 'Highlighted word by word', preset: 'karaoke', animation: 'none', y: 0.8, fontSize: 0.06 },
   { label: 'Vlog', text: 'daily vlog', preset: 'classic', animation: 'pop', y: 0.3, fontSize: 0.09, font: 'Pacifico', color: '#fde68a' },
   { label: 'News ticker', text: 'BREAKING NEWS', preset: 'box', animation: 'slideup', y: 0.88, fontSize: 0.05, font: 'Oswald' },
-  { label: 'Cinema', text: 'Bir zamanlar…', preset: 'classic', animation: 'fade', y: 0.5, fontSize: 0.07, font: 'Playfair Display' },
+  { label: 'Cinema', text: 'Once upon a time…', preset: 'classic', animation: 'fade', y: 0.5, fontSize: 0.07, font: 'Playfair Display' },
   { label: 'Bold', text: 'WATCH NOW', preset: 'title', animation: 'pop', y: 0.5, fontSize: 0.1, font: 'Anton', color: '#facc15' },
   { label: 'Retro', text: 'Retro', preset: 'neon', animation: 'fade', y: 0.45, fontSize: 0.11, font: 'Lobster', color: '#f472b6' },
   { label: 'Modern', text: 'Modern title', preset: 'classic', animation: 'slideup', y: 0.5, fontSize: 0.07, font: 'Montserrat' },
@@ -188,6 +190,7 @@ function TextTab() {
       <p className="hint" style={{ marginTop: 12 }}>
         {tr('Text is added at the playhead. Drag it in the preview to move it.')}
       </p>
+      <CustomFonts />
     </>
   );
 }
@@ -210,6 +213,7 @@ function TransitionTab() {
           <br />
           {tr('Add a second video, or move the playhead into a video and press S to split it.')}
         </div>
+        <CustomEffects kind="transition" disabled onApply={() => {}} />
       </>
     );
   }
@@ -230,7 +234,7 @@ function TransitionTab() {
           {tr('None')}
         </button>
         {TRANSITION_TYPES.map((t) => (
-          <button key={t.type} className={`tile ${current?.type === t.type ? 'active' : ''}`} onClick={() => applyTransition(cut, t.type)}>
+          <button key={t.type} className={`tile ${current?.type === t.type && !current.effectId ? 'active' : ''}`} onClick={() => applyTransition(cut, t.type)}>
             {tr(t.label)}
           </button>
         ))}
@@ -252,11 +256,12 @@ function TransitionTab() {
             onPointerDown={() => useEditor.getState().checkpoint()}
             onChange={(e) => useEditor.getState().updateClip(cut.to.id, { transition: { ...current, duration: +e.target.value } } as Partial<MediaClip>, false)}
           />
-          <button className="btn small" style={{ marginTop: 6 }} onClick={() => applyTransition(cut, current.type)}>
+          <button className="btn small" style={{ marginTop: 6 }} onClick={() => applyTransition(cut, current.type, undefined, current.effectId)}>
             {tr('▶ Preview transition')}
           </button>
         </div>
       )}
+      <CustomEffects kind="transition" activeId={current?.effectId} disabled={false} onApply={(id) => applyTransition(cut, 'fade', undefined, id)} />
     </>
   );
 }
@@ -303,6 +308,7 @@ function FilterTab() {
         </button>
       </div>
       <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], media ?? undefined)} />
+      <CustomEffects kind="filter" activeId={media?.filter.effectId} disabled={!media} onApply={(id) => media && applyFilterEffect(media.id, id)} />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { tr, useLang } from '../i18n';
 import { useEffect, useState } from 'react';
 import { installWindowApi, startBridgeIfEnabled } from '../agent/bridge';
 import { useEditor } from '../core/store';
+import { registerProjectFonts } from '../render/fonts';
 import { ExportDialog } from './ExportDialog';
 import { Inspector } from './Inspector';
 import { ObjectEditor } from './ObjectEditor';
@@ -62,6 +63,10 @@ function Editor() {
     installWindowApi();
     startBridgeIfEnabled();
   }, []);
+  const fonts = useEditor((s) => s.project.fonts);
+  useEffect(() => {
+    void registerProjectFonts(fonts);
+  }, [fonts]);
   const saveStatus = useAutosave();
   const [missing] = useState(missingFeatures);
   const objectClipId = useUi((s) => s.objectEditorClipId);

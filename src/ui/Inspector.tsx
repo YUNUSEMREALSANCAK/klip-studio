@@ -2,12 +2,11 @@ import { tr } from '../i18n';
 import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
 import type { TextAnimation, TextClip, TextStylePreset } from '../core/types';
-import { familyOf, FONTS } from '../render/fonts';
+import { familyOf, fontFamilies } from '../render/fonts';
 import { Section, Slider, Toggle } from './controls';
 import { Icon } from './icons';
 import { MediaInspector } from './MediaInspector';
-import { bridgeEnabled, onBridgeStatus, setBridgeEnabled, type BridgeStatus } from '../agent/bridge';
-import { useEffect, useState } from 'react';
+import { AgentConnection } from './AgentConnection';
 
 export function Inspector() {
   const clip = useEditor(selectedClip);
@@ -40,7 +39,7 @@ function ProjectSettings() {
         }}
       />
       <div className="hint">{tr('When a landscape clip is placed in a vertical project, the edges are filled with a blurred copy.')}</div>
-      <AgentBridgeToggle />
+      <AgentConnection />
       <div className="section-title" style={{ marginTop: 16 }}>
         {tr('Shortcuts')}
       </div>
@@ -76,6 +75,7 @@ const ANIMATIONS: { id: TextAnimation; label: string }[] = [
 ];
 
 function TextInspector({ clip }: { clip: TextClip }) {
+  const fonts = useEditor((s) => s.project.fonts);
   const update = (patch: Partial<TextClip>, record = false) => useEditor.getState().updateClip(clip.id, patch, record);
   const checkpoint = () => useEditor.getState().checkpoint();
   return (
@@ -115,7 +115,7 @@ function TextInspector({ clip }: { clip: TextClip }) {
         <div className="field">
           <label>{tr('Font')}</label>
           <select value={familyOf(clip)} onChange={(e) => update({ font: e.target.value }, true)}>
-            {FONTS.map((f) => (
+            {fontFamilies(fonts).map((f) => (
               <option key={f} value={f} style={{ fontFamily: f }}>
                 {f}
               </option>
@@ -145,34 +145,6 @@ function TextInspector({ clip }: { clip: TextClip }) {
         <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
           <Icon name="trash" size={16} /> {tr('Delete text')}
         </button>
-      </div>
-    </>
-  );
-}
-
-const BRIDGE_TEXT: Record<BridgeStatus, string> = { off: 'Off', connecting: 'Waiting for MCP server…', connected: 'Connected' };
-
-// Lets agents such as Claude drive the editor through the MCP server.
-function AgentBridgeToggle() {
-  const [enabled, setEnabled] = useState(bridgeEnabled);
-  const [status, setStatus] = useState<BridgeStatus>(enabled ? 'connecting' : 'off');
-  useEffect(() => {
-    onBridgeStatus(setStatus);
-  }, []);
-  return (
-    <>
-      <Toggle
-        label={tr('Agent connection (MCP)')}
-        on={enabled}
-        onChange={(on) => {
-          setEnabled(on);
-          setBridgeEnabled(on);
-        }}
-      />
-      <div className="hint">
-        {tr('Status:')} <b className={`bridge-${status}`}>{tr(BRIDGE_TEXT[status])}</b>
-        <br />
-        {tr('Server command:')} <code>npm run mcp</code>
       </div>
     </>
   );

@@ -35,6 +35,8 @@ time (t) ──▶   │ FrameReader: Mediabunny CanvasSink    │──▶ comp
 - `render/composeFrame.ts`: finds the visible clips (two main clips during a transition) and applies the keyframed state, blurred canvas, masks, LUTs and frame blending.
 - `render/compositor.ts` + `render/shaders.ts`: the layer shader (color, blur, LUT, sharpen, vignette, background matte, shape mask, chroma key) and 12 transition shaders; rotation happens in the draw quad.
 - `render/layout.ts`: layer rectangles; the preview selection box (`ui/StageEditor.tsx`) uses them too.
+- `render/effects.ts`: custom GLSL effects (`Project.effects`). A custom filter is compiled into the layer shader as `effect()`; a custom transition gets its own gl-transitions-style program. The compositor caches one program per code and falls back to the built-in effect if it fails to compile. `validateEffect` compiles on a throwaway context so the UI and agents get the error log before saving.
+- `render/fonts.ts`: Google Fonts by family name, and uploaded font files (`Project.fonts`, base64) registered with `FontFace`.
 
 ## Audio pipeline
 
@@ -64,6 +66,7 @@ Assistant (Claude Opus 5.5, tool loop) ─┘
 ```
 
 - `COMMAND_SPECS` is the schema for both the Claude tools and MCP.
+- `mcp/server.mjs` (published as `klip-studio-mcp`): stdio by default, or one shared Streamable HTTP server with `--http`; the WebSocket bridge only accepts local and allow-listed editor origins. Setup per app: [mcp.md](mcp.md).
 - `agent/assistant.ts`: a hand-written tool loop, server-side model fallback (`fallbacks: "default"`), append-only history.
 
 ## State, persistence and language

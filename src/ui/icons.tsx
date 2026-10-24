@@ -15,6 +15,7 @@ const paths: Record<string, string> = {
   plus: 'M12 5v14M5 12h14',
   upload: 'M12 16V4M7 9l5-5 5 5M4 16v4h16v-4',
   close: 'M6 6l12 12M18 6L6 18',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
   magnet: 'M6 4v8a6 6 0 0 0 12 0V4h-4v8a2 2 0 0 1-4 0V4z',
   zoomIn: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5M11 8v6M8 11h6',
   zoomOut: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5M8 11h6',

@@ -9,9 +9,11 @@ void main() {
   gl_Position = vec4(aPosition, 0.0, 1.0);
 }`;
 
-// Layer shader: source + blur + color adjustments + LUT + sharpen + vignette
-// + background matte + shape mask + chroma key.
-export const LAYER_FRAGMENT = /* glsl */ `#version 300 es
+const IDENTITY_EFFECT = 'vec4 effect(vec4 color, vec2 uv) { return color; }';
+
+// Layer shader: source + blur + sharpen + custom filter + color adjustments + LUT + vignette
+// + background matte + shape mask + chroma key. A custom filter (src/render/effects.ts) supplies effect().
+export const layerFragment = (effectCode = IDENTITY_EFFECT) => /* glsl */ `#version 300 es
 precision highp float;
 precision mediump sampler3D;
 in vec2 vUv;
@@ -40,12 +42,17 @@ uniform bool uChroma;
 uniform vec2 uKey;
 uniform float uSimilarity;
 uniform float uSmoothness;
+uniform float uEffectAmount;
+uniform float time;
+uniform vec2 resolution;
 
-vec2 chromaOf(vec3 c) {
+vec4 getColor(vec2 uv) { return texture(uSource, uv); }
+
+vec2 klipChroma(vec3 c) {
   return vec2(-0.1687 * c.r - 0.3313 * c.g + 0.5 * c.b, 0.5 * c.r - 0.4187 * c.g - 0.0813 * c.b);
 }
 
-float shapeAlpha(vec2 uv) {
+float klipShape(vec2 uv) {
   if (uShape == 0) return 1.0;
   vec2 p = uv - uShapeRect.xy;
   vec2 half_ = max(uShapeRect.zw * 0.5, vec2(1e-4));
@@ -56,6 +63,9 @@ float shapeAlpha(vec2 uv) {
   else a = smoothstep(-f * 0.5, f * 0.5, p.y);
   return uShapeInvert ? 1.0 - a : a;
 }
+
+#line 1
+${effectCode}
 
 void main() {
   vec4 color;
@@ -75,9 +85,11 @@ void main() {
       + texture(uSource, vUv - vec2(0.0, uTexel.y)).rgb;
     color.rgb += (color.rgb - blur * 0.25) * uSharpen * 1.5;
   }
+  vec4 original = color;
+  if (uEffectAmount > 0.0) color = mix(color, effect(color, vUv), uEffectAmount);
   float alpha = color.a * uOpacity;
   if (uChroma) {
-    float d = distance(chromaOf(color.rgb), uKey);
+    float d = distance(klipChroma(original.rgb), uKey);
     alpha *= smoothstep(uSimilarity, uSimilarity + uSmoothness, d);
   }
   vec3 c = color.rgb + uBrightness * 0.3;
@@ -93,7 +105,7 @@ void main() {
   float dist = distance(vUv, vec2(0.5));
   c *= 1.0 - uVignette * smoothstep(0.3, 0.75, dist);
   if (uUseMatte) alpha *= smoothstep(0.35, 0.65, texture(uMatte, vUv).r);
-  alpha *= shapeAlpha(vUv);
+  alpha *= klipShape(vUv);
   outColor = vec4(clamp(c, 0.0, 1.0), alpha);
 }`;
 

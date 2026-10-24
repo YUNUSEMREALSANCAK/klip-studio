@@ -1,4 +1,4 @@
-// Proje modeli: CapCut'taki tracks → segments → materials fikrinin sade hâli.
+// Project model: a lean take on CapCut's tracks → segments → materials.
 
 export type AssetKind = 'video' | 'audio' | 'image';
 
@@ -27,21 +27,24 @@ export interface FilterSettings {
   grayscale: boolean;
   lutId?: string;
   lutIntensity: number; // 0..1
+  effectId?: string; // custom filter (Project.effects)
+  effectAmount: number; // 0..1
 }
 
 export interface Transition {
-  type: TransitionType;
+  type: TransitionType; // also the fallback when a custom effect is missing or fails to compile
   duration: number;
+  effectId?: string; // custom transition (Project.effects)
 }
 
 export type TransitionType =
   'fade' | 'fadeblack' | 'slideleft' | 'slideright' | 'slideup' | 'wipeleft' | 'wiperight' | 'circleopen' | 'zoomin' | 'pixelize' | 'radial' | 'blur';
 
 export interface Transform {
-  x: number; // merkez, 0..1
-  y: number; // merkez, 0..1
+  x: number; // center, 0..1
+  y: number; // center, 0..1
   scale: number; // width as a fraction of the canvas
-  rotation: number; // derece
+  rotation: number; // degrees
 }
 
 export type KeyframeProp = 'x' | 'y' | 'scale' | 'rotation' | 'opacity' | 'volume';
@@ -56,7 +59,7 @@ export interface MaskSettings {
   shape: 'rect' | 'ellipse' | 'linear';
   x: number; // center within the layer, 0..1
   y: number;
-  width: number; // katmana oran
+  width: number; // fraction of the layer
   height: number;
   feather: number; // 0..0.5
   invert: boolean;
@@ -72,7 +75,21 @@ export interface Lut {
   id: string;
   name: string;
   size: number;
-  data: string; // base64, size³ × RGB bayt
+  data: string; // base64, size³ × RGB bytes
+}
+
+// A user- or AI-written GLSL transition or filter; see src/render/effects.ts for the API.
+export interface CustomEffect {
+  id: string;
+  name: string;
+  kind: 'transition' | 'filter';
+  code: string;
+}
+
+// An added font. With data it's an uploaded file (base64); without, a Google Fonts family.
+export interface CustomFont {
+  family: string;
+  data?: string;
 }
 
 // Auto reframe: horizontal focus over time (source seconds → 0..1)
@@ -101,8 +118,8 @@ export interface MediaClip {
   keyframes: Keyframe[];
   mask?: MaskSettings;
   chroma?: ChromaSettings;
-  fadeIn: number; // sn
-  fadeOut: number; // sn
+  fadeIn: number; // s
+  fadeOut: number; // s
   duck: boolean; // lower the volume while someone speaks
   slowMotion?: 'blend' | 'ai'; // smooth slow motion: frame blending or RIFE interpolation (on export)
   speedCurve?: SpeedCurve; // when set, speed is the curve's average
@@ -135,7 +152,7 @@ export interface TextClip {
   color: string;
   highlight: string;
   fontSize: number; // fraction of canvas height
-  font?: string; // Google Fonts ailesi
+  font?: string; // font family
   y: number; // 0..1
   words?: Word[];
 }
@@ -152,6 +169,8 @@ export interface Project {
   clips: Clip[];
   markers: number[];
   luts: Record<string, Lut>;
+  effects: Record<string, CustomEffect>;
+  fonts: Record<string, CustomFont>; // by family
 }
 
 export const DEFAULT_FILTER: FilterSettings = {
@@ -163,6 +182,7 @@ export const DEFAULT_FILTER: FilterSettings = {
   sharpen: 0,
   grayscale: false,
   lutIntensity: 1,
+  effectAmount: 1,
 };
 
 export const DEFAULT_TRANSFORM: Transform = { x: 0.5, y: 0.5, scale: 1, rotation: 0 };

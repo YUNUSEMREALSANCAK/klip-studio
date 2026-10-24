@@ -72,6 +72,8 @@
       12 geçiş, kesimdeki ◆ işaretine tıklayarak eklenir ve otomatik önizlenir. Parlaklık, kontrast, doygunluk, sıcaklık, keskinlik, vinyet, 9 filtre ön ayarı ve <b>.cube LUT</b> içe aktarma.
       <br><br>
       Şekil maskeleri (dikdörtgen, elips, doğrusal), <b>yeşil perde</b> (chroma key) ve dikey videolar için <b>bulanık tuval</b> arka planı.
+      <br><br>
+      GLSL ile yazılan <b>özel geçişler ve filtreler</b> (gl-transitions uyumlu; sizin ya da MCP üzerinden bir yapay zekanın yazdığı) ve dosyadan ya da Google Fonts'tan <b>özel yazı tipleri</b>.
     </td>
     <td width="50%" valign="top">
       <img src="docs/images/klip-studio-keyframes.jpg" alt="Döndürülmüş ve elips maskeli üst katman seçili; sağda hız ve anahtar kareli konum/boyut ayarları, zaman çizelgesinde klip üzerinde anahtar kare işaretleri, solda Asistan paneli" width="100%">
@@ -114,24 +116,24 @@ Modeller ilk kullanımda indirilir ve tarayıcı önbelleğinde kalır.
 
 ## Ajanlar için
 
-Editördeki her işlem tipli bir JSON komutudur (`src/core/commands.ts`). Aynı komutları dört yoldan çalıştırabilirsiniz:
+**Zaten abone olduğunuz yapay zeka uygulamasından kullanın.** Klip Stüdyo bir MCP sunucusuyla gelir; Claude Desktop, Claude Code, Cursor, Codex CLI, VS Code, Gemini CLI ve diğer MCP uygulamaları projenizi kendi aboneliğinizle düzenleyebilir. API anahtarı gerekmez, medyanız bilgisayarınızda kalır.
+
+```bash
+claude mcp add klip-studio -- npx -y klip-studio-mcp
+```
+
+Sonra Proje panelinde "Ajan bağlantısı (MCP)" seçeneğini açın ve isteyin: *"~/Movies/vlog.mp4'ü içe aktar, sessizlikleri kes, altyazı ekle, 9:16 yap ve dışa aktar"*. Her uygulama için kurulum: [docs/mcp.md](docs/mcp.md) (İngilizce).
+
+**Efekti tarif edin, yapay zeka yazsın.** Hazırda olmayan bir şey isteyin, örneğin *"eski klip cam gibi kırılarak geçsin"* ya da *"grenli, soluk bir 70'ler film görünümü"*. Yapay zeka bunu bir GLSL shader olarak yazar, editörde derler, hataları düzeltir, uygular ve ekran görüntüsüyle kontrol eder. Özel efektler projede saklanır; Geçiş ve Filtre sekmelerinden düzenlenebilir.
+
+Editördeki her işlem tipli bir JSON komutudur (`src/core/commands.ts`); aynı komutlar dört yoldan çalışır:
 
 | Yol | Nasıl |
 | --- | --- |
 | Arayüz | Her düğme aynı komutları kullanır; hepsi geri alınabilir |
 | Tarayıcı API'si | `await window.klip.execute({ name: 'split', time: 3.2 })`, `window.klip.state()`, `window.klip.screenshot()` |
-| MCP sunucusu | `npm run mcp`, Proje panelinde "Ajan bağlantısı (MCP)" açık |
-| Asistan sekmesi | Claude'a doğal dille yazın: "sessizlikleri kes, Türkçe altyazı ekle, 9:16 yap" |
-
-Claude Code'a MCP sunucusunu eklemek için:
-
-```bash
-claude mcp add klip-studio -- node /tam/yol/klip-studio/mcp/server.mjs
-```
-
-Araçlar: `klip_state`, `klip_commands`, `klip_execute`, `klip_screenshot`, `klip_import_file`.
-
-Asistan sekmesi kendi Anthropic API anahtarınızla çalışır. Anahtar yalnızca tarayıcınızda saklanır. Claude'a proje özeti ve önizleme kareleri gönderilir; medya dosyalarınız gönderilmez.
+| MCP sunucusu | Araçlar: `klip_state`, `klip_commands`, `klip_execute`, `klip_screenshot`, `klip_import_file`, `klip_export` |
+| Asistan sekmesi | Kendi Anthropic API anahtarınızla editörün içinde Claude ile sohbet (anahtar yalnızca tarayıcınızda; yalnız proje özeti ve önizleme kareleri gönderilir) |
 
 ## Kaputun altında
 

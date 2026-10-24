@@ -6,7 +6,7 @@ import { mixTimelineAudio } from './audio';
 export const DUCK_RATE = 20; // envelope samples/s
 const DUCK_LEVEL = 0.25;
 const THRESHOLD = 0.02; // RMS counted as speech
-const ATTACK = 0.15; // sn
+const ATTACK = 0.15; // s
 const RELEASE = 0.5;
 
 // Builds a speech envelope from audio not marked duck: 1 = full volume, DUCK_LEVEL = ducked.

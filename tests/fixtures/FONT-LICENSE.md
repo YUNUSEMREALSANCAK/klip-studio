@@ -1,0 +1,1 @@
+`bungee.ttf` is a Latin-letter subset of [Bungee](https://fonts.google.com/specimen/Bungee) by David Jonathan Ross, licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). It is used only by the font upload test.

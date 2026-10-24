@@ -30,10 +30,10 @@ export function targetCut(): Cut | null {
   return cutAt(best);
 }
 
-// Applies the transition and briefly plays around the cut to preview it.
-export function applyTransition(cut: Cut, type: TransitionType | null, duration?: number) {
+// Applies the transition and briefly plays around the cut to preview it. effectId selects a custom transition.
+export function applyTransition(cut: Cut, type: TransitionType | null, duration?: number, effectId?: string) {
   const s = useEditor.getState();
   const length = Math.min(duration ?? cut.to.transition?.duration ?? DEFAULT_DURATION, maxTransitionDuration(cut));
-  s.updateClip(cut.to.id, { transition: type ? { type, duration: length } : undefined } as Partial<MediaClip>);
+  s.updateClip(cut.to.id, { transition: type ? { type, duration: length, ...(effectId && { effectId }) } : undefined } as Partial<MediaClip>);
   if (type) s.previewRange(cut.to.start - length / 2 - 0.6, cut.to.start + length / 2 + 0.6);
 }

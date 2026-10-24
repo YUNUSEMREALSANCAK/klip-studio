@@ -6,7 +6,7 @@ import type { AspectRatio, Asset, Clip, Project } from './types';
 export interface Task {
   id: string;
   label: string;
-  progress: number; // 0..1, -1 = belirsiz
+  progress: number; // 0..1, -1 = indeterminate
   message?: string;
   error?: string;
 }
@@ -57,6 +57,8 @@ export const emptyProject = (): Project => ({
   clips: [],
   markers: [],
   luts: {},
+  effects: {},
+  fonts: {},
 });
 
 export const useEditor = create<EditorState>((set, get) => ({

@@ -58,9 +58,9 @@ test('the applied effects panel lists every transition and effect with its setti
 
   // Settings on a card change the clip.
   const swirl = card('Swirl');
-  await swirl.locator('input[type=range]').fill('0.5');
+  await swirl.locator('input[type=range]').first().fill('0.5');
   await expect(swirl).toContainText('0.5 s');
-  await card('Shake').locator('input[type=range]').fill('0.4');
+  await card('Shake').locator('input[type=range]').first().fill('0.4');
   await expect(card('Shake')).toContainText('40%');
 
   // The title selects the clip; × removes the item.

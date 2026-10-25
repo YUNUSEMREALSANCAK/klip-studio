@@ -1,7 +1,7 @@
 import type { TextClip } from '../core/types';
 import { ensureFont, familyOf } from './fonts';
 
-const IN_DURATION = 0.3;
+const DEFAULT_DURATION = 0.3;
 
 interface Animated {
   alpha: number;
@@ -12,12 +12,13 @@ interface Animated {
 
 function animate(clip: TextClip, t: number): Animated {
   const local = t - clip.start;
-  const p = Math.min(local / IN_DURATION, 1);
-  const out = Math.min((clip.start + clip.duration - t) / 0.15, 1);
+  const remaining = clip.start + clip.duration - t;
   const state: Animated = { alpha: 1, scale: 1, offsetY: 0, visibleChars: Infinity };
+  const inDuration = clip.animationInDuration ?? DEFAULT_DURATION;
+  const p = inDuration > 0 ? Math.min(local / inDuration, 1) : 1;
   switch (clip.animation) {
     case 'fade':
-      state.alpha = Math.min(p, out);
+      state.alpha = p;
       break;
     case 'pop': {
       const overshoot = 1 + Math.sin(p * Math.PI) * 0.12;
@@ -30,7 +31,27 @@ function animate(clip: TextClip, t: number): Animated {
       state.alpha = p;
       break;
     case 'typewriter':
-      state.visibleChars = Math.floor(local / 0.045);
+      state.visibleChars = Math.floor((local / Math.max(inDuration, 0.05)) * 7);
+      break;
+  }
+  // Older projects have no out animation: a fading text fades out briefly, as before.
+  const outType = clip.animationOut ?? (clip.animation === 'fade' ? 'fade' : 'none');
+  const outDuration = clip.animationOut ? (clip.animationOutDuration ?? DEFAULT_DURATION) : 0.15;
+  const q = outDuration > 0 ? Math.min(Math.max(remaining, 0) / outDuration, 1) : 1;
+  switch (outType) {
+    case 'fade':
+      state.alpha *= q;
+      break;
+    case 'pop':
+      state.scale *= 0.6 + 0.4 * q;
+      state.alpha *= q;
+      break;
+    case 'slideup':
+      state.offsetY -= (1 - q) * 0.04;
+      state.alpha *= q;
+      break;
+    case 'typewriter':
+      state.visibleChars = Math.min(state.visibleChars, Math.floor((remaining / Math.max(outDuration, 0.05)) * 7));
       break;
   }
   return state;

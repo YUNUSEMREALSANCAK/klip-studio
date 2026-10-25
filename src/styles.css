@@ -1364,3 +1364,34 @@ code {
 .applied-card-body > select {
   width: 100%;
 }
+.keyframe-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11.5px;
+}
+.keyframe-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+.keyframe-list .value {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.keyframe-list .btn.icon {
+  width: 20px;
+  height: 20px;
+}
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}

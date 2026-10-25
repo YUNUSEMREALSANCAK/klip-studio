@@ -12,23 +12,21 @@ import {
   type FilterSettings,
   type MaskSettings,
   type MediaClip,
-  type TransitionType,
 } from '../core/types';
 import { VOICE_PRESETS } from '../media/voice';
-import { TRANSITION_TYPES } from '../render/shaders';
-import { applyFilterEffect, resolveEffect } from './customActions';
-import { BLEND_MODES, CROP_SIDES, cropFromSides, cropSides, effectOptions, percent, seconds } from './clipOptions';
+import { BLEND_MODES, CROP_SIDES, cropFromSides, cropSides, percent, seconds } from './clipOptions';
 import { KeySlider, Section, Slider, Toggle } from './controls';
 import { freezeFrame, importLut, reverse, setSpeed, setSpeedCurve, voiceEffect } from './editActions';
 import { Icon } from './icons';
-import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
+import { targetCut } from './transitions';
+import { EffectSettings, MotionSettings, TransitionSettings } from './settings';
 import { useUi } from './uiStore';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
+
 export function MediaInspector({ clip }: { clip: MediaClip }) {
   const asset = useEditor((s) => s.assets[clip.assetId]);
   const luts = useEditor((s) => s.project.luts);
-  const effectMap = useEditor((s) => s.project.effects);
   useEditor((s) => s.project.clips); // recompute when cuts change
   const lutInput = useRef<HTMLInputElement>(null);
   const cut = clip.track === 'main' ? targetCut() : null;
@@ -212,41 +210,19 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
 
       {cut && (
         <Section title={`${tr('Transition')} · ${tr('Cut')} ${cut.index}`}>
-          <select
-            value={cut.to.transition ? (cut.to.transition.effectId ?? cut.to.transition.type) : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (effectOptions(effectMap, 'transition').some((fx) => fx.id === value))
-                applyTransition(cut, 'fade', undefined, resolveEffect(value, 'transition'));
-              else applyTransition(cut, (value || null) as TransitionType | null);
-            }}
-            style={{ width: '100%', marginBottom: 10 }}
-          >
-            <option value="">{tr('No transition')}</option>
-            {TRANSITION_TYPES.map((t) => (
-              <option key={t.type} value={t.type}>
-                {tr(t.label)}
-              </option>
-            ))}
-            {effectOptions(effectMap, 'transition').map((fx) => (
-              <option key={fx.id} value={fx.id}>
-                {fx.name}
-              </option>
-            ))}
-          </select>
-          {cut.to.transition && (
-            <Slider
-              label={tr('Duration')}
-              value={cut.to.transition.duration}
-              min={0.2}
-              max={maxTransitionDuration(cut)}
-              onCommit={checkpoint}
-              format={seconds}
-              onChange={(duration) =>
-                useEditor.getState().updateClip(cut.to.id, { transition: { ...cut.to.transition!, duration } } as Partial<MediaClip>, false)
-              }
-            />
-          )}
+          <TransitionSettings cut={cut} allowNone />
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Animation')} open={!!clip.animIn || !!clip.animOut}>
+          <MotionSettings clip={clip} />
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Effect')} open={!!clip.filter.effectId}>
+          <EffectSettings clip={clip} allowNone />
         </Section>
       )}
 
@@ -297,28 +273,6 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             </div>
             <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], clip)} />
           </div>
-          <div className="field">
-            <label>{tr('Effect')}</label>
-            <select value={clip.filter.effectId ?? ''} onChange={(e) => applyFilterEffect(clip.id, e.target.value || null)}>
-              <option value="">{tr('None')}</option>
-              {effectOptions(effectMap, 'filter').map((fx) => (
-                <option key={fx.id} value={fx.id}>
-                  {fx.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          {clip.filter.effectId && (
-            <Slider
-              label={tr('Effect amount')}
-              value={clip.filter.effectAmount}
-              min={0}
-              max={1}
-              onCommit={checkpoint}
-              format={percent}
-              onChange={(effectAmount) => setFilter({ effectAmount })}
-            />
-          )}
           {clip.filter.lutId && (
             <Slider
               label={tr('LUT intensity')}

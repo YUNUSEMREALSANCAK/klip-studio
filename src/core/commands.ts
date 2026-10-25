@@ -13,6 +13,8 @@ import {
   type AspectRatio,
   type Clip,
   type CustomEffect,
+  type Easing,
+  type EffectParams,
   type KeyframeProp,
   type MediaClip,
   type TextClip,
@@ -41,11 +43,11 @@ export type Command =
   | { name: 'remove_clip'; clipId: string }
   | { name: 'split'; time: number; clipId?: string }
   | { name: 'delete_range'; start: number; end: number }
-  | { name: 'set_transition'; toClipId: string; type?: TransitionType | null; effectId?: string; duration?: number }
+  | { name: 'set_transition'; toClipId: string; type?: TransitionType | null; effectId?: string; duration?: number; easing?: Easing; params?: EffectParams }
   | { name: 'create_effect'; kind: CustomEffect['kind']; title: string; code: string }
   | { name: 'update_effect'; effectId: string; title?: string; code?: string }
   | { name: 'delete_effect'; effectId: string }
-  | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number }
+  | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number; fadeIn?: number; fadeOut?: number; params?: EffectParams }
   | { name: 'add_font'; family: string }
   | { name: 'set_keyframe'; clipId: string; prop: KeyframeProp; time: number; value: number }
   | { name: 'clear_keyframes'; clipId: string; prop?: KeyframeProp }
@@ -108,7 +110,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'update_clip',
     description:
-      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground (people), slowMotion ("blend" | "ai"), transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}, crop {x,y,width,height} (0–1 of the source from the top left), blend (overlays: normal|multiply|screen|add|lighten|darken), mask {shape: rect|ellipse|linear, x, y, width, height, feather, invert}, chroma {color "#00ff00", similarity, smoothness} (green screen). Text: text, preset, animation, color, highlight, fontSize, y, font, outlineColor, outlineWidth (0–0.3), shadow, boxColor, letterSpacing. Both: start, duration. Use null to remove crop, mask or chroma.',
+      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut (audio), animIn / animOut {type: fade|zoom|slideleft|slideright|slideup|slidedown|spin, duration} (picture in/out animation), duck, removeBackground (people), slowMotion ("blend" | "ai"), transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}, crop {x,y,width,height} (0–1 of the source from the top left), blend (overlays: normal|multiply|screen|add|lighten|darken), mask {shape: rect|ellipse|linear, x, y, width, height, feather, invert}, chroma {color "#00ff00", similarity, smoothness} (green screen). Text: text, preset, animation (in), animationOut, animationInDuration, animationOutDuration (animations: none|fade|pop|slideup|typewriter), color, highlight, fontSize, y, font, outlineColor, outlineWidth (0–0.3), shadow, boxColor, letterSpacing. Both: start, duration. Use null to remove crop, mask, chroma or an animation.',
     parameters: { clipId: { type: 'string' }, changes: { type: 'object' } },
     required: ['clipId', 'changes'],
   },
@@ -134,6 +136,8 @@ export const COMMAND_SPECS: CommandSpec[] = [
       type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] },
       effectId: { type: 'string', description: `custom transition id, or a built-in one: ${libraryIds('transition')}` },
       duration: { type: 'number' },
+      easing: { type: 'string', enum: ['linear', 'easeIn', 'easeOut', 'easeInOut'] },
+      params: { type: 'object', description: 'values for the custom transition\'s parameters (its uniform declarations), e.g. {"strength": 8}' },
     },
     required: ['toClipId'],
   },
@@ -162,7 +166,14 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'set_filter',
     description: `Applies a video effect to a video or image clip, or removes it with null. effectId comes from create_effect or is a built-in animated effect: ${libraryIds('filter')}. amount 0–1 (default 1).`,
-    parameters: { clipId: { type: 'string' }, effectId: { type: ['string', 'null'] }, amount: { type: 'number' } },
+    parameters: {
+      clipId: { type: 'string' },
+      effectId: { type: ['string', 'null'] },
+      amount: { type: 'number' },
+      fadeIn: { type: 'number', description: 'seconds the effect takes to ramp up from the clip start' },
+      fadeOut: { type: 'number', description: 'seconds it takes to ramp down to the clip end' },
+      params: { type: 'object', description: 'values for the effect\'s parameters (its uniform declarations), e.g. {"strength": 2, "speed": 0.5}' },
+    },
     required: ['clipId', 'effectId'],
   },
   {
@@ -293,7 +304,8 @@ function requireClip(id: string): Clip {
 }
 
 // Starting values when an agent sets only part of an optional object.
-const FIELD_DEFAULTS: Record<string, object> = { mask: DEFAULT_MASK, chroma: DEFAULT_CHROMA, crop: FULL_CROP };
+const MOTION_DEFAULT = { type: 'fade', duration: 0.5 };
+const FIELD_DEFAULTS: Record<string, object> = { mask: DEFAULT_MASK, chroma: DEFAULT_CHROMA, crop: FULL_CROP, animIn: MOTION_DEFAULT, animOut: MOTION_DEFAULT };
 
 // Merges allowed fields; nested objects (transform, filter) are partially updated.
 function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Clip> {
@@ -305,6 +317,9 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
           'text',
           'preset',
           'animation',
+          'animationOut',
+          'animationInDuration',
+          'animationOutDuration',
           'color',
           'highlight',
           'fontSize',
@@ -327,6 +342,8 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
           'fadeOut',
           'duck',
           'removeBackground',
+          'animIn',
+          'animOut',
           'transform',
           'filter',
           'slowMotion',
@@ -400,8 +417,13 @@ export async function execute(command: Command): Promise<unknown> {
       const duration = Math.min(command.duration ?? clip.transition?.duration ?? 0.8, main[index - 1].duration, clip.duration);
       if (command.effectId) (await import('../ui/customActions')).resolveEffect(command.effectId, 'transition');
       const type = command.type ?? (command.effectId ? 'fade' : null);
+      const keep = clip.transition?.effectId === command.effectId ? clip.transition?.params : undefined;
+      const params = command.params ? { ...keep, ...command.params } : keep;
+      const easing = command.easing ?? clip.transition?.easing;
       s.updateClip(clip.id, {
-        transition: type ? { type, duration, ...(command.effectId && { effectId: command.effectId }) } : undefined,
+        transition: type
+          ? { type, duration, ...(command.effectId && { effectId: command.effectId }), ...(easing && { easing }), ...(params && { params }) }
+          : undefined,
       } as Partial<MediaClip>);
       return { ok: true };
     }
@@ -424,6 +446,13 @@ export async function execute(command: Command): Promise<unknown> {
     case 'set_filter': {
       const { applyFilterEffect } = await import('../ui/customActions');
       applyFilterEffect(command.clipId, command.effectId, command.amount);
+      const clip = requireMedia(command.clipId);
+      const extra = {
+        ...(command.fadeIn !== undefined && { effectFadeIn: command.fadeIn }),
+        ...(command.fadeOut !== undefined && { effectFadeOut: command.fadeOut }),
+        ...(command.params && { effectParams: { ...clip.filter.effectParams, ...command.params } }),
+      };
+      if (command.effectId && Object.keys(extra).length) s.updateClip(clip.id, { filter: { ...clip.filter, ...extra } }, false);
       return { ok: true };
     }
     case 'set_keyframe': {

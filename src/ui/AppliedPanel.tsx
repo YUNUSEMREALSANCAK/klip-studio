@@ -1,32 +1,20 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { appliedItems, type AppliedItem, type AppliedKind } from '../core/applied';
 import { SPEED_CURVES } from '../core/speed';
 import { useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
-import {
-  DEFAULT_FILTER,
-  type Clip,
-  type CustomEffect,
-  type FilterSettings,
-  type MaskSettings,
-  type MediaClip,
-  type TextAnimation,
-  type TextClip,
-  type TransitionType,
-} from '../core/types';
+import { DEFAULT_FILTER, type Clip, type CustomEffect, type FilterSettings, type MaskSettings, type MediaClip, type TextClip } from '../core/types';
 import { tr } from '../i18n';
-import { isLibraryId } from '../render/effectLibrary';
-import { TRANSITION_TYPES } from '../render/shaders';
-import { BLEND_MODES, CROP_SIDES, cropFromSides, cropSides, effectName, effectOptions, percent, seconds, transitionLabel } from './clipOptions';
+import { BLEND_MODES, CROP_SIDES, cropFromSides, cropSides, effectName, percent, seconds, transitionLabel } from './clipOptions';
 import { Slider, Toggle } from './controls';
-import { applyFilterEffect, resolveEffect } from './customActions';
+import { applyFilterEffect } from './customActions';
 import { setSpeed, setSpeedCurve } from './editActions';
-import { EffectEditor } from './EffectEditor';
 import { Icon } from './icons';
 import { usePanels } from './panelSizes';
-import { applyTransition, cutBefore, maxTransitionDuration } from './transitions';
+import { EffectSettings, MOTIONS, MotionSettings, TEXT_ANIMATIONS, TextAnimationSettings, TransitionSettings } from './settings';
+import { applyTransition, cutBefore } from './transitions';
 
-// Every transition and feature used in the video, in timeline order, each on a card with its own settings.
+// Every transition and feature used in the video, in timeline order, each on a card with all of its settings.
 
 const KIND: Record<AppliedKind, { label: string; icon: string }> = {
   transition: { label: 'Transition', icon: 'transition' },
@@ -35,7 +23,8 @@ const KIND: Record<AppliedKind, { label: string; icon: string }> = {
   lut: { label: 'LUT', icon: 'filter' },
   speed: { label: 'Speed', icon: 'speed' },
   slowMotion: { label: 'Smooth slow motion', icon: 'speed' },
-  fade: { label: 'Fade', icon: 'volume' },
+  motion: { label: 'Animation', icon: 'move' },
+  fade: { label: 'Audio fade', icon: 'volume' },
   blend: { label: 'Blend', icon: 'mask' },
   crop: { label: 'Crop', icon: 'crop' },
   mask: { label: 'Mask', icon: 'mask' },
@@ -45,17 +34,34 @@ const KIND: Record<AppliedKind, { label: string; icon: string }> = {
   textAnimation: { label: 'Text animation', icon: 'text' },
 };
 
-const ANIMATIONS: [TextAnimation, string][] = [
-  ['fade', 'Fade'],
-  ['pop', 'Pop'],
-  ['slideup', 'Slide up'],
-  ['typewriter', 'Typewriter'],
+const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
+const KEYFRAME_PROPS: Record<string, string> = {
+  x: 'Horizontal position',
+  y: 'Vertical position',
+  scale: 'Size',
+  rotation: 'Rotation',
+  opacity: 'Opacity',
+  volume: 'Volume',
+};
+const COLOR_SLIDERS: [keyof FilterSettings, string, number][] = [
+  ['brightness', 'Brightness', -1],
+  ['contrast', 'Contrast', -1],
+  ['saturation', 'Saturation', -1],
+  ['temperature', 'Temperature', -1],
+  ['sharpen', 'Sharpness', 0],
+  ['vignette', 'Vignette', 0],
+];
+const MASK_SHAPES: [MaskSettings['shape'], string][] = [
+  ['rect', 'Rectangle'],
+  ['ellipse', 'Ellipse'],
+  ['linear', 'Linear'],
 ];
 
 const editor = () => useEditor.getState();
 const checkpoint = () => editor().checkpoint();
 const update = (clip: Clip, patch: Partial<MediaClip> | Partial<TextClip>, record = false) => editor().updateClip(clip.id, patch as Partial<Clip>, record);
 const setFilter = (clip: MediaClip, patch: Partial<FilterSettings>, record = false) => update(clip, { filter: { ...clip.filter, ...patch } }, record);
+const labelOf = <T extends string>(list: [T, string][], id: T | undefined) => tr(list.find(([key]) => key === id)?.[1] ?? '');
 
 export function AppliedPanel() {
   const project = useEditor((s) => s.project);
@@ -154,90 +160,114 @@ interface CardContent {
 function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, CustomEffect>): CardContent | null {
   if (clip.type === 'text') {
     if (item.kind !== 'textAnimation') return null;
+    const names = [
+      clip.animation !== 'none' && labelOf(TEXT_ANIMATIONS, clip.animation),
+      clip.animationOut && clip.animationOut !== 'none' && labelOf(TEXT_ANIMATIONS, clip.animationOut),
+    ];
     return {
-      name: tr(ANIMATIONS.find(([id]) => id === clip.animation)?.[1] ?? clip.animation),
-      remove: () => update(clip, { animation: 'none' }, true),
-      body: (
-        <div className="chips">
-          {ANIMATIONS.map(([id, label]) => (
-            <button key={id} className={`chip ${clip.animation === id ? 'active' : ''}`} onClick={() => update(clip, { animation: id }, true)}>
-              {tr(label)}
-            </button>
-          ))}
-        </div>
-      ),
+      name: names.filter(Boolean).join(' → '),
+      remove: () => update(clip, { animation: 'none', animationOut: 'none' }, true),
+      body: <TextAnimationSettings clip={clip} />,
     };
   }
 
   switch (item.kind) {
-    case 'transition':
-      return transitionCard(clip, effects);
-    case 'effect': {
-      const id = clip.filter.effectId!;
+    case 'transition': {
+      const cut = cutBefore(clip.id);
+      const transition = clip.transition;
+      if (!cut || !transition) return null;
       return {
-        name: effectName(effects, id),
-        remove: () => applyFilterEffect(clip.id, null),
-        body: <EffectBody clip={clip} effects={effects} />,
+        name: transition.effectId ? effectName(effects, transition.effectId) : transitionLabel(transition.type),
+        remove: () => applyTransition(cut, null),
+        body: <TransitionSettings cut={cut} />,
       };
     }
+    case 'effect':
+      return { name: effectName(effects, clip.filter.effectId!), remove: () => applyFilterEffect(clip.id, null), body: <EffectSettings clip={clip} /> };
     case 'color':
       return {
         name: tr('Adjusted'),
         remove: () =>
-          update(
-            clip,
-            {
-              filter: {
-                ...DEFAULT_FILTER,
-                lutId: clip.filter.lutId,
-                lutIntensity: clip.filter.lutIntensity,
-                effectId: clip.filter.effectId,
-                effectAmount: clip.filter.effectAmount,
-              },
-            },
-            true,
-          ),
-        body: <ColorBody clip={clip} />,
-      };
-    case 'lut':
-      return {
-        name: editor().project.luts[clip.filter.lutId!]?.name ?? 'LUT',
-        remove: () => setFilter(clip, { lutId: undefined }, true),
+          update(clip, { filter: { ...clip.filter, ...Object.fromEntries(COLOR_SLIDERS.map(([key]) => [key, DEFAULT_FILTER[key]])), grayscale: false } }, true),
         body: (
-          <Slider
-            label={tr('Intensity')}
-            value={clip.filter.lutIntensity}
-            min={0}
-            max={1}
-            format={percent}
-            onCommit={checkpoint}
-            onChange={(lutIntensity) => setFilter(clip, { lutIntensity })}
-          />
+          <>
+            {COLOR_SLIDERS.map(([key, label, min]) => (
+              <Slider
+                key={key}
+                label={tr(label)}
+                value={clip.filter[key] as number}
+                min={min}
+                max={1}
+                onCommit={checkpoint}
+                onChange={(value) => setFilter(clip, { [key]: value })}
+              />
+            ))}
+            <Toggle label={tr('Black & white')} on={clip.filter.grayscale} onChange={(grayscale) => setFilter(clip, { grayscale }, true)} />
+          </>
         ),
       };
+    case 'lut': {
+      const luts = editor().project.luts;
+      return {
+        name: luts[clip.filter.lutId!]?.name ?? 'LUT',
+        remove: () => setFilter(clip, { lutId: undefined }, true),
+        body: (
+          <>
+            <select value={clip.filter.lutId} onChange={(e) => setFilter(clip, { lutId: e.target.value }, true)}>
+              {Object.values(luts).map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+            <Slider
+              label={tr('Intensity')}
+              value={clip.filter.lutIntensity}
+              min={0}
+              max={1}
+              format={percent}
+              onCommit={checkpoint}
+              onChange={(lutIntensity) => setFilter(clip, { lutIntensity })}
+            />
+          </>
+        ),
+      };
+    }
     case 'speed':
       return {
         name: clip.speedCurve ? tr(clip.speedCurve.name) : `${Number(clip.speed.toFixed(2))}×`,
         remove: () => setSpeed(clip, 1),
-        body: clip.speedCurve ? (
-          <select value={clip.speedCurve.name} onChange={(e) => setSpeedCurve(clip, SPEED_CURVES.find((c) => c.name === e.target.value) ?? null)}>
-            {SPEED_CURVES.map((c) => (
-              <option key={c.name} value={c.name}>
-                {tr(c.name)}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <Slider
-            label={tr('Speed')}
-            value={clip.speed}
-            min={0.25}
-            max={4}
-            step={0.05}
-            format={(v) => `${v.toFixed(2)}×`}
-            onCommit={() => {}}
-            onChange={(v) => setSpeed(clip, v)}
-          />
+        body: (
+          <>
+            <div className="chips">
+              {SPEEDS.map((v) => (
+                <button key={v} className={`chip ${!clip.speedCurve && clip.speed === v ? 'active' : ''}`} onClick={() => setSpeed(clip, v)}>
+                  {v}×
+                </button>
+              ))}
+            </div>
+            <Slider
+              label={tr('Custom speed')}
+              value={clip.speed}
+              min={0.25}
+              max={4}
+              step={0.05}
+              format={(v) => `${v.toFixed(2)}×`}
+              onCommit={() => {}}
+              onChange={(v) => setSpeed(clip, v)}
+            />
+            <div className="field-label">{tr('Speed curve')}</div>
+            <div className="chips">
+              <button className={`chip ${!clip.speedCurve ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, null)}>
+                {tr('None')}
+              </button>
+              {SPEED_CURVES.map((curve) => (
+                <button key={curve.name} className={`chip ${clip.speedCurve?.name === curve.name ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, curve)}>
+                  {tr(curve.name)}
+                </button>
+              ))}
+            </div>
+          </>
         ),
       };
     case 'slowMotion':
@@ -254,9 +284,18 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
           </div>
         ),
       };
-    case 'fade':
+    case 'motion':
       return {
-        name: [clip.fadeIn > 0 && tr('In'), clip.fadeOut > 0 && tr('Out')].filter(Boolean).join(' + '),
+        name: [clip.animIn && labelOf(MOTIONS, clip.animIn.type), clip.animOut && labelOf(MOTIONS, clip.animOut.type)].filter(Boolean).join(' → '),
+        remove: () => update(clip, { animIn: undefined, animOut: undefined }, true),
+        body: <MotionSettings clip={clip} />,
+      };
+    case 'fade': {
+      const max = Math.max(0.1, Math.min(5, clip.duration / 2));
+      return {
+        name: [clip.fadeIn > 0 && `${tr('In')} ${seconds(clip.fadeIn)}`, clip.fadeOut > 0 && `${tr('Out')} ${seconds(clip.fadeOut)}`]
+          .filter(Boolean)
+          .join(' · '),
         remove: () => update(clip, { fadeIn: 0, fadeOut: 0 }, true),
         body: (
           <>
@@ -264,7 +303,7 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
               label={tr('Fade in')}
               value={clip.fadeIn}
               min={0}
-              max={Math.min(5, clip.duration / 2)}
+              max={max}
               step={0.1}
               format={seconds}
               onCommit={checkpoint}
@@ -274,27 +313,48 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
               label={tr('Fade out')}
               value={clip.fadeOut}
               min={0}
-              max={Math.min(5, clip.duration / 2)}
+              max={max}
               step={0.1}
               format={seconds}
               onCommit={checkpoint}
               onChange={(fadeOut) => update(clip, { fadeOut })}
             />
+            <Slider
+              label={tr('Volume')}
+              value={clip.volume}
+              min={0}
+              max={2}
+              format={percent}
+              onCommit={checkpoint}
+              onChange={(volume) => update(clip, { volume })}
+            />
           </>
         ),
       };
+    }
     case 'blend':
       return {
-        name: tr(BLEND_MODES.find(([id]) => id === clip.blend)?.[1] ?? ''),
+        name: labelOf(BLEND_MODES, clip.blend),
         remove: () => update(clip, { blend: 'normal' }, true),
         body: (
-          <select value={clip.blend} onChange={(e) => update(clip, { blend: e.target.value as MediaClip['blend'] }, true)}>
-            {BLEND_MODES.map(([id, label]) => (
-              <option key={id} value={id}>
-                {tr(label)}
-              </option>
-            ))}
-          </select>
+          <>
+            <select value={clip.blend} onChange={(e) => update(clip, { blend: e.target.value as MediaClip['blend'] }, true)}>
+              {BLEND_MODES.map(([id, label]) => (
+                <option key={id} value={id}>
+                  {tr(label)}
+                </option>
+              ))}
+            </select>
+            <Slider
+              label={tr('Opacity')}
+              value={clip.opacity}
+              min={0}
+              max={1}
+              format={percent}
+              onCommit={checkpoint}
+              onChange={(opacity) => update(clip, { opacity })}
+            />
+          </>
         ),
       };
     case 'crop':
@@ -318,10 +378,41 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
       const mask = clip.mask!;
       const setMask = (patch: Partial<MaskSettings>, record = false) => update(clip, { mask: { ...mask, ...patch } }, record);
       return {
-        name: tr({ rect: 'Rectangle', ellipse: 'Ellipse', linear: 'Linear' }[mask.shape]),
+        name: labelOf(MASK_SHAPES, mask.shape),
         remove: () => update(clip, { mask: undefined }, true),
         body: (
           <>
+            <div className="chips">
+              {MASK_SHAPES.map(([shape, label]) => (
+                <button key={shape} className={`chip ${mask.shape === shape ? 'active' : ''}`} onClick={() => setMask({ shape }, true)}>
+                  {tr(label)}
+                </button>
+              ))}
+            </div>
+            <Slider label={tr('Horizontal position')} value={mask.x} min={0} max={1} format={percent} onCommit={checkpoint} onChange={(x) => setMask({ x })} />
+            <Slider label={tr('Vertical position')} value={mask.y} min={0} max={1} format={percent} onCommit={checkpoint} onChange={(y) => setMask({ y })} />
+            {mask.shape !== 'linear' && (
+              <>
+                <Slider
+                  label={tr('Width')}
+                  value={mask.width}
+                  min={0.05}
+                  max={1.5}
+                  format={percent}
+                  onCommit={checkpoint}
+                  onChange={(width) => setMask({ width })}
+                />
+                <Slider
+                  label={tr('Height')}
+                  value={mask.height}
+                  min={0.05}
+                  max={1.5}
+                  format={percent}
+                  onCommit={checkpoint}
+                  onChange={(height) => setMask({ height })}
+                />
+              </>
+            )}
             <Slider
               label={tr('Feather')}
               value={mask.feather}
@@ -343,6 +434,10 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
         remove: () => update(clip, { chroma: undefined }, true),
         body: (
           <>
+            <div className="toggle">
+              <span>{tr('Key color')}</span>
+              <input type="color" value={chroma.color} onFocus={checkpoint} onChange={(e) => update(clip, { chroma: { ...chroma, color: e.target.value } })} />
+            </div>
             <Slider
               label={tr('Similarity')}
               value={chroma.similarity}
@@ -367,135 +462,34 @@ function cardContent(item: AppliedItem, clip: Clip, effects: Record<string, Cust
     }
     case 'background':
       return { name: tr('People'), remove: () => update(clip, { removeBackground: false }, true) };
-    case 'keyframes': {
-      const props = [...new Set(clip.keyframes.map((k) => k.prop))];
+    case 'keyframes':
       return {
         name: `${clip.keyframes.length}`,
         remove: () => update(clip, { keyframes: [] }, true),
-        body: <div className="hint">{props.map((p) => tr(KEYFRAME_PROPS[p])).join(', ')}</div>,
+        body: (
+          <ul className="keyframe-list">
+            {[...clip.keyframes]
+              .sort((a, b) => a.time - b.time)
+              .map((k) => (
+                <li key={`${k.prop}-${k.time}`}>
+                  <button className="link" onClick={() => editor().setTime(clip.start + k.time)}>
+                    {formatTime(clip.start + k.time)}
+                  </button>
+                  <span>{tr(KEYFRAME_PROPS[k.prop])}</span>
+                  <span className="value">{k.prop === 'rotation' ? `${Math.round(k.value)}°` : percent(k.value)}</span>
+                  <button
+                    className="btn ghost icon"
+                    title={tr('Remove')}
+                    onClick={() => update(clip, { keyframes: clip.keyframes.filter((other) => other !== k) }, true)}
+                  >
+                    <Icon name="close" size={12} />
+                  </button>
+                </li>
+              ))}
+          </ul>
+        ),
       };
-    }
     default:
       return null;
   }
-}
-
-const KEYFRAME_PROPS: Record<string, string> = {
-  x: 'Horizontal position',
-  y: 'Vertical position',
-  scale: 'Size',
-  rotation: 'Rotation',
-  opacity: 'Opacity',
-  volume: 'Volume',
-};
-
-function transitionCard(clip: MediaClip, effects: Record<string, CustomEffect>): CardContent | null {
-  const cut = cutBefore(clip.id);
-  const transition = clip.transition;
-  if (!cut || !transition) return null;
-  const options = effectOptions(effects, 'transition');
-  return {
-    name: transition.effectId ? effectName(effects, transition.effectId) : transitionLabel(transition.type),
-    remove: () => applyTransition(cut, null),
-    body: (
-      <>
-        <select
-          value={transition.effectId ?? transition.type}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (options.some((o) => o.id === value)) applyTransition(cut, 'fade', undefined, resolveEffect(value, 'transition'));
-            else applyTransition(cut, value as TransitionType);
-          }}
-        >
-          {TRANSITION_TYPES.map((t) => (
-            <option key={t.type} value={t.type}>
-              {tr(t.label)}
-            </option>
-          ))}
-          {options.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.name}
-            </option>
-          ))}
-        </select>
-        <Slider
-          label={tr('Duration')}
-          value={transition.duration}
-          min={0.2}
-          max={maxTransitionDuration(cut)}
-          step={0.1}
-          format={seconds}
-          onCommit={checkpoint}
-          onChange={(duration) => update(clip, { transition: { ...transition, duration } })}
-        />
-        <button className="btn small" onClick={() => applyTransition(cut, transition.type, undefined, transition.effectId)}>
-          {tr('▶ Preview transition')}
-        </button>
-      </>
-    ),
-  };
-}
-
-function EffectBody({ clip, effects }: { clip: MediaClip; effects: Record<string, CustomEffect> }) {
-  const [editing, setEditing] = useState(false);
-  const id = clip.filter.effectId!;
-  const custom = !isLibraryId(id) ? effects[id] : undefined;
-  return (
-    <>
-      <Slider
-        label={tr('Intensity')}
-        value={clip.filter.effectAmount}
-        min={0}
-        max={1}
-        format={percent}
-        onCommit={checkpoint}
-        onChange={(effectAmount) => setFilter(clip, { effectAmount })}
-      />
-      <div className="row">
-        <select value={id} onChange={(e) => applyFilterEffect(clip.id, e.target.value)}>
-          {effectOptions(effects, 'filter').map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.name}
-            </option>
-          ))}
-        </select>
-        {custom && (
-          <button className="btn small" style={{ flex: 'none' }} onClick={() => setEditing(true)}>
-            {tr('Edit code')}
-          </button>
-        )}
-      </div>
-      {editing && custom && <EffectEditor kind="filter" effect={custom} onClose={() => setEditing(false)} />}
-    </>
-  );
-}
-
-const COLOR_SLIDERS: [keyof FilterSettings, string, number][] = [
-  ['brightness', 'Brightness', -1],
-  ['contrast', 'Contrast', -1],
-  ['saturation', 'Saturation', -1],
-  ['temperature', 'Temperature', -1],
-  ['sharpen', 'Sharpness', 0],
-  ['vignette', 'Vignette', 0],
-];
-
-// Only the adjustments that were changed, so the card stays short.
-function ColorBody({ clip }: { clip: MediaClip }) {
-  const changed = COLOR_SLIDERS.filter(([key]) => clip.filter[key] !== DEFAULT_FILTER[key]);
-  return (
-    <>
-      {changed.map(([key, label, min]) => (
-        <Slider
-          key={key}
-          label={tr(label)}
-          value={clip.filter[key] as number}
-          min={min}
-          max={1}
-          onCommit={checkpoint}
-          onChange={(value) => setFilter(clip, { [key]: value })}
-        />
-      ))}
-      {clip.filter.grayscale && <Toggle label={tr('Black & white')} on onChange={(grayscale) => setFilter(clip, { grayscale }, true)} />}
-    </>
-  );
 }

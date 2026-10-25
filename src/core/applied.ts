@@ -12,6 +12,7 @@ export type AppliedKind =
   | 'speed'
   | 'slowMotion'
   | 'fade'
+  | 'motion'
   | 'blend'
   | 'crop'
   | 'mask'
@@ -38,6 +39,7 @@ function mediaKinds(clip: MediaClip): AppliedKind[] {
     ['lut', !!clip.filter.lutId],
     ['speed', clip.speed !== 1 || !!clip.speedCurve],
     ['slowMotion', !!clip.slowMotion],
+    ['motion', !!clip.animIn || !!clip.animOut],
     ['fade', clip.fadeIn > 0 || clip.fadeOut > 0],
     ['blend', clip.track === 'overlay' && !!clip.blend && clip.blend !== 'normal'],
     ['crop', !!clip.crop],
@@ -49,7 +51,9 @@ function mediaKinds(clip: MediaClip): AppliedKind[] {
   return checks.filter(([, on]) => on).map(([kind]) => kind);
 }
 
-const kindsOf = (clip: Clip): AppliedKind[] => (clip.type === 'text' ? (clip.animation !== 'none' ? ['textAnimation'] : []) : mediaKinds(clip));
+const textAnimated = (clip: Clip) => clip.type === 'text' && (clip.animation !== 'none' || (!!clip.animationOut && clip.animationOut !== 'none'));
+
+const kindsOf = (clip: Clip): AppliedKind[] => (clip.type === 'text' ? (textAnimated(clip) ? ['textAnimation'] : []) : mediaKinds(clip));
 
 export function appliedItems(project: Project): AppliedItem[] {
   const items: AppliedItem[] = [];

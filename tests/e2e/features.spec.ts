@@ -118,3 +118,47 @@ test('freeze frame and reverse work as commands', async ({ page }) => {
   expect((await run(page, { name: 'reverse_clip', clipId: first.id })).error).toBeUndefined();
   expect((await state(page)).assets.some((a) => a.name.includes('(reversed)'))).toBe(true);
 });
+
+test('effects have parameters and fades, clips have in/out animations, transitions have easing', async ({ page }) => {
+  await importMedia(page, 'gradient.webm');
+  await addToMain(page, 0);
+  await addToMain(page, 0);
+  const [first, second] = (await state(page)).clips;
+
+  // A parameter declared in the code drives the render.
+  const { effectId } = await run(page, {
+    name: 'create_effect',
+    kind: 'filter',
+    title: 'Red level',
+    code: 'uniform float level; // = 0.0 [0, 1]\nvec4 effect(vec4 color, vec2 uv) { return vec4(level, 0.0, 0.0, 1.0); }',
+  });
+  await run(page, { name: 'set_filter', clipId: first.id, effectId, params: { level: 1 } });
+  await run(page, { name: 'seek', time: 2 });
+  await expect.poll(async () => (await pixel(page, 0.5, 0.5))[0]).toBeGreaterThan(240);
+
+  // The effect fades in over 2 s.
+  await run(page, { name: 'set_filter', clipId: first.id, effectId, fadeIn: 2 });
+  await run(page, { name: 'seek', time: 0.1 });
+  await expect.poll(async () => (await pixel(page, 0.5, 0.5))[0]).toBeLessThan(120);
+
+  // A fade-in animation starts the second clip from black.
+  await run(page, { name: 'update_clip', clipId: second.id, changes: { animIn: { type: 'fade', duration: 1 } } });
+  await run(page, { name: 'seek', time: second.start + 0.02 });
+  await expect.poll(() => litRatio(page)).toBeLessThan(0.1);
+  await run(page, { name: 'seek', time: second.start + 1.5 });
+  await expect.poll(() => litRatio(page)).toBeGreaterThan(0.9);
+
+  await run(page, { name: 'set_transition', toClipId: second.id, effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });
+  expect(await clipField(page, second.id, 'transition')).toMatchObject({ effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });
+
+  // Every card carries the full set of settings.
+  const card = (name: string) => page.locator('.applied-card').filter({ has: page.locator('.applied-card-title', { hasText: name }) });
+  await expect(card('Red level')).toContainText('Level');
+  await expect(card('Red level')).toContainText('Fade in');
+  await expect(card('Red level')).toContainText('Fade out');
+  await expect(card('Swirl')).toContainText('Easing');
+  await expect(card('Swirl')).toContainText('Strength');
+  await expect(card('Fade')).toContainText('Out');
+  await card('Fade').locator('select').last().selectOption('zoom');
+  expect(await clipField(page, second.id, 'animOut')).toEqual({ type: 'zoom', duration: 0.5 });
+});

@@ -1,5 +1,5 @@
 import { isActiveAt, sortedTrack, sourceTime, transitionAt, type TransitionState } from '../core/timeline';
-import { animatedState } from '../core/animation';
+import { animatedState, EASINGS, withMotion } from '../core/animation';
 import { DEFAULT_TRANSFORM, type Asset, type Clip, type MediaClip, type Project, type ReframeTrack, type TextClip } from '../core/types';
 import type { Compositor, LutData, Mask } from './compositor';
 import { drawText } from './text';
@@ -55,9 +55,17 @@ export function focusAt(reframe: ReframeTrack | undefined, time: number) {
   return centers[centers.length - 1];
 }
 
+// The clip's custom filter at t; its strength ramps with the effect's fade in and fade out.
 function effectFor(project: Project, clip: MediaClip, t: number) {
   const effect = clip.filter.effectId ? project.effects[clip.filter.effectId] : undefined;
-  return effect?.kind === 'filter' ? { code: effect.code, amount: clip.filter.effectAmount, time: t - clip.start } : undefined;
+  if (effect?.kind !== 'filter') return undefined;
+  const local = t - clip.start;
+  const { effectFadeIn = 0, effectFadeOut = 0 } = clip.filter;
+  let ramp = 1;
+  if (effectFadeIn > 0) ramp = Math.min(ramp, local / effectFadeIn);
+  if (effectFadeOut > 0) ramp = Math.min(ramp, (clip.duration - local) / effectFadeOut);
+  const amount = clip.filter.effectAmount * Math.max(0, Math.min(1, ramp));
+  return { code: effect.code, amount, time: local, params: clip.filter.effectParams ?? {} };
 }
 
 const lutCache = new Map<string, LutData>();
@@ -86,7 +94,7 @@ function drawMedia(
   const isOverlay = clip.track === 'overlay';
   const focusX = focusAt(clip.reframe, clipSourceTime(clip, t, assets));
   const mode = isOverlay ? 'overlay' : focusX !== undefined ? 'cover' : 'contain';
-  const state = animatedState(clip, t);
+  const state = withMotion(clip, animatedState(clip, t), t);
 
   // Blurred canvas: a filled, blurred and slightly darkened copy of the main video is drawn behind it.
   if (!isOverlay && project.backgroundBlur && mode === 'contain') {
@@ -158,9 +166,10 @@ export function composeFrame(
     const { from, to, progress } = visible.transition;
     drawMedia(compositor, project, from, t, assets, inputs, 'from');
     drawMedia(compositor, project, to, t, assets, inputs, 'to');
-    const { type, effectId } = to.transition!;
+    const { type, effectId, easing, params } = to.transition!;
     const effect = effectId ? project.effects[effectId] : undefined;
-    compositor.drawTransition(type, progress, effect?.kind === 'transition' ? effect.code : undefined);
+    const custom = effect?.kind === 'transition' ? { code: effect.code, params: params ?? {} } : undefined;
+    compositor.drawTransition(type, EASINGS[easing ?? 'linear'](Math.min(Math.max(progress, 0), 1)), custom);
   } else if (visible.main) {
     drawMedia(compositor, project, visible.main, t, assets, inputs, 'screen');
   }

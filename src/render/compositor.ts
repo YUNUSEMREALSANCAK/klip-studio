@@ -1,6 +1,6 @@
-import type { BlendMode, Crop, FilterSettings, MaskSettings, Transform, TransitionType } from '../core/types';
+import type { BlendMode, Crop, EffectParams, FilterSettings, MaskSettings, Transform, TransitionType } from '../core/types';
 import { croppedSize, fitRect, overlayRect } from './layout';
-import { filterFragment, transitionFragment } from './effects';
+import { filterFragment, paramValues, transitionFragment } from './effects';
 import { layerFragment, QUAD_VERTEX, TRANSITION_FRAGMENT, TRANSITION_INDEX } from './shaders';
 
 export interface Mask {
@@ -29,7 +29,7 @@ export interface Layer {
   lut?: LutData | null;
   blur?: number; // sample spacing (source pixels)
   opacity?: number;
-  effect?: { code: string; amount: number; time: number }; // custom filter
+  effect?: { code: string; amount: number; time: number; params: EffectParams }; // custom filter
   crop?: Crop;
   blendMode?: BlendMode;
 }
@@ -149,6 +149,7 @@ export class Compositor {
     gl.uniform1f(u('uEffectAmount'), program === this.layerProgram ? 0 : effect!.amount);
     gl.uniform1f(u('time'), effect?.time ?? 0);
     gl.uniform2f(u('resolution'), layer.width, layer.height);
+    if (effect && program !== this.layerProgram) this.setParams(program, effect.code, effect.params);
     gl.uniform1i(u('uBlendMode'), BLEND_MODES.indexOf(layer.blendMode ?? 'normal'));
     const crop = layer.crop ?? { x: 0, y: 0, width: 1, height: 1 };
     // Texture rows are flipped on upload, so v runs from the bottom of the image.
@@ -171,9 +172,9 @@ export class Compositor {
   }
 
   // A custom transition (GLSL code) replaces the built-in type; if it doesn't compile, the type is used.
-  drawTransition(type: TransitionType, progress: number, code?: string) {
+  drawTransition(type: TransitionType, progress: number, effect?: { code: string; params: EffectParams }) {
     const { gl } = this;
-    const custom = code ? this.effectProgram('transition', code) : null;
+    const custom = effect ? this.effectProgram('transition', effect.code) : null;
     this.bindTarget('screen');
     gl.useProgram(custom ?? this.transitionProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -187,6 +188,7 @@ export class Compositor {
       gl.uniform1f(u('progress'), Math.min(Math.max(progress, 0), 1));
       gl.uniform1f(u('ratio'), this.width / this.height);
       gl.uniform2f(u('resolution'), this.width, this.height);
+      this.setParams(custom, effect!.code, effect!.params);
       this.drawQuad(custom, [0, 0, this.width, this.height]);
       return;
     }
@@ -197,6 +199,15 @@ export class Compositor {
     gl.uniform1i(u('uType'), TRANSITION_INDEX[type]);
     gl.uniform2f(u('uResolution'), this.width, this.height);
     this.drawQuad(this.transitionProgram, [0, 0, this.width, this.height]);
+  }
+
+  private setParams(program: WebGLProgram, code: string, values: EffectParams) {
+    const { gl } = this;
+    for (const param of paramValues(code, values)) {
+      const location = gl.getUniformLocation(program, param.name);
+      if (Array.isArray(param.value)) gl.uniform3f(location, param.value[0], param.value[1], param.value[2]);
+      else gl.uniform1f(location, param.value);
+    }
   }
 
   // Compiled once per code; null when it fails, so callers fall back to the built-in program.

@@ -29,12 +29,30 @@ export interface FilterSettings {
   lutIntensity: number; // 0..1
   effectId?: string; // custom filter (Project.effects)
   effectAmount: number; // 0..1
+  effectFadeIn?: number; // s; the effect ramps up from the clip start
+  effectFadeOut?: number; // s; and down to the clip end
+  effectParams?: EffectParams;
 }
+
+// Values for an effect's parameters (uniforms declared in its code); missing ones use the code's defaults.
+export type EffectParams = Record<string, number | number[]>;
+
+export type Easing = 'linear' | 'easeIn' | 'easeOut' | 'easeInOut';
 
 export interface Transition {
   type: TransitionType; // also the fallback when a custom effect is missing or fails to compile
   duration: number;
   effectId?: string; // custom transition (Project.effects)
+  easing?: Easing; // applied to the progress; default linear
+  params?: EffectParams;
+}
+
+export type MotionType = 'fade' | 'zoom' | 'slideleft' | 'slideright' | 'slideup' | 'slidedown' | 'spin';
+
+// In or out animation of a video or image clip.
+export interface ClipMotion {
+  type: MotionType;
+  duration: number; // s
 }
 
 export type TransitionType =
@@ -130,6 +148,8 @@ export interface MediaClip {
   chroma?: ChromaSettings;
   crop?: Crop;
   blend?: BlendMode; // overlays only
+  animIn?: ClipMotion;
+  animOut?: ClipMotion;
   fadeIn: number; // s
   fadeOut: number; // s
   duck: boolean; // lower the volume while someone speaks
@@ -161,6 +181,9 @@ export interface TextClip {
   text: string;
   preset: TextStylePreset;
   animation: TextAnimation;
+  animationOut?: TextAnimation;
+  animationInDuration?: number; // s, default 0.3
+  animationOutDuration?: number; // s, default 0.3
   color: string;
   highlight: string;
   fontSize: number; // fraction of canvas height

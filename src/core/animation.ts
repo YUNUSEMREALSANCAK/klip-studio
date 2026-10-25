@@ -1,4 +1,4 @@
-import type { Keyframe, KeyframeProp, MediaClip, Transform } from './types';
+import type { ClipMotion, Easing, Keyframe, KeyframeProp, MediaClip, MotionType, Transform } from './types';
 
 const FRAME = 1 / 60; // tolerance for keyframes at the same moment
 
@@ -80,4 +80,43 @@ export function fadeGain(clip: MediaClip, t: number): number {
   if (clip.fadeIn > 0) gain = Math.min(gain, local / clip.fadeIn);
   if (clip.fadeOut > 0) gain = Math.min(gain, (clip.duration - local) / clip.fadeOut);
   return Math.max(0, Math.min(1, gain));
+}
+
+export const EASINGS: Record<Easing, (p: number) => number> = {
+  linear: (p) => p,
+  easeIn: (p) => p * p * p,
+  easeOut: (p) => 1 - (1 - p) ** 3,
+  easeInOut: (p) => (p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2),
+};
+
+// Moves a state away from rest by `away` (0 = at rest, 1 = fully out). Slides continue in their direction,
+// so a "slide left" clip enters from the right and leaves to the left.
+function applyMotion(state: AnimatedState, type: MotionType, away: number, entering: boolean): AnimatedState {
+  const { transform } = state;
+  const sign = entering ? 1 : -1;
+  const slide = { slideleft: [1, 0], slideright: [-1, 0], slideup: [0, 1], slidedown: [0, -1] } as Record<string, [number, number]>;
+  if (slide[type]) {
+    const [dx, dy] = slide[type];
+    return { ...state, transform: { ...transform, x: transform.x + dx * away * sign, y: transform.y + dy * away * sign } };
+  }
+  const opacity = state.opacity * (1 - away);
+  if (type === 'zoom') return { ...state, opacity, transform: { ...transform, scale: transform.scale * (1 - 0.4 * away) } };
+  if (type === 'spin') {
+    return { ...state, opacity, transform: { ...transform, scale: transform.scale * (1 - 0.6 * away), rotation: transform.rotation - 180 * away * sign } };
+  }
+  return { ...state, opacity };
+}
+
+const motionAway = (motion: ClipMotion | undefined, remaining: number) =>
+  motion && motion.duration > 0 && remaining < motion.duration ? 1 - EASINGS.easeOut(Math.max(remaining, 0) / motion.duration) : 0;
+
+// A visual clip's in and out animations on top of its keyframed state.
+export function withMotion(clip: MediaClip, state: AnimatedState, t: number): AnimatedState {
+  const local = t - clip.start;
+  const awayIn = motionAway(clip.animIn, local);
+  const awayOut = motionAway(clip.animOut, clip.duration - local);
+  let next = state;
+  if (awayIn > 0) next = applyMotion(next, clip.animIn!.type, awayIn, true);
+  if (awayOut > 0) next = applyMotion(next, clip.animOut!.type, awayOut, false);
+  return next;
 }

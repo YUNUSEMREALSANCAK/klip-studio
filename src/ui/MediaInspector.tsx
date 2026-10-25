@@ -8,18 +8,16 @@ import {
   DEFAULT_FILTER,
   DEFAULT_MASK,
   DEFAULT_TRANSFORM,
-  FULL_CROP,
   type BlendMode,
-  type Crop,
   type FilterSettings,
   type MaskSettings,
   type MediaClip,
   type TransitionType,
 } from '../core/types';
 import { VOICE_PRESETS } from '../media/voice';
-import { EFFECT_LIBRARY, isLibraryId, libraryId } from '../render/effectLibrary';
 import { TRANSITION_TYPES } from '../render/shaders';
 import { applyFilterEffect, resolveEffect } from './customActions';
+import { BLEND_MODES, CROP_SIDES, cropFromSides, cropSides, effectOptions, percent, seconds } from './clipOptions';
 import { KeySlider, Section, Slider, Toggle } from './controls';
 import { freezeFrame, importLut, reverse, setSpeed, setSpeedCurve, voiceEffect } from './editActions';
 import { Icon } from './icons';
@@ -27,42 +25,10 @@ import { applyTransition, maxTransitionDuration, targetCut } from './transitions
 import { useUi } from './uiStore';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
-const percent = (v: number) => `${Math.round(v * 100)}%`;
-
-const BLEND_MODES: [BlendMode, string][] = [
-  ['normal', 'Normal'],
-  ['multiply', 'Multiply'],
-  ['screen', 'Screen'],
-  ['add', 'Add'],
-  ['lighten', 'Lighten'],
-  ['darken', 'Darken'],
-];
-
-type CropSides = { left: number; right: number; top: number; bottom: number };
-const CROP_SIDES: [keyof CropSides, string][] = [
-  ['left', 'Left'],
-  ['right', 'Right'],
-  ['top', 'Top'],
-  ['bottom', 'Bottom'],
-];
-const cropSides = (crop: Crop = FULL_CROP): CropSides => ({
-  left: crop.x,
-  right: 1 - crop.x - crop.width,
-  top: crop.y,
-  bottom: 1 - crop.y - crop.height,
-});
-const cropFromSides = ({ left, right, top, bottom }: CropSides): Crop | undefined =>
-  left + right + top + bottom === 0 ? undefined : { x: left, y: top, width: 1 - left - right, height: 1 - top - bottom };
-const seconds = (v: number) => `${v.toFixed(1)} s`;
-
 export function MediaInspector({ clip }: { clip: MediaClip }) {
   const asset = useEditor((s) => s.assets[clip.assetId]);
   const luts = useEditor((s) => s.project.luts);
   const effectMap = useEditor((s) => s.project.effects);
-  const effectOptions = (kind: 'transition' | 'filter') => [
-    ...EFFECT_LIBRARY.filter((e) => e.kind === kind).map((e) => ({ id: libraryId(e), name: tr(e.name) })),
-    ...Object.values(effectMap).filter((e) => e.kind === kind && !isLibraryId(e.id)),
-  ];
   useEditor((s) => s.project.clips); // recompute when cuts change
   const lutInput = useRef<HTMLInputElement>(null);
   const cut = clip.track === 'main' ? targetCut() : null;
@@ -250,7 +216,8 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             value={cut.to.transition ? (cut.to.transition.effectId ?? cut.to.transition.type) : ''}
             onChange={(e) => {
               const value = e.target.value;
-              if (effectOptions('transition').some((fx) => fx.id === value)) applyTransition(cut, 'fade', undefined, resolveEffect(value, 'transition'));
+              if (effectOptions(effectMap, 'transition').some((fx) => fx.id === value))
+                applyTransition(cut, 'fade', undefined, resolveEffect(value, 'transition'));
               else applyTransition(cut, (value || null) as TransitionType | null);
             }}
             style={{ width: '100%', marginBottom: 10 }}
@@ -261,7 +228,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
                 {tr(t.label)}
               </option>
             ))}
-            {effectOptions('transition').map((fx) => (
+            {effectOptions(effectMap, 'transition').map((fx) => (
               <option key={fx.id} value={fx.id}>
                 {fx.name}
               </option>
@@ -334,7 +301,7 @@ export function MediaInspector({ clip }: { clip: MediaClip }) {
             <label>{tr('Effect')}</label>
             <select value={clip.filter.effectId ?? ''} onChange={(e) => applyFilterEffect(clip.id, e.target.value || null)}>
               <option value="">{tr('None')}</option>
-              {effectOptions('filter').map((fx) => (
+              {effectOptions(effectMap, 'filter').map((fx) => (
                 <option key={fx.id} value={fx.id}>
                   {fx.name}
                 </option>

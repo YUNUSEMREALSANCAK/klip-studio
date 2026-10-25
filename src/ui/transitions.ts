@@ -30,6 +30,13 @@ export function targetCut(): Cut | null {
   return cutAt(best);
 }
 
+// The cut in front of a main-track clip, or null for the first clip.
+export function cutBefore(clipId: string): Cut | null {
+  const main = sortedTrack<MediaClip>(useEditor.getState().project.clips, 'main');
+  const i = main.findIndex((c) => c.id === clipId);
+  return i > 0 ? { from: main[i - 1], to: main[i], index: i } : null;
+}
+
 // Applies the transition and briefly plays around the cut to preview it. effectId selects a custom transition.
 export function applyTransition(cut: Cut, type: TransitionType | null, duration?: number, effectId?: string) {
   const s = useEditor.getState();

@@ -61,7 +61,8 @@ export function applyFilterEffect(clipId: string, effectId: string | null, amoun
   if (!clip || clip.type !== 'media') throw new Error(`Clip not found: ${clipId}`);
   if (effectId) resolveEffect(effectId, 'filter');
   const effectAmount = Math.min(Math.max(amount ?? clip.filter.effectAmount ?? 1, 0), 1);
-  editor().updateClip(clip.id, { filter: { ...clip.filter, effectId: effectId ?? undefined, effectAmount } });
+  const effectParams = effectId === clip.filter.effectId ? clip.filter.effectParams : undefined;
+  editor().updateClip(clip.id, { filter: { ...clip.filter, effectId: effectId ?? undefined, effectAmount, effectParams } });
 }
 
 export async function addGoogleFont(name: string): Promise<string> {

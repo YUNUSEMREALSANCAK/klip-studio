@@ -101,11 +101,28 @@ test('voice effects and sound effects add new audio clips', async ({ page }) => 
   const sfx = await run(page, { name: 'add_sound_effect', effect: 'whoosh', start: 1 });
   const whoosh = (await state(page)).clips.find((c) => c.id === sfx.clipId);
   expect(whoosh).toMatchObject({ track: 'audio', start: 1 });
-  expect(whoosh!.duration).toBeCloseTo(0.8, 1);
+  expect(Math.abs(whoosh!.duration - 1)).toBeLessThan(0.1); // a real recording from public/sfx (~0.97 s + MP3 padding)
 
-  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
   await page.locator('.tile', { hasText: 'Ding' }).click();
-  await expect(page.locator('.asset', { hasText: 'Ding' })).toHaveCount(1);
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Success bell' })).toHaveCount(1);
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
+
+  // The library list adds any recording; automatic sound effects put a whoosh on the cut.
+  await page.locator('.chip', { hasText: 'Pop' }).click();
+  await page.locator('.sound-row', { hasText: 'Plop!' }).locator('button').last().click();
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Plop!' })).toHaveCount(1);
+  // A sound pack lists a video's named sounds and adds them like any other.
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
+  await page.locator('.chip', { hasText: 'İnternet videosu' }).click();
+  await page.locator('.sound-row', { hasText: 'Enter tuşu (mekanik)' }).locator('button').last().click();
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Enter tuşu (mekanik)' })).toHaveCount(1);
+  await run(page, { name: 'split', time: 1, clipId: main.id });
+  const auto = await run(page, { name: 'auto_sfx', texts: false });
+  expect(auto.added).toBe(1);
 });
 
 test('freeze frame and reverse work as commands', async ({ page }) => {
@@ -117,4 +134,51 @@ test('freeze frame and reverse work as commands', async ({ page }) => {
   const first = (await state(page)).clips[0];
   expect((await run(page, { name: 'reverse_clip', clipId: first.id })).error).toBeUndefined();
   expect((await state(page)).assets.some((a) => a.name.includes('(reversed)'))).toBe(true);
+});
+
+test('effects have parameters and fades, clips have in/out animations, transitions have easing', async ({ page }) => {
+  await importMedia(page, 'gradient.webm');
+  await addToMain(page, 0);
+  await addToMain(page, 0);
+  const [first, second] = (await state(page)).clips;
+
+  // A parameter declared in the code drives the render.
+  const { effectId } = await run(page, {
+    name: 'create_effect',
+    kind: 'filter',
+    title: 'Red level',
+    code: 'uniform float level; // = 0.0 [0, 1]\nvec4 effect(vec4 color, vec2 uv) { return vec4(level, 0.0, 0.0, 1.0); }',
+  });
+  await run(page, { name: 'set_filter', clipId: first.id, effectId, params: { level: 1 } });
+  await run(page, { name: 'seek', time: 2 });
+  await expect.poll(async () => (await pixel(page, 0.5, 0.5))[0]).toBeGreaterThan(240);
+
+  // The effect fades in over 2 s.
+  await run(page, { name: 'set_filter', clipId: first.id, effectId, fadeIn: 2 });
+  await run(page, { name: 'seek', time: 0.1 });
+  await expect.poll(async () => (await pixel(page, 0.5, 0.5))[0]).toBeLessThan(120);
+
+  // A fade-in animation starts the second clip from black. Compared by brightness, not a fixed threshold:
+  // the preview lands on the nearest frame, so "just after the cut" can be a few percent into the fade.
+  await run(page, { name: 'update_clip', clipId: second.id, changes: { animIn: { type: 'fade', duration: 1 } } });
+  const brightness = async () => (await pixel(page, 0.5, 0.5)).reduce((a, b) => a + b, 0);
+  await run(page, { name: 'seek', time: second.start + 1.5 });
+  await expect.poll(() => litRatio(page)).toBeGreaterThan(0.9);
+  const full = await brightness();
+  await run(page, { name: 'seek', time: second.start + 0.02 });
+  await expect.poll(brightness).toBeLessThan(full * 0.25);
+
+  await run(page, { name: 'set_transition', toClipId: second.id, effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });
+  expect(await clipField(page, second.id, 'transition')).toMatchObject({ effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });
+
+  // Every card carries the full set of settings.
+  const card = (name: string) => page.locator('.applied-card').filter({ has: page.locator('.applied-card-title', { hasText: name }) });
+  await expect(card('Red level')).toContainText('Level');
+  await expect(card('Red level')).toContainText('Fade in');
+  await expect(card('Red level')).toContainText('Fade out');
+  await expect(card('Swirl')).toContainText('Easing');
+  await expect(card('Swirl')).toContainText('Strength');
+  await expect(card('Fade')).toContainText('Out');
+  await card('Fade').locator('select').last().selectOption('zoom');
+  expect(await clipField(page, second.id, 'animOut')).toEqual({ type: 'zoom', duration: 0.5 });
 });

@@ -1,7 +1,7 @@
 import type { CustomFont, TextClip } from '../core/types';
 
 // Google Fonts families for text clips; loaded on first use.
-export const FONTS = ['Inter', 'Bebas Neue', 'Montserrat', 'Poppins', 'Oswald', 'Anton', 'Playfair Display', 'Lobster', 'Pacifico', 'Roboto Mono'];
+export const FONTS = ['Inter', 'Bebas Neue', 'Montserrat', 'Poppins', 'Oswald', 'Anton', 'Playfair Display', 'Lobster', 'Pacifico', 'Roboto Mono', 'JetBrains Mono'];
 
 export const FONT_FILE_TYPES = '.ttf,.otf,.woff,.woff2';
 

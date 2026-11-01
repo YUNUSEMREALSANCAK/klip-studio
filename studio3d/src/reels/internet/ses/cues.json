@@ -1,0 +1,810 @@
+{
+ "video": "/Users/yunusemre/Desktop/Fityazilim_Instagram/03_Reels_InternetNasilCalisir/ses_tasarimi/work/film_ses_yok_sfx.mp4",
+ "keep_audio": "auto",
+ "cues": [
+  {
+   "t": 0.2,
+   "label": "riser x0.55",
+   "_g": 0.55,
+   "gain_db": -5.0,
+   "anchor": "start",
+   "max_dur": 3.2,
+   "fade_out": 0.6,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/Movie_Swell_2_218524.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 3.062,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    19.179,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.8
+  },
+  {
+   "t": 3.158,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    9.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.0
+  },
+  {
+   "t": 3.241,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.384,
+    0.071
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.8
+  },
+  {
+   "t": 3.313,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.834,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.3
+  },
+  {
+   "t": 3.394,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    20.499,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.5
+  },
+  {
+   "t": 3.49,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    0.804,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -4.8
+  },
+  {
+   "t": 3.595,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    26.234,
+    0.051
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.5
+  },
+  {
+   "t": 3.686,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    14.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.2
+  },
+  {
+   "t": 3.78,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    16.559,
+    0.081
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -2.5
+  },
+  {
+   "t": 3.87,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    8.099,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -5.3
+  },
+  {
+   "t": 3.984,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    11.949,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -2.3
+  },
+  {
+   "t": 4.073,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    28.689,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.1
+  },
+  {
+   "t": 4.75,
+   "label": "click x1.20",
+   "_g": 1.2,
+   "slice": [
+    0.004,
+    0.081
+   ],
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/click/MECH-KEYBOARD-01_348239.mp3",
+   "role": "click"
+  },
+  {
+   "t": 5.9,
+   "label": "riser x0.70",
+   "_g": 0.7,
+   "gain_db": -5.1,
+   "anchor": "start",
+   "max_dur": 1.4,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/Cinematic_Woosh_SFX-010_648729.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 7.0,
+   "label": "hit x0.60",
+   "_g": 0.6,
+   "role": "hit",
+   "gain_db": -15.4,
+   "highpass": 170,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/impact/Ambient_Hits_Ambient_Hit_529139.mp3"
+  },
+  {
+   "t": 7.1,
+   "label": "veri tüneli: Swoosh 5",
+   "_g": 0.75,
+   "gain_db": -8.5,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Swoosh_5_234553.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 9.1,
+   "label": "wipe",
+   "_g": 1.0,
+   "gain_db": -6.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/classic_double_swwosh_19312.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 10.3,
+   "label": "whoosh x0.55",
+   "_g": 0.55,
+   "gain_db": -9.2,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/woosh_243400.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 12.6,
+   "label": "sunucu yandı",
+   "_g": 0.6,
+   "gain_db": -3.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/success_bell_511484.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 14.2,
+   "label": "wipe",
+   "_g": 1.0,
+   "gain_db": -6.0,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/soft_swoosh_with_noisy_ambience_623709.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 16.05,
+   "label": "pop x0.70",
+   "_g": 0.7,
+   "gain_db": -3.1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/pop/Plop_447910.mp3",
+   "role": "pop"
+  },
+  {
+   "t": 16.7,
+   "label": "data x0.60",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/SciFi_Inspect_Sound_UI_or_In-Game_Notification_01_657945.mp3",
+   "role": "data"
+  },
+  {
+   "t": 17.5,
+   "label": "kayıt yok 1",
+   "_g": 0.45,
+   "gain_db": -8.9,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/glitch/interference_58929.mp3",
+   "role": "glitch"
+  },
+  {
+   "t": 18.15,
+   "label": "data x0.60",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/Sci_Fi_Interface_367997.mp3",
+   "role": "data"
+  },
+  {
+   "t": 18.95,
+   "label": "kayıt yok 2",
+   "_g": 0.45,
+   "gain_db": -8.9,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/glitch/static_glitch_58931.mp3",
+   "role": "glitch"
+  },
+  {
+   "t": 20.9,
+   "label": "sorgu Resolver'a",
+   "_g": 0.65,
+   "gain_db": -7.7,
+   "pitch": 2,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/DSGNWhsh_Noisy_air_whoosh_with_little_reverb_and_sub_note_An_776651.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 23.3,
+   "label": "hit x0.40",
+   "_g": 0.4,
+   "role": "hit",
+   "gain_db": -16.0,
+   "highpass": 170,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/impact/Cinematic_Low_Pitch_Impact_408141.mp3"
+  },
+  {
+   "t": 25.6,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "gain_db": -13.9,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Soft_Synth_Whoosh_and_Impact_Sci_fi_728523.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 26.95,
+   "label": "chime x0.60",
+   "_g": 0.6,
+   "gain_db": -3.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Notification_Sound_235911.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 28.25,
+   "label": "chime x0.55",
+   "_g": 0.55,
+   "gain_db": -4.2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/correct_243701.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 29.55,
+   "label": "chime x0.60",
+   "_g": 0.6,
+   "gain_db": -3.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Chime_Notification_380482.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 30.6,
+   "label": "IP kristali döner",
+   "_g": 0.5,
+   "gain_db": -10.0,
+   "pitch": 1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Whoosh_For_Whip_Zoom_486234.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 33.18,
+   "label": "IP bulundu",
+   "_g": 0.8,
+   "gain_db": -0.9,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Ui_sounds_-_Shimmering_success_648212.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 33.6,
+   "label": "kristal istemciye",
+   "_g": 0.5,
+   "gain_db": -10.0,
+   "pitch": -1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Whosh_-_Reversed_Reverbed_breath_181889.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 37.7,
+   "label": "wipe",
+   "_g": 1.0,
+   "gain_db": -11.0,
+   "pitch": 2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/fast_simple_chop_5_127197.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 39.96,
+   "label": "HTTP/3",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "pitch": 0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/hint_320181.mp3",
+   "role": "ui"
+  },
+  {
+   "t": 41.22,
+   "label": "UDP",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "pitch": 2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/hint_320181.mp3",
+   "role": "ui"
+  },
+  {
+   "t": 42.12,
+   "label": "QUIC",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "pitch": 4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/hint_320181.mp3",
+   "role": "ui"
+  },
+  {
+   "t": 43.56,
+   "label": "TLS 1.3",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "pitch": 7,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/hint_320181.mp3",
+   "role": "ui"
+  },
+  {
+   "t": 45.45,
+   "label": "TLS kaynaşır",
+   "_g": 0.7,
+   "gain_db": -4.1,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Mysterious_Sparkle_Flourish_844398.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 45.6,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "gain_db": -10.9,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/digital_whoosh_soft_71852.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 46.5,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "gain_db": -10.9,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Swosh_Whoosh_Air_Cut_60030.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 46.8,
+   "label": "riser x0.60",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "anchor": "start",
+   "max_dur": 1.6,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/sweep_503815.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 48.42,
+   "label": "success x0.70",
+   "_g": 0.7,
+   "gain_db": -2.1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/success_bell_511484.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 49.66,
+   "label": "whoosh x0.60",
+   "_g": 0.6,
+   "gain_db": -8.4,
+   "pitch": 2,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Transition_whoosh_sound_432922.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 57.0,
+   "label": "data x0.60",
+   "_g": 0.6,
+   "gain_db": -16.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/SciFi_Inspect_Sound_UI_or_In-Game_Notification_01_657945.mp3",
+   "role": "data"
+  },
+  {
+   "t": 57.9,
+   "label": "click x0.80",
+   "_g": 0.8,
+   "slice": [
+    0.004,
+    0.041
+   ],
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.9,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/click/keyboard5_194799.mp3",
+   "role": "click"
+  },
+  {
+   "t": 58.2,
+   "label": "R2'ye",
+   "_g": 0.45,
+   "gain_db": -10.9,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Whoosh_60013.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 59.4,
+   "label": "data x0.50",
+   "_g": 0.5,
+   "gain_db": -8.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/Sci_Fi_Interface_367997.mp3",
+   "role": "data"
+  },
+  {
+   "t": 59.7,
+   "label": "click x0.70",
+   "_g": 0.7,
+   "slice": [
+    0.009,
+    0.106
+   ],
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/click/Enter_Key_Press_Mechanical_Keyboard_627647.mp3",
+   "role": "click"
+  },
+  {
+   "t": 60.0,
+   "label": "sonraki durak",
+   "_g": 0.5,
+   "gain_db": -10.0,
+   "pitch": 1,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/swoosh_169867.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 61.6,
+   "label": "wipe",
+   "_g": 1.0,
+   "gain_db": -6.0,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/SWOSH-01_44_1kHz_59988.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 63.3,
+   "label": "paketler birleşir",
+   "_g": 0.45,
+   "role": "hit",
+   "gain_db": -20.0,
+   "highpass": 170,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/impact/Cinematic_Low_Pitch_Impact_408141.mp3"
+  },
+  {
+   "t": 64.73,
+   "label": "Database",
+   "_g": 0.6,
+   "gain_db": -6.4,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/ui/08-data-transmission_199939.mp3",
+   "role": "ui"
+  },
+  {
+   "t": 67.08,
+   "label": "HTTP Response",
+   "_g": 0.6,
+   "gain_db": -5.4,
+   "pitch": 2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Mystical_Wind_Chimes_Transition_FX_419594.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 67.8,
+   "label": "yanıt fırlar",
+   "_g": 0.55,
+   "gain_db": -9.2,
+   "pitch": -1,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Woosh_Medium_Short_01_425706.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 69.1,
+   "label": "yüksek hızlı dönüş",
+   "_g": 0.65,
+   "gain_db": -8.7,
+   "anchor": "start",
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Very_Big_Whoosh_237980.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 71.6,
+   "label": "riser x0.50",
+   "_g": 0.5,
+   "gain_db": -8.0,
+   "anchor": "start",
+   "max_dur": 0.9,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/Riser_sound_effect_short_685256.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 72.25,
+   "label": "thump x0.40",
+   "_g": 0.4,
+   "role": "hit",
+   "gain_db": -13.0,
+   "highpass": 170,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/impact/Muffled_Distant_Explosion_149966.mp3"
+  },
+  {
+   "t": 74.0,
+   "label": "pop x0.60",
+   "_g": 0.6,
+   "gain_db": -4.4,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/pop/cartoon_pop_or_drip_221091.mp3",
+   "role": "pop"
+  },
+  {
+   "t": 74.28,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "gain_db": -5.2,
+   "pitch": 2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/pop/Pop_sound_202230.mp3",
+   "role": "pop"
+  },
+  {
+   "t": 74.56,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -9.0,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/pop/Cartoon_Pop_Distorted_245646.mp3",
+   "role": "pop"
+  },
+  {
+   "t": 75.08,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "gain_db": -13.1,
+   "pitch": -2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Swing_Woosh_389590.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 75.67,
+   "label": "Paint",
+   "_g": 0.45,
+   "gain_db": -7.9,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Item_Sparkle_545238.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 76.2,
+   "label": "whoosh x0.40",
+   "_g": 0.4,
+   "gain_db": -12.0,
+   "pitch": 2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/Transition_action_jump_pitch-shift_short_shimmer_whoosh_posi_449645.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 78.0,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "gain_db": -13.1,
+   "pitch": -3,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/whoosh/whoosh_332003.mp3",
+   "role": "whoosh",
+   "lowpass": 5500
+  },
+  {
+   "t": 78.9,
+   "label": "thump x0.40",
+   "_g": 0.4,
+   "role": "hit",
+   "gain_db": -21.0,
+   "highpass": 170,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/impact/Bass_Impact_-_Ki_01_512389.mp3"
+  },
+  {
+   "t": 79.1,
+   "label": "riser x0.50",
+   "_g": 0.5,
+   "gain_db": -8.0,
+   "anchor": "start",
+   "max_dur": 1.1,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/Riser_561207.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 80.15,
+   "label": "site ekranda",
+   "_g": 0.6,
+   "gain_db": -2.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Ui_sounds_-_Shimmering_success_648212.mp3",
+   "role": "chime"
+  },
+  {
+   "t": 83.0,
+   "label": "büyük geri çekiliş",
+   "_g": 0.55,
+   "gain_db": -5.2,
+   "anchor": "start",
+   "max_dur": 5.1,
+   "highpass": 140,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/riser/DKNO_Logo_EFX_I_385074.mp3",
+   "role": "riser"
+  },
+  {
+   "t": 89.0,
+   "label": "chime x0.55",
+   "_g": 0.55,
+   "gain_db": -4.2,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/sfx_kutuphane/chime/Notification_Sound_235911.mp3",
+   "role": "chime"
+  }
+ ],
+ "_draft": {
+  "source": "/Users/yunusemre/Desktop/Fityazilim_Instagram/03_Reels_InternetNasilCalisir/ses_tasarimi/work/events.json",
+  "events": 77,
+  "thinned": 0,
+  "thinned_by_kind": {},
+  "fused": 0,
+  "routed": {
+   "riser": 7,
+   "key": 12,
+   "click": 3,
+   "hit": 6,
+   "whoosh": 16,
+   "wipe": 4,
+   "chime": 5,
+   "pop": 4,
+   "data": 5,
+   "glitch": 2,
+   "magic": 4,
+   "thump": 3,
+   "glass": 4,
+   "success": 2
+  },
+  "unmapped": {},
+  "sync": null,
+  "stems": null,
+  "voice": null,
+  "retimed": null,
+  "baked": null,
+  "baked_strong": false,
+  "keep_audio_decision": null,
+  "declared": 66,
+  "voiced": 77,
+  "clamped_quiet": 0,
+  "layer_lufs": null,
+  "base_kind": null,
+  "screen_rec": false,
+  "music_ref": [],
+  "reference_layer": [],
+  "typing_runs": [],
+  "first_event_t": 0.2,
+  "time_map": null,
+  "unlisted_synth_onsets": [],
+  "kinds_user": {
+   "hit": {
+    "ids": [
+     187,
+     197,
+     192,
+     202,
+     181
+    ],
+    "role": "hit"
+   },
+   "thump": {
+    "ids": [
+     206,
+     189
+    ],
+    "role": "hit"
+   }
+  }
+ }
+}

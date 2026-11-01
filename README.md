@@ -69,7 +69,7 @@
       <br>
       <sub>Midpoint of the "Circle open" transition, with target cut and duration.</sub>
       <h3>Transitions, color and effects</h3>
-      21 transitions, added by clicking the ◆ marker on a cut and previewed automatically. 13 animated <b>video effects</b> (glitch, shake, VHS, old film, light leak, kaleidoscope…). Brightness, contrast, saturation, temperature, sharpen, vignette, 9 filter presets and <b>.cube LUT</b> import.
+      21 transitions, added by clicking the ◆ marker on a cut and previewed automatically. 14 animated <b>video effects</b> (glitch, shake, VHS, old film, light leak, cinematic glow, kaleidoscope…). Brightness, contrast, saturation, temperature, sharpen, vignette, 9 filter presets and <b>.cube LUT</b> import.
       <br><br>
       <b>Crop</b>, <b>blend modes</b> for overlays, shape masks (rectangle, ellipse, linear), <b>chroma key</b>, and a <b>blurred canvas</b> background for vertical video.
       <br><br>
@@ -85,12 +85,15 @@
         <li>Drag and drop, trim, split (S), undo/redo</li>
         <li><b>Keyframes:</b> position, size, rotation, opacity, volume</li>
         <li><b>Speed</b> 0.25×–4× and <b>speed curves</b> (pitch preserved), freeze frame, reverse</li>
-        <li>Audio fade in/out, music ducking under speech, <b>voice effects</b> (chipmunk, deep, robot, echo, telephone), 7 synthesized <b>sound effects</b></li>
-        <li>10 fonts plus your own, 12 text templates, karaoke captions, outline, shadow and letter spacing</li>
+        <li>Audio fade in/out, music ducking under speech, <b>voice effects</b> (chipmunk, deep, robot, echo, telephone), a <b>Sounds tab</b> with <b>115 real recorded sound effects</b> (CC0, transition whooshes softened) and named <b>sound packs</b> from earlier videos, one-click <b>automatic sound effects</b> (whooshes on cuts, ticks on texts, ducked under speech)</li>
+        <li><b>Social media loudness</b> on export (-14 LUFS, Instagram/TikTok), <b>transparent video</b> (VP9 alpha) overlays</li>
+        <li>11 fonts plus your own, 16 text templates (including tech label and chapter tag), karaoke captions, outline, shadow and letter spacing</li>
       </ul>
     </td>
   </tr>
 </table>
+
+**3D studio** (`studio3d/`): renders cinematic 3D scenes with Remotion + React Three Fiber; the scenes, every label (as a transparent video) and every sound become separate pieces of a `.klip` project you edit here. Details (Turkish): [studio3d/README.md](studio3d/README.md).
 
 **Projects** autosave to IndexedDB and can be saved and opened as `.klip` files. The app is **installable** (PWA) and opens offline. The UI is available in **English and Turkish**.
 
@@ -187,4 +190,4 @@ Report vulnerabilities through the process in [SECURITY.md](SECURITY.md) rather 
 
 Klip Studio is available under either the [MIT](LICENSE-MIT) or the [Apache-2.0](LICENSE-APACHE) license, at your option. Models are downloaded at runtime under their own licenses (see the notes above).
 
-Built on: [transformers.js](https://github.com/huggingface/transformers.js), [Whisper](https://github.com/openai/whisper), [SlimSAM](https://github.com/czg1225/SlimSAM), [BiRefNet](https://github.com/ZhengPeng7/BiRefNet), [MODNet](https://github.com/ZHKKKe/MODNet), [MediaPipe](https://github.com/google-ai-edge/mediapipe), [RNNoise](https://github.com/xiph/rnnoise), [Mediabunny](https://github.com/Vanilagy/mediabunny), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), [React](https://react.dev), [Zustand](https://github.com/pmndrs/zustand), [Vite](https://vite.dev). Inspired by short-form video editors, especially CapCut's workflow; contains no CapCut code or models.
+Built on: [transformers.js](https://github.com/huggingface/transformers.js), [Whisper](https://github.com/openai/whisper), [SlimSAM](https://github.com/czg1225/SlimSAM), [BiRefNet](https://github.com/ZhengPeng7/BiRefNet), [MODNet](https://github.com/ZHKKKe/MODNet), [MediaPipe](https://github.com/google-ai-edge/mediapipe), [RNNoise](https://github.com/xiph/rnnoise), [Mediabunny](https://github.com/Vanilagy/mediabunny), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), [React](https://react.dev), [Zustand](https://github.com/pmndrs/zustand), [Vite](https://vite.dev), plus [Remotion](https://remotion.dev) and [Three.js](https://threejs.org) in studio3d. Sound effects are CC0 recordings from [Freesound](https://freesound.org) ([public/sfx/CREDITS.md](public/sfx/CREDITS.md)). Inspired by short-form video editors, especially CapCut's workflow; contains no CapCut code or models.

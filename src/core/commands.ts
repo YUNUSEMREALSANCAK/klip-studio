@@ -4,7 +4,7 @@ import { clipEnd, createMediaClip, createTextClip, formatTime, projectDuration, 
 import { EFFECT_LIBRARY, libraryId } from '../render/effectLibrary';
 import { FILTER_API, TRANSITION_API } from '../render/effects';
 import { fontFamilies } from '../render/fonts';
-import { SOUND_EFFECTS, type SoundEffect } from '../media/soundEffects';
+import { SOUND_CATEGORIES, SOUND_EFFECTS, type SoundEffect } from '../media/soundEffects';
 import { VOICE_PRESETS, type VoicePreset } from '../media/voice';
 import {
   DEFAULT_CHROMA,
@@ -13,6 +13,8 @@ import {
   type AspectRatio,
   type Clip,
   type CustomEffect,
+  type Easing,
+  type EffectParams,
   type KeyframeProp,
   type MediaClip,
   type TextClip,
@@ -41,18 +43,20 @@ export type Command =
   | { name: 'remove_clip'; clipId: string }
   | { name: 'split'; time: number; clipId?: string }
   | { name: 'delete_range'; start: number; end: number }
-  | { name: 'set_transition'; toClipId: string; type?: TransitionType | null; effectId?: string; duration?: number }
+  | { name: 'set_transition'; toClipId: string; type?: TransitionType | null; effectId?: string; duration?: number; easing?: Easing; params?: EffectParams }
   | { name: 'create_effect'; kind: CustomEffect['kind']; title: string; code: string }
   | { name: 'update_effect'; effectId: string; title?: string; code?: string }
   | { name: 'delete_effect'; effectId: string }
-  | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number }
+  | { name: 'set_filter'; clipId: string; effectId: string | null; amount?: number; fadeIn?: number; fadeOut?: number; params?: EffectParams }
   | { name: 'add_font'; family: string }
   | { name: 'set_keyframe'; clipId: string; prop: KeyframeProp; time: number; value: number }
   | { name: 'clear_keyframes'; clipId: string; prop?: KeyframeProp }
   | { name: 'freeze_frame'; clipId: string; time: number }
   | { name: 'reverse_clip'; clipId: string }
   | { name: 'voice_effect'; clipId: string; preset: VoicePreset }
-  | { name: 'add_sound_effect'; effect: SoundEffect; start?: number }
+  | { name: 'add_sound_effect'; effect?: SoundEffect; sound?: string; start?: number; volume?: number }
+  | { name: 'list_sounds'; category?: string; pack?: string }
+  | { name: 'auto_sfx'; cuts?: boolean; texts?: boolean; volume?: number }
   | { name: 'set_speed'; clipId: string; speed?: number; curve?: string | null }
   | { name: 'set_aspect'; aspect: AspectRatio }
   | { name: 'set_background_blur'; enabled: boolean }
@@ -108,7 +112,7 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'update_clip',
     description:
-      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut, duck, removeBackground (people), slowMotion ("blend" | "ai"), transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}, crop {x,y,width,height} (0–1 of the source from the top left), blend (overlays: normal|multiply|screen|add|lighten|darken), mask {shape: rect|ellipse|linear, x, y, width, height, feather, invert}, chroma {color "#00ff00", similarity, smoothness} (green screen). Text: text, preset, animation, color, highlight, fontSize, y, font, outlineColor, outlineWidth (0–0.3), shadow, boxColor, letterSpacing. Both: start, duration. Use null to remove crop, mask or chroma.',
+      'Changes clip fields. Media: volume, muted, speed, opacity, fadeIn, fadeOut (audio), animIn / animOut {type: fade|zoom|slideleft|slideright|slideup|slidedown|spin, duration} (picture in/out animation), duck, removeBackground (people), slowMotion ("blend" | "ai"), transform {x,y,scale,rotation}, filter {brightness,contrast,saturation,temperature,vignette,sharpen,grayscale}, crop {x,y,width,height} (0–1 of the source from the top left), blend (overlays: normal|multiply|screen|add|lighten|darken), mask {shape: rect|ellipse|linear, x, y, width, height, feather, invert}, chroma {color "#00ff00", similarity, smoothness} (green screen). Text: text, preset, animation (in), animationOut, animationInDuration, animationOutDuration (animations: none|fade|pop|slideup|typewriter), color, highlight, fontSize, y, font, outlineColor, outlineWidth (0–0.3), shadow, boxColor, letterSpacing. Both: start, duration. Use null to remove crop, mask, chroma or an animation.',
     parameters: { clipId: { type: 'string' }, changes: { type: 'object' } },
     required: ['clipId', 'changes'],
   },
@@ -134,6 +138,8 @@ export const COMMAND_SPECS: CommandSpec[] = [
       type: { type: ['string', 'null'], enum: [...TRANSITIONS, null] },
       effectId: { type: 'string', description: `custom transition id, or a built-in one: ${libraryIds('transition')}` },
       duration: { type: 'number' },
+      easing: { type: 'string', enum: ['linear', 'easeIn', 'easeOut', 'easeInOut'] },
+      params: { type: 'object', description: 'values for the custom transition\'s parameters (its uniform declarations), e.g. {"strength": 8}' },
     },
     required: ['toClipId'],
   },
@@ -162,7 +168,14 @@ export const COMMAND_SPECS: CommandSpec[] = [
   {
     name: 'set_filter',
     description: `Applies a video effect to a video or image clip, or removes it with null. effectId comes from create_effect or is a built-in animated effect: ${libraryIds('filter')}. amount 0–1 (default 1).`,
-    parameters: { clipId: { type: 'string' }, effectId: { type: ['string', 'null'] }, amount: { type: 'number' } },
+    parameters: {
+      clipId: { type: 'string' },
+      effectId: { type: ['string', 'null'] },
+      amount: { type: 'number' },
+      fadeIn: { type: 'number', description: 'seconds the effect takes to ramp up from the clip start' },
+      fadeOut: { type: 'number', description: 'seconds it takes to ramp down to the clip end' },
+      params: { type: 'object', description: 'values for the effect\'s parameters (its uniform declarations), e.g. {"strength": 2, "speed": 0.5}' },
+    },
     required: ['clipId', 'effectId'],
   },
   {
@@ -203,9 +216,25 @@ export const COMMAND_SPECS: CommandSpec[] = [
   },
   {
     name: 'add_sound_effect',
-    description: 'Adds a synthesized sound effect on the audio track at start (default: playhead).',
-    parameters: { effect: { type: 'string', enum: SOUND_EFFECTS.map((s) => s.id) }, start: { type: 'number' } },
-    required: ['effect'],
+    description:
+      'Adds a real recorded sound effect (CC0 library) on the audio track at start (default: playhead). Give effect (a one-click pick) or sound (a library id from list_sounds). volume 0–2 (default 1).',
+    parameters: {
+      effect: { type: 'string', enum: SOUND_EFFECTS.map((s) => s.id) },
+      sound: { type: 'string' },
+      start: { type: 'number' },
+      volume: { type: 'number' },
+    },
+  },
+  {
+    name: 'list_sounds',
+    description: `Lists the sound effect library (id, name, category, duration). Categories: ${SOUND_CATEGORIES.map((c) => c.id).join(', ')}. Sound packs hold the finished, named sounds of earlier videos (pack "internet": the Fityazılım internet reel); filter with pack, each sound says where it was used (use).`,
+    parameters: { category: { type: 'string' }, pack: { type: 'string' } },
+  },
+  {
+    name: 'auto_sfx',
+    description:
+      'Automatic sound design: a soft whoosh before every cut of the main track (cuts) and a quiet tick when a text appears (texts), rotating recordings and ducked under speech. volume scales them (default 1). One undo removes them all.',
+    parameters: { cuts: { type: 'boolean' }, texts: { type: 'boolean' }, volume: { type: 'number' } },
   },
   {
     name: 'add_font',
@@ -293,7 +322,8 @@ function requireClip(id: string): Clip {
 }
 
 // Starting values when an agent sets only part of an optional object.
-const FIELD_DEFAULTS: Record<string, object> = { mask: DEFAULT_MASK, chroma: DEFAULT_CHROMA, crop: FULL_CROP };
+const MOTION_DEFAULT = { type: 'fade', duration: 0.5 };
+const FIELD_DEFAULTS: Record<string, object> = { mask: DEFAULT_MASK, chroma: DEFAULT_CHROMA, crop: FULL_CROP, animIn: MOTION_DEFAULT, animOut: MOTION_DEFAULT };
 
 // Merges allowed fields; nested objects (transform, filter) are partially updated.
 function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Clip> {
@@ -305,6 +335,9 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
           'text',
           'preset',
           'animation',
+          'animationOut',
+          'animationInDuration',
+          'animationOutDuration',
           'color',
           'highlight',
           'fontSize',
@@ -327,6 +360,8 @@ function applyChanges(clip: Clip, changes: Record<string, unknown>): Partial<Cli
           'fadeOut',
           'duck',
           'removeBackground',
+          'animIn',
+          'animOut',
           'transform',
           'filter',
           'slowMotion',
@@ -400,8 +435,13 @@ export async function execute(command: Command): Promise<unknown> {
       const duration = Math.min(command.duration ?? clip.transition?.duration ?? 0.8, main[index - 1].duration, clip.duration);
       if (command.effectId) (await import('../ui/customActions')).resolveEffect(command.effectId, 'transition');
       const type = command.type ?? (command.effectId ? 'fade' : null);
+      const keep = clip.transition?.effectId === command.effectId ? clip.transition?.params : undefined;
+      const params = command.params ? { ...keep, ...command.params } : keep;
+      const easing = command.easing ?? clip.transition?.easing;
       s.updateClip(clip.id, {
-        transition: type ? { type, duration, ...(command.effectId && { effectId: command.effectId }) } : undefined,
+        transition: type
+          ? { type, duration, ...(command.effectId && { effectId: command.effectId }), ...(easing && { easing }), ...(params && { params }) }
+          : undefined,
       } as Partial<MediaClip>);
       return { ok: true };
     }
@@ -424,6 +464,13 @@ export async function execute(command: Command): Promise<unknown> {
     case 'set_filter': {
       const { applyFilterEffect } = await import('../ui/customActions');
       applyFilterEffect(command.clipId, command.effectId, command.amount);
+      const clip = requireMedia(command.clipId);
+      const extra = {
+        ...(command.fadeIn !== undefined && { effectFadeIn: command.fadeIn }),
+        ...(command.fadeOut !== undefined && { effectFadeOut: command.fadeOut }),
+        ...(command.params && { effectParams: { ...clip.filter.effectParams, ...command.params } }),
+      };
+      if (command.effectId && Object.keys(extra).length) s.updateClip(clip.id, { filter: { ...clip.filter, ...extra } }, false);
       return { ok: true };
     }
     case 'set_keyframe': {
@@ -449,8 +496,22 @@ export async function execute(command: Command): Promise<unknown> {
     case 'voice_effect':
       return taskResult(await (await import('../ui/editActions')).voiceEffect(requireMedia(command.clipId), command.preset));
     case 'add_sound_effect': {
+      const id = command.sound ?? command.effect;
+      if (!id) throw new Error('Give effect or sound');
       const { addSoundEffect } = await import('../ui/editActions');
-      return { clipId: await addSoundEffect(command.effect, command.start) };
+      return { clipId: await addSoundEffect(id, command.start, Math.min(Math.max(command.volume ?? 1, 0), 2)) };
+    }
+    case 'list_sounds': {
+      const { loadSoundLibrary } = await import('../media/soundEffects');
+      const library = await loadSoundLibrary();
+      return library
+        .filter((s) => (!command.category || s.category === command.category) && (!command.pack || s.pack === command.pack))
+        .map(({ id, name, category, duration, pack, use }) => ({ id, name, category, duration, pack, use }));
+    }
+    case 'auto_sfx': {
+      const { autoSoundDesign } = await import('../ui/editActions');
+      const volume = command.volume === undefined ? undefined : Math.min(Math.max(command.volume, 0), 2);
+      return { added: await autoSoundDesign({ cuts: command.cuts, texts: command.texts, volume }) };
     }
     case 'add_font': {
       const { addGoogleFont } = await import('../ui/customActions');

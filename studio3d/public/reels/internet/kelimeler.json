@@ -1,0 +1,807 @@
+[
+ {
+  "text": "İnternetin",
+  "startMs": 80,
+  "endMs": 550
+ },
+ {
+  "text": "içinde",
+  "startMs": 550,
+  "endMs": 840
+ },
+ {
+  "text": "bir",
+  "startMs": 840,
+  "endMs": 1000
+ },
+ {
+  "text": "yolculuğa",
+  "startMs": 1000,
+  "endMs": 1470
+ },
+ {
+  "text": "çıkıyoruz.",
+  "startMs": 1470,
+  "endMs": 2180
+ },
+ {
+  "text": "Tarayıcına",
+  "startMs": 2620,
+  "endMs": 3170
+ },
+ {
+  "text": "bir",
+  "startMs": 3170,
+  "endMs": 3430
+ },
+ {
+  "text": "URL",
+  "startMs": 3430,
+  "endMs": 3710
+ },
+ {
+  "text": "yazıp",
+  "startMs": 3710,
+  "endMs": 4190
+ },
+ {
+  "text": "Enter'a",
+  "startMs": 4190,
+  "endMs": 5220
+ },
+ {
+  "text": "bastığında",
+  "startMs": 5220,
+  "endMs": 5860
+ },
+ {
+  "text": "arka",
+  "startMs": 5860,
+  "endMs": 6120
+ },
+ {
+  "text": "planda",
+  "startMs": 6120,
+  "endMs": 6520
+ },
+ {
+  "text": "onlarca",
+  "startMs": 6520,
+  "endMs": 6990
+ },
+ {
+  "text": "farklı",
+  "startMs": 6990,
+  "endMs": 7390
+ },
+ {
+  "text": "işlem",
+  "startMs": 7390,
+  "endMs": 7720
+ },
+ {
+  "text": "gerçekleşiyor.",
+  "startMs": 7720,
+  "endMs": 8860
+ },
+ {
+  "text": "Peki",
+  "startMs": 9220,
+  "endMs": 9250
+ },
+ {
+  "text": "bu",
+  "startMs": 9250,
+  "endMs": 9300
+ },
+ {
+  "text": "istek",
+  "startMs": 9300,
+  "endMs": 9580
+ },
+ {
+  "text": "bilgisayarından",
+  "startMs": 9580,
+  "endMs": 10560
+ },
+ {
+  "text": "dünyanın",
+  "startMs": 10560,
+  "endMs": 11060
+ },
+ {
+  "text": "diğer",
+  "startMs": 11060,
+  "endMs": 11410
+ },
+ {
+  "text": "ucundaki",
+  "startMs": 11410,
+  "endMs": 11930
+ },
+ {
+  "text": "bir",
+  "startMs": 11930,
+  "endMs": 12140
+ },
+ {
+  "text": "sunucuya",
+  "startMs": 12140,
+  "endMs": 12710
+ },
+ {
+  "text": "nasıl",
+  "startMs": 12710,
+  "endMs": 12990
+ },
+ {
+  "text": "ulaşıyor?",
+  "startMs": 12990,
+  "endMs": 13840
+ },
+ {
+  "text": "İlk",
+  "startMs": 14300,
+  "endMs": 14380
+ },
+ {
+  "text": "durağımız",
+  "startMs": 14380,
+  "endMs": 15050
+ },
+ {
+  "text": "DNS.",
+  "startMs": 15050,
+  "endMs": 15640
+ },
+ {
+  "text": "Önce",
+  "startMs": 16320,
+  "endMs": 16320
+ },
+ {
+  "text": "tarayıcı",
+  "startMs": 16320,
+  "endMs": 16500
+ },
+ {
+  "text": "ve",
+  "startMs": 16500,
+  "endMs": 16640
+ },
+ {
+  "text": "işletim",
+  "startMs": 16640,
+  "endMs": 17140
+ },
+ {
+  "text": "sisteminin",
+  "startMs": 17140,
+  "endMs": 17870
+ },
+ {
+  "text": "DNS",
+  "startMs": 17870,
+  "endMs": 18090
+ },
+ {
+  "text": "önbelleği",
+  "startMs": 18090,
+  "endMs": 18930
+ },
+ {
+  "text": "kontrol",
+  "startMs": 18930,
+  "endMs": 19250
+ },
+ {
+  "text": "ediliyor.",
+  "startMs": 19250,
+  "endMs": 20180
+ },
+ {
+  "text": "Kayıt",
+  "startMs": 20620,
+  "endMs": 20700
+ },
+ {
+  "text": "bulunamazsa",
+  "startMs": 20700,
+  "endMs": 21420
+ },
+ {
+  "text": "sorgu",
+  "startMs": 21420,
+  "endMs": 21770
+ },
+ {
+  "text": "Recursive",
+  "startMs": 21770,
+  "endMs": 22460
+ },
+ {
+  "text": "DNS",
+  "startMs": 22460,
+  "endMs": 22710
+ },
+ {
+  "text": "Resolver'a",
+  "startMs": 22710,
+  "endMs": 23440
+ },
+ {
+  "text": "gönderiliyor.",
+  "startMs": 23440,
+  "endMs": 24660
+ },
+ {
+  "text": "Resolver",
+  "startMs": 24740,
+  "endMs": 25420
+ },
+ {
+  "text": "gerekirse",
+  "startMs": 25420,
+  "endMs": 26280
+ },
+ {
+  "text": "sırasıyla",
+  "startMs": 26280,
+  "endMs": 27270
+ },
+ {
+  "text": "Root DNS,",
+  "startMs": 27270,
+  "endMs": 27980
+ },
+ {
+  "text": "TLD DNS",
+  "startMs": 27980,
+  "endMs": 28560
+ },
+ {
+  "text": "ve",
+  "startMs": 28560,
+  "endMs": 28740
+ },
+ {
+  "text": "Authoritative",
+  "startMs": 28740,
+  "endMs": 29980
+ },
+ {
+  "text": "DNS",
+  "startMs": 29980,
+  "endMs": 30270
+ },
+ {
+  "text": "sunucularına",
+  "startMs": 30270,
+  "endMs": 31400
+ },
+ {
+  "text": "başvurarak",
+  "startMs": 31400,
+  "endMs": 32480
+ },
+ {
+  "text": "alan",
+  "startMs": 32480,
+  "endMs": 32740
+ },
+ {
+  "text": "adının",
+  "startMs": 32740,
+  "endMs": 33180
+ },
+ {
+  "text": "IP",
+  "startMs": 33180,
+  "endMs": 33260
+ },
+ {
+  "text": "adresini",
+  "startMs": 33260,
+  "endMs": 33900
+ },
+ {
+  "text": "buluyor.",
+  "startMs": 33900,
+  "endMs": 34500
+ },
+ {
+  "text": "Artık",
+  "startMs": 34960,
+  "endMs": 34960
+ },
+ {
+  "text": "hedef",
+  "startMs": 34960,
+  "endMs": 35220
+ },
+ {
+  "text": "sunucunun",
+  "startMs": 35220,
+  "endMs": 35830
+ },
+ {
+  "text": "IP",
+  "startMs": 35830,
+  "endMs": 35970
+ },
+ {
+  "text": "adresini",
+  "startMs": 35970,
+  "endMs": 36530
+ },
+ {
+  "text": "biliyoruz.",
+  "startMs": 36530,
+  "endMs": 37420
+ },
+ {
+  "text": "Şimdi",
+  "startMs": 37760,
+  "endMs": 37840
+ },
+ {
+  "text": "bağlantı",
+  "startMs": 37840,
+  "endMs": 38230
+ },
+ {
+  "text": "kurulması",
+  "startMs": 38230,
+  "endMs": 38790
+ },
+ {
+  "text": "gerekiyor.",
+  "startMs": 38790,
+  "endMs": 39600
+ },
+ {
+  "text": "HTTP/3",
+  "startMs": 39960,
+  "endMs": 40950
+ },
+ {
+  "text": "ile",
+  "startMs": 40950,
+  "endMs": 41220
+ },
+ {
+  "text": "UDP",
+  "startMs": 41220,
+  "endMs": 41490
+ },
+ {
+  "text": "tabanlı",
+  "startMs": 41490,
+  "endMs": 42120
+ },
+ {
+  "text": "QUIC",
+  "startMs": 42120,
+  "endMs": 42600
+ },
+ {
+  "text": "kullanıyor",
+  "startMs": 42600,
+  "endMs": 43450
+ },
+ {
+  "text": "ve",
+  "startMs": 43450,
+  "endMs": 43560
+ },
+ {
+  "text": "TLS",
+  "startMs": 43560,
+  "endMs": 43860
+ },
+ {
+  "text": "1.3'ü",
+  "startMs": 43860,
+  "endMs": 44850
+ },
+ {
+  "text": "bağlantı",
+  "startMs": 44850,
+  "endMs": 45540
+ },
+ {
+  "text": "kurulumuna",
+  "startMs": 45540,
+  "endMs": 46480
+ },
+ {
+  "text": "entegre",
+  "startMs": 46480,
+  "endMs": 47070
+ },
+ {
+  "text": "ediyor.",
+  "startMs": 47070,
+  "endMs": 47920
+ },
+ {
+  "text": "Bağlantı",
+  "startMs": 48420,
+  "endMs": 48520
+ },
+ {
+  "text": "hazır.",
+  "startMs": 48520,
+  "endMs": 49160
+ },
+ {
+  "text": "Şimdi",
+  "startMs": 49580,
+  "endMs": 49660
+ },
+ {
+  "text": "HTTP",
+  "startMs": 49660,
+  "endMs": 49940
+ },
+ {
+  "text": "GET",
+  "startMs": 49940,
+  "endMs": 50200
+ },
+ {
+  "text": "isteği",
+  "startMs": 50200,
+  "endMs": 50720
+ },
+ {
+  "text": "gönderiliyor.",
+  "startMs": 50720,
+  "endMs": 52060
+ },
+ {
+  "text": "Veriler",
+  "startMs": 52140,
+  "endMs": 52530
+ },
+ {
+  "text": "IP",
+  "startMs": 52530,
+  "endMs": 52670
+ },
+ {
+  "text": "paketlerine",
+  "startMs": 52670,
+  "endMs": 53400
+ },
+ {
+  "text": "dönüştürülerek",
+  "startMs": 53400,
+  "endMs": 54320
+ },
+ {
+  "text": "ağ",
+  "startMs": 54320,
+  "endMs": 54670
+ },
+ {
+  "text": "üzerinden",
+  "startMs": 54670,
+  "endMs": 55070
+ },
+ {
+  "text": "ilerliyor.",
+  "startMs": 55070,
+  "endMs": 56040
+ },
+ {
+  "text": "Router'lar,",
+  "startMs": 56440,
+  "endMs": 56720
+ },
+ {
+  "text": "routing",
+  "startMs": 56720,
+  "endMs": 57190
+ },
+ {
+  "text": "tablolarındaki",
+  "startMs": 57190,
+  "endMs": 58040
+ },
+ {
+  "text": "bilgilere",
+  "startMs": 58040,
+  "endMs": 58610
+ },
+ {
+  "text": "göre",
+  "startMs": 58610,
+  "endMs": 59050
+ },
+ {
+  "text": "paketleri",
+  "startMs": 59050,
+  "endMs": 59420
+ },
+ {
+  "text": "bir",
+  "startMs": 59420,
+  "endMs": 59630
+ },
+ {
+  "text": "sonraki",
+  "startMs": 59630,
+  "endMs": 60040
+ },
+ {
+  "text": "noktaya",
+  "startMs": 60040,
+  "endMs": 60480
+ },
+ {
+  "text": "iletiyor.",
+  "startMs": 60480,
+  "endMs": 61240
+ },
+ {
+  "text": "Ardından",
+  "startMs": 61620,
+  "endMs": 61770
+ },
+ {
+  "text": "Application",
+  "startMs": 61770,
+  "endMs": 62520
+ },
+ {
+  "text": "Server",
+  "startMs": 62520,
+  "endMs": 62920
+ },
+ {
+  "text": "isteği",
+  "startMs": 62920,
+  "endMs": 63330
+ },
+ {
+  "text": "işliyor.",
+  "startMs": 63330,
+  "endMs": 64040
+ },
+ {
+  "text": "Gerekirse",
+  "startMs": 64440,
+  "endMs": 64730
+ },
+ {
+  "text": "Database'den",
+  "startMs": 64730,
+  "endMs": 65660
+ },
+ {
+  "text": "veri",
+  "startMs": 65660,
+  "endMs": 65960
+ },
+ {
+  "text": "çekiyor",
+  "startMs": 65960,
+  "endMs": 66530
+ },
+ {
+  "text": "ve",
+  "startMs": 66530,
+  "endMs": 66650
+ },
+ {
+  "text": "HTTP",
+  "startMs": 66650,
+  "endMs": 67080
+ },
+ {
+  "text": "Response",
+  "startMs": 67080,
+  "endMs": 67590
+ },
+ {
+  "text": "oluşturuyor.",
+  "startMs": 67590,
+  "endMs": 68780
+ },
+ {
+  "text": "Yanıt",
+  "startMs": 69140,
+  "endMs": 69220
+ },
+ {
+  "text": "ağ",
+  "startMs": 69220,
+  "endMs": 69240
+ },
+ {
+  "text": "üzerinden",
+  "startMs": 69240,
+  "endMs": 69830
+ },
+ {
+  "text": "tekrar",
+  "startMs": 69830,
+  "endMs": 70230
+ },
+ {
+  "text": "istemciye",
+  "startMs": 70230,
+  "endMs": 70850
+ },
+ {
+  "text": "gönderiliyor.",
+  "startMs": 70850,
+  "endMs": 71860
+ },
+ {
+  "text": "Ama",
+  "startMs": 72240,
+  "endMs": 72240
+ },
+ {
+  "text": "işlem",
+  "startMs": 72240,
+  "endMs": 72450
+ },
+ {
+  "text": "henüz",
+  "startMs": 72450,
+  "endMs": 72810
+ },
+ {
+  "text": "bitmedi.",
+  "startMs": 72810,
+  "endMs": 73580
+ },
+ {
+  "text": "Ardından",
+  "startMs": 73940,
+  "endMs": 74200
+ },
+ {
+  "text": "Render",
+  "startMs": 74200,
+  "endMs": 74630
+ },
+ {
+  "text": "Tree,",
+  "startMs": 74630,
+  "endMs": 75080
+ },
+ {
+  "text": "Layout,",
+  "startMs": 75080,
+  "endMs": 75670
+ },
+ {
+  "text": "Paint",
+  "startMs": 75670,
+  "endMs": 76030
+ },
+ {
+  "text": "ve",
+  "startMs": 76030,
+  "endMs": 76200
+ },
+ {
+  "text": "Compositing",
+  "startMs": 76200,
+  "endMs": 77030
+ },
+ {
+  "text": "aşamaları",
+  "startMs": 77030,
+  "endMs": 77710
+ },
+ {
+  "text": "gerçekleşiyor.",
+  "startMs": 77710,
+  "endMs": 79000
+ },
+ {
+  "text": "Ve",
+  "startMs": 79080,
+  "endMs": 79130
+ },
+ {
+  "text": "ekranda",
+  "startMs": 79130,
+  "endMs": 79590
+ },
+ {
+  "text": "gördüğümüz",
+  "startMs": 79590,
+  "endMs": 80260
+ },
+ {
+  "text": "web",
+  "startMs": 80260,
+  "endMs": 80450
+ },
+ {
+  "text": "sitesi",
+  "startMs": 80450,
+  "endMs": 80850
+ },
+ {
+  "text": "ortaya",
+  "startMs": 80850,
+  "endMs": 81250
+ },
+ {
+  "text": "çıkıyor.",
+  "startMs": 81250,
+  "endMs": 81980
+ },
+ {
+  "text": "İşte",
+  "startMs": 82320,
+  "endMs": 82400
+ },
+ {
+  "text": "internet",
+  "startMs": 82400,
+  "endMs": 82880
+ },
+ {
+  "text": "dediğimiz",
+  "startMs": 82880,
+  "endMs": 83560
+ },
+ {
+  "text": "şey,",
+  "startMs": 83560,
+  "endMs": 83960
+ },
+ {
+  "text": "saniyeler",
+  "startMs": 83960,
+  "endMs": 84930
+ },
+ {
+  "text": "içinde",
+  "startMs": 84930,
+  "endMs": 85010
+ },
+ {
+  "text": "gerçekleşen",
+  "startMs": 85010,
+  "endMs": 85810
+ },
+ {
+  "text": "bu",
+  "startMs": 85810,
+  "endMs": 85920
+ },
+ {
+  "text": "devasa",
+  "startMs": 85920,
+  "endMs": 86340
+ },
+ {
+  "text": "protokol",
+  "startMs": 86340,
+  "endMs": 86890
+ },
+ {
+  "text": "ve",
+  "startMs": 86890,
+  "endMs": 87210
+ },
+ {
+  "text": "sistem",
+  "startMs": 87210,
+  "endMs": 87460
+ },
+ {
+  "text": "koordinasyonu.",
+  "startMs": 87460,
+  "endMs": 88600
+ }
+]

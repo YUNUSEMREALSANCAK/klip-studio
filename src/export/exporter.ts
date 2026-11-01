@@ -20,6 +20,7 @@ import { clipEnd, projectDuration } from '../core/timeline';
 import type { Asset, MediaClip, Project, TextClip } from '../core/types';
 import { ensureFonts, registerProjectFonts } from '../render/fonts';
 import { mixTimelineAudio } from '../media/audio';
+import { normalizeLoudness, SOCIAL_LOUDNESS } from '../media/loudness';
 import { Compositor, type Mask } from '../render/compositor';
 import { clipSourceTime, clipsToDraw, composeFrame, drawTexts, visibleClips, type VisualSource } from '../render/composeFrame';
 
@@ -69,6 +70,7 @@ export interface ExportOptions {
   fps: number;
   onProgress: (progress: number) => void;
   signal?: AbortSignal;
+  loudness?: number | null; // target LUFS for the final mix (default -14, like Instagram/TikTok); null leaves it as mixed
 }
 
 export async function exportVideo(project: Project, assets: Record<string, Asset>, options: ExportOptions): Promise<Blob> {
@@ -119,7 +121,8 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
     if (!readers.has(clip.id)) {
       const track = await videoTrack(asset);
       if (!track) return undefined;
-      readers.set(clip.id, new FrameReader(new CanvasSink(track)));
+      // Transparent videos (VP9/AV1 with alpha, e.g. rendered titles) keep their alpha.
+      readers.set(clip.id, new FrameReader(new CanvasSink(track, { alpha: await track.canBeTransparent() })));
     }
     const reader = readers.get(clip.id)!;
     const time = clipSourceTime(clip, t, assets);
@@ -172,6 +175,11 @@ export async function exportVideo(project: Project, assets: Record<string, Asset
 
   if (audioSource) {
     const mix = await mixTimelineAudio(project.clips, assets, 48000, 2, [0, duration]);
+    const target = options.loudness === undefined ? SOCIAL_LOUDNESS : options.loudness;
+    if (target !== null) {
+      const channels = Array.from({ length: mix.numberOfChannels }, (_, ch) => mix.getChannelData(ch));
+      normalizeLoudness(channels, mix.sampleRate, target);
+    }
     await audioSource.add(mix);
   }
   await output.finalize();

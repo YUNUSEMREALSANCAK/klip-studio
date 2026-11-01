@@ -1,12 +1,13 @@
 import { tr } from '../i18n';
 import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
-import type { TextAnimation, TextClip, TextStylePreset } from '../core/types';
+import type { TextClip, TextStylePreset } from '../core/types';
 import { familyOf, fontFamilies } from '../render/fonts';
 import { Section, Slider, Toggle } from './controls';
 import { Icon } from './icons';
 import { MediaInspector } from './MediaInspector';
 import { AgentConnection } from './AgentConnection';
+import { TextAnimationSettings } from './settings';
 
 export function Inspector() {
   const clip = useEditor(selectedClip);
@@ -66,14 +67,6 @@ const PRESETS: { id: TextStylePreset; label: string }[] = [
   { id: 'title', label: 'Title' },
 ];
 
-const ANIMATIONS: { id: TextAnimation; label: string }[] = [
-  { id: 'none', label: 'None' },
-  { id: 'fade', label: 'Fade' },
-  { id: 'pop', label: 'Pop' },
-  { id: 'slideup', label: 'Slide up' },
-  { id: 'typewriter', label: 'Typewriter' },
-];
-
 function TextInspector({ clip }: { clip: TextClip }) {
   const fonts = useEditor((s) => s.project.fonts);
   const update = (patch: Partial<TextClip>, record = false) => useEditor.getState().updateClip(clip.id, patch, record);
@@ -103,13 +96,7 @@ function TextInspector({ clip }: { clip: TextClip }) {
         </div>
       </Section>
       <Section title={tr('Animation')}>
-        <div className="chips">
-          {ANIMATIONS.map((a) => (
-            <button key={a.id} className={`chip ${clip.animation === a.id ? 'active' : ''}`} onClick={() => update({ animation: a.id }, true)}>
-              {tr(a.label)}
-            </button>
-          ))}
-        </div>
+        <TextAnimationSettings clip={clip} />
       </Section>
       <Section title={tr('Appearance')}>
         <div className="field">

@@ -30,10 +30,28 @@ export function targetCut(): Cut | null {
   return cutAt(best);
 }
 
+// The cut in front of a main-track clip, or null for the first clip.
+export function cutBefore(clipId: string): Cut | null {
+  const main = sortedTrack<MediaClip>(useEditor.getState().project.clips, 'main');
+  const i = main.findIndex((c) => c.id === clipId);
+  return i > 0 ? { from: main[i - 1], to: main[i], index: i } : null;
+}
+
 // Applies the transition and briefly plays around the cut to preview it. effectId selects a custom transition.
 export function applyTransition(cut: Cut, type: TransitionType | null, duration?: number, effectId?: string) {
   const s = useEditor.getState();
   const length = Math.min(duration ?? cut.to.transition?.duration ?? DEFAULT_DURATION, maxTransitionDuration(cut));
-  s.updateClip(cut.to.id, { transition: type ? { type, duration: length, ...(effectId && { effectId }) } : undefined } as Partial<MediaClip>);
+  const previous = cut.to.transition;
+  // Easing carries over; parameters only while the same custom transition stays.
+  const transition = type
+    ? {
+        type,
+        duration: length,
+        ...(effectId && { effectId }),
+        ...(previous?.easing && { easing: previous.easing }),
+        ...(effectId && previous?.effectId === effectId && previous.params && { params: previous.params }),
+      }
+    : undefined;
+  s.updateClip(cut.to.id, { transition } as Partial<MediaClip>);
   if (type) s.previewRange(cut.to.start - length / 2 - 0.6, cut.to.start + length / 2 + 0.6);
 }

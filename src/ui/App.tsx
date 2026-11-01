@@ -1,5 +1,5 @@
 import { tr, useLang } from '../i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { installWindowApi, startBridgeIfEnabled } from '../agent/bridge';
 import { useEditor } from '../core/store';
 import { registerProjectFonts } from '../render/fonts';
@@ -13,7 +13,12 @@ import { Timeline } from './Timeline';
 import { TopBar } from './TopBar';
 import { missingFeatures } from './compat';
 import { ErrorBoundary } from './ErrorBoundary';
+import { AppliedPanel } from './AppliedPanel';
+import { appliedItems } from '../core/applied';
+import { COLLAPSED_WIDTH, usePanels } from './panelSizes';
+import { Splitter } from './Splitter';
 import { useAutosave } from './useAutosave';
+import { openKlipFromUrl } from './projectFile';
 import { useUi } from './uiStore';
 
 function useShortcuts() {
@@ -68,12 +73,39 @@ function Editor() {
     void registerProjectFonts(fonts);
   }, [fonts]);
   const saveStatus = useAutosave();
+  const restored = saveStatus !== 'loading';
+  useEffect(() => {
+    if (restored) void openKlipFromUrl();
+  }, [restored]);
+  const sizes = usePanels((s) => s.sizes);
+  const appliedCollapsed = usePanels((s) => s.appliedCollapsed);
+  const hasApplied = useEditor((s) => appliedItems(s.project).length > 0);
+  const appliedColumns = !hasApplied ? '' : appliedCollapsed ? `${COLLAPSED_WIDTH}px` : '1px var(--applied-w)';
+  // Re-fit the panels when the window shrinks so the stage keeps its minimum size.
+  useEffect(() => {
+    const refit = () => {
+      const { sizes, resize } = usePanels.getState();
+      (Object.keys(sizes) as (keyof typeof sizes)[]).forEach((panel) => resize(panel, sizes[panel]));
+    };
+    window.addEventListener('resize', refit);
+    return () => window.removeEventListener('resize', refit);
+  }, []);
   const [missing] = useState(missingFeatures);
   const objectClipId = useUi((s) => s.objectEditorClipId);
   const exportOpen = useUi((s) => s.exportOpen);
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={
+        {
+          '--side-w': `${sizes.side}px`,
+          '--inspector-w': `${sizes.inspector}px`,
+          '--applied-w': `${sizes.applied}px`,
+          '--timeline-h': `${sizes.timeline}px`,
+        } as CSSProperties
+      }
+    >
       <div>
         {missing.length > 0 && (
           <div className="compat">
@@ -82,11 +114,16 @@ function Editor() {
         )}
       </div>
       <TopBar saveStatus={saveStatus} />
-      <div className="workspace">
+      <div className="workspace" style={{ gridTemplateColumns: `var(--side-w) 1px minmax(0, 1fr) ${appliedColumns} 1px var(--inspector-w)` }}>
         <SidePanel />
+        <Splitter panel="side" grows={1} />
         <Preview />
+        {hasApplied && !appliedCollapsed && <Splitter panel="applied" grows={-1} />}
+        {hasApplied && <AppliedPanel />}
+        <Splitter panel="inspector" grows={-1} />
         <Inspector />
       </div>
+      <Splitter panel="timeline" grows={-1} />
       <Timeline />
       <TaskToasts />
       {objectClipId && <ObjectEditor clipId={objectClipId} />}

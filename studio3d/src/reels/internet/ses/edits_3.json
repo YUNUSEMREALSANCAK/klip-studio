@@ -1,0 +1,10 @@
+[
+  {"at": 7.0, "set": {"highpass": 170}},
+  {"at": 23.3, "set": {"highpass": 170}},
+  {"at": 35.4, "set": {"highpass": 170}},
+  {"at": 63.3, "set": {"highpass": 170}},
+  {"at": 72.25, "set": {"highpass": 170}},
+  {"at": 78.9, "set": {"highpass": 170}},
+  {"at": 15.05, "set": {"highpass": 170}},
+  {"at": 53.4, "set": {"highpass": 170}}
+]

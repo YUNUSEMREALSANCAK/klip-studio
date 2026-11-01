@@ -10,6 +10,7 @@ Klip Studio is an open-source, AI-powered video editor that runs in the browser.
 | `ROADMAP.md` | Stage, coverage, what's next |
 | `src/core/types.ts` | The project model every feature builds on |
 | `src/core/commands.ts` | The command layer used by agents and non-UI tools |
+| `studio3d/README.md` | The 3D studio (Remotion + R3F): renders scenes and labels as parts and builds `.klip` projects |
 
 ## 2. Commands
 

@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { useEditor } from '../core/store';
 import { ASPECT_SIZES } from '../core/types';
 import { exportVideo } from '../export/exporter';
+import { SOCIAL_LOUDNESS } from '../media/loudness';
 import { Icon } from './icons';
 import { useUi } from './uiStore';
 
@@ -19,6 +20,7 @@ export function ExportDialog() {
   const aspect = useEditor((s) => s.project.aspect);
   const [scale, setScale] = useState(1);
   const [fps, setFps] = useState(30);
+  const [normalize, setNormalize] = useState(true);
   const [progress, setProgress] = useState<number | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,14 @@ export function ExportDialog() {
     setProgress(0);
     abort.current = new AbortController();
     try {
-      const blob = await exportVideo(project, assets, { width, height, fps, onProgress: setProgress, signal: abort.current.signal });
+      const blob = await exportVideo(project, assets, {
+        width,
+        height,
+        fps,
+        onProgress: setProgress,
+        signal: abort.current.signal,
+        loudness: normalize ? SOCIAL_LOUDNESS : null,
+      });
       setResult(URL.createObjectURL(blob));
     } catch (e) {
       if ((e as Error).name !== 'AbortError') setError((e as Error).message);
@@ -72,6 +81,10 @@ export function ExportDialog() {
               <option value={60}>{tr('60 fps')}</option>
             </select>
           </div>
+          <label className="row" style={{ cursor: 'pointer', marginBottom: 8 }} title={tr('Instagram, TikTok and YouTube play videos at about -14 LUFS')}>
+            <input type="checkbox" checked={normalize} onChange={(e) => setNormalize(e.target.checked)} disabled={progress !== null} style={{ flex: 'none' }} />
+            {tr('Social media loudness (-14 LUFS)')}
+          </label>
           <div className="hint">
             {tr('Output:')} {width}×{height}
             {tr(', MP4. Encoded in your browser with WebCodecs.')}

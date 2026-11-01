@@ -101,11 +101,28 @@ test('voice effects and sound effects add new audio clips', async ({ page }) => 
   const sfx = await run(page, { name: 'add_sound_effect', effect: 'whoosh', start: 1 });
   const whoosh = (await state(page)).clips.find((c) => c.id === sfx.clipId);
   expect(whoosh).toMatchObject({ track: 'audio', start: 1 });
-  expect(whoosh!.duration).toBeCloseTo(0.8, 1);
+  expect(Math.abs(whoosh!.duration - 1)).toBeLessThan(0.1); // a real recording from public/sfx (~0.97 s + MP3 padding)
 
-  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
   await page.locator('.tile', { hasText: 'Ding' }).click();
-  await expect(page.locator('.asset', { hasText: 'Ding' })).toHaveCount(1);
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Success bell' })).toHaveCount(1);
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
+
+  // The library list adds any recording; automatic sound effects put a whoosh on the cut.
+  await page.locator('.chip', { hasText: 'Pop' }).click();
+  await page.locator('.sound-row', { hasText: 'Plop!' }).locator('button').last().click();
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Plop!' })).toHaveCount(1);
+  // A sound pack lists a video's named sounds and adds them like any other.
+  await page.locator('.side-tab', { hasText: 'Sounds' }).click();
+  await page.locator('.chip', { hasText: 'İnternet videosu' }).click();
+  await page.locator('.sound-row', { hasText: 'Enter tuşu (mekanik)' }).locator('button').last().click();
+  await page.locator('.side-tab', { hasText: 'Media' }).click();
+  await expect(page.locator('.asset', { hasText: 'Enter tuşu (mekanik)' })).toHaveCount(1);
+  await run(page, { name: 'split', time: 1, clipId: main.id });
+  const auto = await run(page, { name: 'auto_sfx', texts: false });
+  expect(auto.added).toBe(1);
 });
 
 test('freeze frame and reverse work as commands', async ({ page }) => {

@@ -18,6 +18,7 @@ import { appliedItems } from '../core/applied';
 import { COLLAPSED_WIDTH, usePanels } from './panelSizes';
 import { Splitter } from './Splitter';
 import { useAutosave } from './useAutosave';
+import { openKlipFromUrl } from './projectFile';
 import { useUi } from './uiStore';
 
 function useShortcuts() {
@@ -72,6 +73,10 @@ function Editor() {
     void registerProjectFonts(fonts);
   }, [fonts]);
   const saveStatus = useAutosave();
+  const restored = saveStatus !== 'loading';
+  useEffect(() => {
+    if (restored) void openKlipFromUrl();
+  }, [restored]);
   const sizes = usePanels((s) => s.sizes);
   const appliedCollapsed = usePanels((s) => s.appliedCollapsed);
   const hasApplied = useEditor((s) => appliedItems(s.project).length > 0);

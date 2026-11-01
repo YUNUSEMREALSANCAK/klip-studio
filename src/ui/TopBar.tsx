@@ -1,9 +1,10 @@
 import { tr, useLang, type Lang } from '../i18n';
 import { useRef } from 'react';
-import { clearSession, exportKlip, importKlip } from '../core/persistence';
+import { clearSession, exportKlip } from '../core/persistence';
 import { useEditor } from '../core/store';
 import type { AspectRatio } from '../core/types';
 import { Icon } from './icons';
+import { openKlip } from './projectFile';
 import type { SaveStatus } from './useAutosave';
 import { useUi } from './uiStore';
 
@@ -36,19 +37,6 @@ async function saveKlip() {
     download(await exportKlip(project, assets), 'project.klip');
   } finally {
     endTask(task);
-  }
-}
-
-async function openKlip(file: File) {
-  const s = useEditor.getState();
-  try {
-    const { project, assets } = await importKlip(file);
-    await clearSession();
-    s.loadProject(project, assets);
-  } catch (error) {
-    const task = s.startTask('Could not open project');
-    s.updateTask(task, { error: (error as Error).message });
-    setTimeout(() => s.endTask(task), 6000);
   }
 }
 
@@ -87,10 +75,10 @@ export function TopBar({ saveStatus }: { saveStatus: SaveStatus }) {
       <button className="btn ghost small" disabled={!hasClips} onClick={() => void saveKlip()} title={tr('Download as a .klip project file')}>
         {tr('Save')}
       </button>
+      {/* No accept filter: macOS greys out unknown extensions like .klip; importKlip rejects other files. */}
       <input
         ref={fileRef}
         type="file"
-        accept=".klip"
         hidden
         onChange={(e) => {
           const file = e.target.files?.[0];

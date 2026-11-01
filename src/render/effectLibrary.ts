@@ -154,6 +154,35 @@ vec4 effect(vec4 color, vec2 uv) {
 }`,
   },
   {
+    key: 'cinematic_glow',
+    name: 'Cinematic glow',
+    code: `uniform float glow; // = 0.7 [0, 2]
+uniform float threshold; // = 0.6 [0, 1]
+uniform float aberration; // = 0.5 [0, 2]
+uniform float vignette; // = 0.45 [0, 1]
+uniform vec3 tint; // = vec3(0.9, 1.0, 1.1)
+// The look of a 3D render pass: bloom on bright parts, lens color fringing, a cool grade and a soft vignette.
+vec4 effect(vec4 color, vec2 uv) {
+  vec2 d = uv - 0.5;
+  float r2 = dot(d, d);
+  vec2 shift = d * r2 * 0.04 * aberration;
+  vec3 c = vec3(getColor(uv + shift).r, color.g, getColor(uv - shift).b);
+  vec2 px = 1.0 / resolution;
+  vec3 bloom = vec3(0.0);
+  for (int ring = 1; ring <= 3; ring++) {
+    for (int i = 0; i < 10; i++) {
+      float a = float(i) * 0.6283 + float(ring) * 0.31;
+      vec2 o = vec2(cos(a), sin(a)) * px * 9.0 * float(ring * ring);
+      bloom += max(getColor(uv + o).rgb - threshold, 0.0) / float(ring);
+    }
+  }
+  c += bloom * 0.12 * glow;
+  c *= mix(vec3(1.0), tint, 0.6);
+  c *= 1.0 - vignette * smoothstep(0.08, 0.5, r2);
+  return vec4(c, color.a);
+}`,
+  },
+  {
     key: 'light_leak',
     name: 'Light leak',
     code: `uniform float intensity; // = 0.9 [0, 2]

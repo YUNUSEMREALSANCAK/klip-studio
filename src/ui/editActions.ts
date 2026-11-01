@@ -4,7 +4,8 @@ import { averageSpeed } from '../core/speed';
 import type { Clip, MediaClip, SpeedCurve } from '../core/types';
 import { captureFrame, reverseClip } from '../media/clipOps';
 import { createAsset } from '../media/importMedia';
-import { SOUND_EFFECTS, synthesizeSoundEffect, type SoundEffect } from '../media/soundEffects';
+import { planAutoSfx, type AutoSfxOptions } from '../media/autoSfx';
+import { fetchSound, findSound, loadSoundLibrary } from '../media/soundEffects';
 import { changeVoice, VOICE_PRESETS, type VoicePreset } from '../media/voice';
 import { parseCube } from '../media/lut';
 import { clipSourceTime } from '../render/composeFrame';
@@ -41,15 +42,33 @@ export function voiceEffect(clip: MediaClip, preset: VoicePreset) {
   });
 }
 
-// Adds a synthesized sound effect on the audio track at the given time (default: the playhead).
-export async function addSoundEffect(id: SoundEffect, start = editor().time): Promise<string> {
-  const effect = SOUND_EFFECTS.find((s) => s.id === id);
-  if (!effect) throw new Error(`Unknown sound effect: ${id}`);
-  const asset = await createAsset(await synthesizeSoundEffect(id), `${effect.label}.wav`);
-  editor().addAsset(asset);
-  const clip = createMediaClip(asset, 'audio', start);
+// Adds a recorded sound effect on the audio track at the given time (default: the playhead).
+// `id` is a one-click pick ("whoosh") or a library id ("whoosh/whoosh_60013"); a sound already imported is reused.
+export async function addSoundEffect(id: string, start = editor().time, volume = 1): Promise<string> {
+  const clip = await soundClip(id, start, volume);
   editor().mutate((clips) => [...clips, clip]);
   return clip.id;
+}
+
+async function soundClip(id: string, start: number, volume: number) {
+  const sound = await findSound(id);
+  const name = `${sound.name}.mp3`;
+  let asset = Object.values(editor().assets).find((a) => a.kind === 'audio' && a.name === name);
+  if (!asset) {
+    asset = await createAsset(await fetchSound(sound), name);
+    editor().addAsset(asset);
+  }
+  return { ...createMediaClip(asset, 'audio', Math.max(0, start)), volume };
+}
+
+// Automatic sound design: soft whooshes on the main track's cuts and ticks on texts, all ducked under speech.
+// One undo step removes them all. Returns how many sounds were placed.
+export async function autoSoundDesign(options: AutoSfxOptions = {}): Promise<number> {
+  const plan = planAutoSfx(editor().project.clips, await loadSoundLibrary(), options);
+  const added: MediaClip[] = [];
+  for (const p of plan) added.push({ ...(await soundClip(p.sound, p.start, p.volume)), duck: true });
+  if (added.length) editor().mutate((clips) => [...clips, ...added]);
+  return added.length;
 }
 
 // Changes speed; the clip's source range stays fixed, duration and keyframes are scaled.

@@ -4,7 +4,7 @@ import { selectedClip, useEditor } from '../core/store';
 import { formatTime } from '../core/timeline';
 import type { MediaClip, TextAnimation, TextStylePreset } from '../core/types';
 import { importFile, thumbnailOf } from '../media/importMedia';
-import { SOUND_EFFECTS } from '../media/soundEffects';
+import { loadSoundLibrary, loadSoundPacks, SOUND_CATEGORIES, SOUND_EFFECTS, soundUrl, type LibrarySound, type SoundPack } from '../media/soundEffects';
 import { FILTER_PRESETS } from '../render/filterPresets';
 import { ensureFont, FONTS } from '../render/fonts';
 import { TRANSITION_TYPES } from '../render/shaders';
@@ -12,17 +12,19 @@ import { AiPanel } from './AiPanel';
 import { AssistantPanel } from './AssistantPanel';
 import { applyFilterEffect, resolveEffect } from './customActions';
 import { CustomEffects, CustomFonts, LibraryEffects } from './CustomLibrary';
-import { addSoundEffect, importLut } from './editActions';
+import { addSoundEffect, autoSoundDesign, importLut } from './editActions';
 import { Icon } from './icons';
+import { isKlipFile, openKlip } from './projectFile';
 import { applyTransition, maxTransitionDuration, targetCut } from './transitions';
 
-type Tab = 'media' | 'text' | 'transition' | 'filter' | 'ai' | 'assistant';
+type Tab = 'media' | 'text' | 'transition' | 'filter' | 'sounds' | 'ai' | 'assistant';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'media', label: 'Media', icon: 'media' },
   { id: 'text', label: 'Text', icon: 'text' },
   { id: 'transition', label: 'Transition', icon: 'transition' },
   { id: 'filter', label: 'Filter', icon: 'filter' },
+  { id: 'sounds', label: 'Sounds', icon: 'volume' },
   { id: 'ai', label: 'AI', icon: 'ai' },
   { id: 'assistant', label: 'Assistant', icon: 'chat' },
 ];
@@ -44,6 +46,7 @@ export function SidePanel() {
         {tab === 'text' && <TextTab />}
         {tab === 'transition' && <TransitionTab />}
         {tab === 'filter' && <FilterTab />}
+        {tab === 'sounds' && <SoundsTab />}
         {tab === 'ai' && <AiPanel />}
         {tab === 'assistant' && <AssistantPanel />}
       </div>
@@ -51,13 +54,55 @@ export function SidePanel() {
   );
 }
 
-// Synthesized sound effects, added to the audio track at the playhead.
-function SoundEffects() {
+// Sounds tab: one-click picks, automatic placement, the named sounds of earlier videos (packs) and the recorded library.
+let lastSoundSource = ''; // remembered while switching tabs
+
+function SoundsTab() {
+  const [library, setLibrary] = useState<LibrarySound[]>([]);
+  const [packs, setPacks] = useState<SoundPack[]>([]);
+  const [source, setSourceState] = useState(lastSoundSource); // "pack:<id>" or a library category
+  const setSource = (next: string | ((current: string) => string)) =>
+    setSourceState((current) => (lastSoundSource = typeof next === 'function' ? next(current) : next));
+  const [busy, setBusy] = useState(false);
+  const preview = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    Promise.all([loadSoundLibrary(), loadSoundPacks()])
+      .then(([sounds, list]) => {
+        setLibrary(sounds.filter((sound) => !sound.pack));
+        setPacks(list);
+        setSource((current) => current || (list[0] ? `pack:${list[0].id}` : 'whoosh'));
+      })
+      .catch(() => setSource('whoosh'));
+    return () => {
+      preview.current?.pause();
+    };
+  }, []);
+
+  const play = (sound: LibrarySound) => {
+    preview.current?.pause();
+    preview.current = new Audio(soundUrl(sound));
+    void preview.current.play();
+  };
+  const autoDesign = async () => {
+    setBusy(true);
+    try {
+      await autoSoundDesign();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const pack = packs.find((p) => `pack:${p.id}` === source);
+  // A pack is listed by kind (whooshes, risers…), each kind in the order the video used them.
+  const groups = pack
+    ? SOUND_CATEGORIES.map((c) => ({ ...c, sounds: pack.sounds.filter((s) => s.category === c.id).sort((a, b) => (a.moment ?? 0) - (b.moment ?? 0)) })).filter(
+        (g) => g.sounds.length,
+      )
+    : [{ id: source, label: '', sounds: library.filter((s) => s.category === source) }];
+
   return (
     <>
-      <div className="section-title" style={{ marginTop: 18 }}>
-        {tr('Sound effects')}
-      </div>
+      <div className="section-title">{tr('Sound effects')}</div>
       <div className="tile-grid" style={{ marginTop: 8 }}>
         {SOUND_EFFECTS.map((effect) => (
           <button key={effect.id} className="tile" title={tr('Adds it at the playhead')} onClick={() => void addSoundEffect(effect.id)}>
@@ -65,7 +110,82 @@ function SoundEffects() {
           </button>
         ))}
       </div>
+      <button
+        className="btn"
+        style={{ marginTop: 8, width: '100%' }}
+        disabled={busy}
+        title={tr('A soft whoosh on every cut and a quiet tick on texts, lowered under speech')}
+        onClick={() => void autoDesign()}
+      >
+        {tr('Automatic sound effects')}
+      </button>
+      {packs.length > 0 && (
+        <>
+          <div className="section-title" style={{ marginTop: 18 }}>
+            {tr('Sound packs')}
+          </div>
+          <div className="chips" style={{ marginTop: 8 }}>
+            {packs.map((p) => (
+              <button
+                key={p.id}
+                className={`chip ${source === `pack:${p.id}` ? 'active' : ''}`}
+                title={p.description}
+                onClick={() => setSource(`pack:${p.id}`)}
+              >
+                {p.title} · {p.sounds.length}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      <div className="section-title" style={{ marginTop: 18 }}>
+        {tr('Library')}
+      </div>
+      <div className="chips" style={{ marginTop: 8 }}>
+        {SOUND_CATEGORIES.map((c) => (
+          <button key={c.id} className={`chip ${source === c.id ? 'active' : ''}`} onClick={() => setSource(c.id)}>
+            {tr(c.label)}
+          </button>
+        ))}
+      </div>
+      {pack && (
+        <div className="hint" style={{ marginTop: 10 }}>
+          {pack.description}
+        </div>
+      )}
+      <div className="sound-list">
+        {groups.map((group) => (
+          <div key={group.id}>
+            {group.label && <div className="sound-group">{tr(group.label)}</div>}
+            {group.sounds.map((sound) => (
+              <SoundRow key={sound.id} sound={sound} onPlay={() => play(sound)} />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="hint" style={{ marginTop: 6 }}>
+        {tr('Real recordings from Freesound, CC0 (free for any use).')}
+      </div>
     </>
+  );
+}
+
+function SoundRow({ sound, onPlay }: { sound: LibrarySound; onPlay: () => void }) {
+  const title = sound.pack ? `${sound.name} · ${sound.use ?? ''}` : `${sound.name} · ${sound.author} · ${sound.license}`;
+  return (
+    <div className="sound-row" title={title}>
+      <button className="btn ghost icon" title={tr('Listen')} onClick={onPlay}>
+        <Icon name="play" size={12} />
+      </button>
+      <div className="sound-text">
+        <div className="sound-name">{sound.name}</div>
+        {sound.use && <div className="sound-use">{sound.use}</div>}
+      </div>
+      <span className="badge">{sound.duration.toFixed(1)}s</span>
+      <button className="btn ghost icon" title={tr('Adds it at the playhead')} onClick={() => void addSoundEffect(sound.id)}>
+        <Icon name="plus" size={12} />
+      </button>
+    </div>
   );
 }
 
@@ -77,6 +197,10 @@ function MediaTab() {
   const addFiles = async (files: FileList | null) => {
     const s = useEditor.getState();
     for (const file of Array.from(files ?? [])) {
+      if (isKlipFile(file)) {
+        await openKlip(file); // a project file dropped or picked here opens as the project
+        continue;
+      }
       const task = s.startTask(`Importing: ${file.name}`);
       try {
         const asset = await importFile(file);
@@ -107,8 +231,8 @@ function MediaTab() {
       >
         <Icon name="upload" size={22} />
         <div style={{ marginTop: 6 }}>{tr('Drag files here or click')}</div>
-        <div className="hint">{tr('Video, audio, image')}</div>
-        <input ref={inputRef} type="file" multiple accept="video/*,audio/*,image/*" hidden onChange={(e) => void addFiles(e.target.files)} />
+        <div className="hint">{tr('Video, audio, image or a .klip project')}</div>
+        <input ref={inputRef} type="file" multiple accept="video/*,audio/*,image/*,.klip" hidden onChange={(e) => void addFiles(e.target.files)} />
       </div>
       <div className="asset-grid">
         {Object.values(assets).map((asset) => (
@@ -142,7 +266,6 @@ function MediaTab() {
           </div>
         ))}
       </div>
-      <SoundEffects />
     </>
   );
 }
@@ -157,6 +280,8 @@ interface TextTemplate {
   font?: string;
   color?: string;
   highlight?: string;
+  boxColor?: string;
+  letterSpacing?: number;
 }
 
 const TEXT_PRESETS: TextTemplate[] = [
@@ -172,6 +297,32 @@ const TEXT_PRESETS: TextTemplate[] = [
   { label: 'Bold', text: 'WATCH NOW', preset: 'title', animation: 'pop', y: 0.5, fontSize: 0.1, font: 'Anton', color: '#facc15' },
   { label: 'Retro', text: 'Retro', preset: 'neon', animation: 'fade', y: 0.45, fontSize: 0.11, font: 'Lobster', color: '#f472b6' },
   { label: 'Modern', text: 'Modern title', preset: 'classic', animation: 'slideup', y: 0.5, fontSize: 0.07, font: 'Montserrat' },
+  // Tech explainer look (dark navy, electric cyan), as in the 3D reels made with studio3d
+  { label: 'Tech label', text: 'Recursive DNS Resolver', preset: 'box', animation: 'pop', y: 0.18, fontSize: 0.03, font: 'Inter', boxColor: '#030a1c' },
+  {
+    label: 'Chapter tag',
+    text: '01  DNS',
+    preset: 'box',
+    animation: 'slideup',
+    y: 0.08,
+    fontSize: 0.026,
+    font: 'JetBrains Mono',
+    color: '#22e3ff',
+    boxColor: '#030a1c',
+    letterSpacing: 0.06,
+  },
+  { label: 'Glow title', text: 'How does it work?', preset: 'neon', animation: 'fade', y: 0.42, fontSize: 0.065, font: 'Inter', color: '#22e3ff' },
+  {
+    label: 'End card',
+    text: 'Follow for more',
+    preset: 'neon',
+    animation: 'pop',
+    y: 0.5,
+    fontSize: 0.08,
+    font: 'Inter',
+    color: '#ffffff',
+    highlight: '#22e3ff',
+  },
 ];
 
 function TextTab() {
@@ -193,6 +344,8 @@ function TextTab() {
         font: p.font,
         color: p.color ?? '#ffffff',
         highlight: p.highlight ?? '#ffd400',
+        boxColor: p.boxColor,
+        letterSpacing: p.letterSpacing,
       },
       false,
     );

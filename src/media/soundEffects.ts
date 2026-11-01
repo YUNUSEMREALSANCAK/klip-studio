@@ -1,164 +1,94 @@
-import { encodeWav } from './audio';
+// Sound effects: real CC0 recordings bundled in public/sfx (built by scripts/build-sfx-library.mjs).
+// Whooshes are pre-softened above 5.5 kHz so transitions don't sound harsh.
 
-// Sound effects synthesized with Web Audio: no sample files and no licensing questions.
+export interface LibrarySound {
+  id: string; // "<category>/<name>"
+  name: string;
+  category: string;
+  file: string; // relative to sfx/
+  duration: number;
+  author: string;
+  url: string;
+  license: string;
+  pack?: string; // id of the sound pack it belongs to
+  use?: string; // where the pack's video used it
+  moment?: number; // s in that video
+}
 
-export type SoundEffect = 'whoosh' | 'pop' | 'ding' | 'click' | 'riser' | 'boom' | 'shutter';
+// The finished sounds of one video, named for reuse (public/sfx/packs.json, built by scripts/build-sfx-pack.mjs).
+export interface SoundPack {
+  id: string;
+  title: string;
+  description: string;
+  sounds: LibrarySound[];
+}
 
-export const SOUND_EFFECTS: { id: SoundEffect; label: string; duration: number }[] = [
-  { id: 'whoosh', label: 'Whoosh', duration: 0.8 },
-  { id: 'pop', label: 'Pop', duration: 0.2 },
-  { id: 'ding', label: 'Ding', duration: 1.5 },
-  { id: 'click', label: 'Click', duration: 0.08 },
-  { id: 'riser', label: 'Riser', duration: 2 },
-  { id: 'boom', label: 'Boom', duration: 1.6 },
-  { id: 'shutter', label: 'Camera shutter', duration: 0.3 },
+export type SoundEffect = 'whoosh' | 'pop' | 'ding' | 'click' | 'riser' | 'boom' | 'glitch' | 'typing';
+
+// One-click picks; each points to a recording in the library.
+export const SOUND_EFFECTS: { id: SoundEffect; label: string; sound: string }[] = [
+  { id: 'whoosh', label: 'Whoosh', sound: 'whoosh/soft_swoosh_with_noisy_ambience_623709' },
+  { id: 'pop', label: 'Pop', sound: 'pop/plop_447910' },
+  { id: 'ding', label: 'Ding', sound: 'chime/success_bell_511484' },
+  { id: 'click', label: 'Click', sound: 'click/enter_key_180997' },
+  { id: 'riser', label: 'Riser', sound: 'riser/riser_sound_effect_short_685256' },
+  { id: 'boom', label: 'Boom', sound: 'impact/muffled_distant_explosion_149966' },
+  { id: 'glitch', label: 'Glitch', sound: 'glitch/interference_58929' },
+  { id: 'typing', label: 'Typing', sound: 'typing/keyboard_typing_79388' },
 ];
 
-const RATE = 48000;
+export const SOUND_CATEGORIES: { id: string; label: string }[] = [
+  { id: 'whoosh', label: 'Whoosh' },
+  { id: 'riser', label: 'Riser' },
+  { id: 'impact', label: 'Impact' },
+  { id: 'pop', label: 'Pop' },
+  { id: 'chime', label: 'Chime' },
+  { id: 'click', label: 'Click' },
+  { id: 'typing', label: 'Typing' },
+  { id: 'ui', label: 'Interface' },
+  { id: 'glitch', label: 'Glitch' },
+  { id: 'scifi', label: 'Sci-fi' },
+  { id: 'ambience', label: 'Ambience' },
+];
 
-function noise(context: OfflineAudioContext, seconds: number) {
-  const buffer = context.createBuffer(1, Math.ceil(seconds * RATE), RATE);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  const node = context.createBufferSource();
-  node.buffer = buffer;
-  return node;
+const base = () => import.meta.env.BASE_URL ?? '/';
+
+export const soundUrl = (sound: LibrarySound) => `${base()}sfx/${sound.file}`;
+
+let catalog: Promise<LibrarySound[]> | null = null;
+let packs: Promise<SoundPack[]> | null = null;
+
+export function loadSoundPacks(): Promise<SoundPack[]> {
+  packs ??= fetch(`${base()}sfx/packs.json`)
+    .then((response) => (response.ok ? (response.json() as Promise<SoundPack[]>) : []))
+    .then((list) => list.map((p) => ({ ...p, sounds: p.sounds.map((s) => ({ ...s, pack: p.id })) })))
+    .catch(() => []);
+  return packs;
 }
 
-function envelope(context: OfflineAudioContext, points: [number, number][]) {
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(points[0][1], points[0][0]);
-  for (const [time, value] of points.slice(1)) gain.gain.linearRampToValueAtTime(value, time);
-  return gain;
+// The recorded library plus every pack's sounds.
+export function loadSoundLibrary(): Promise<LibrarySound[]> {
+  catalog ??= Promise.all([
+    fetch(`${base()}sfx/catalog.json`).then((response) => {
+      if (!response.ok) throw new Error('Could not load the sound library');
+      return response.json() as Promise<LibrarySound[]>;
+    }),
+    loadSoundPacks(),
+  ]).then(([library, list]) => [...library, ...list.flatMap((p) => p.sounds)]);
+  catalog.catch(() => (catalog = null));
+  return catalog;
 }
 
-function tone(context: OfflineAudioContext, type: OscillatorType, from: number, to: number, seconds: number) {
-  const osc = new OscillatorNode(context, { type, frequency: from });
-  osc.frequency.exponentialRampToValueAtTime(to, seconds);
-  return osc;
+// Accepts a one-click pick ("whoosh") or a library id ("whoosh/whoosh_60013").
+export async function findSound(idOrEffect: string): Promise<LibrarySound> {
+  const id = SOUND_EFFECTS.find((s) => s.id === idOrEffect)?.sound ?? idOrEffect;
+  const sound = (await loadSoundLibrary()).find((s) => s.id === id);
+  if (!sound) throw new Error(`Unknown sound effect: ${idOrEffect}`);
+  return sound;
 }
 
-const BUILD: Record<SoundEffect, (c: OfflineAudioContext, out: AudioNode) => void> = {
-  whoosh: (c, out) => {
-    const src = noise(c, 0.8);
-    const filter = new BiquadFilterNode(c, { type: 'bandpass', frequency: 300, Q: 1.2 });
-    filter.frequency.exponentialRampToValueAtTime(3000, 0.4);
-    filter.frequency.exponentialRampToValueAtTime(500, 0.8);
-    src
-      .connect(filter)
-      .connect(
-        envelope(c, [
-          [0, 0],
-          [0.4, 0.9],
-          [0.8, 0],
-        ]),
-      )
-      .connect(out);
-    src.start();
-  },
-  pop: (c, out) => {
-    const osc = tone(c, 'sine', 700, 120, 0.12);
-    osc
-      .connect(
-        envelope(c, [
-          [0, 0.9],
-          [0.15, 0],
-        ]),
-      )
-      .connect(out);
-    osc.start();
-    osc.stop(0.2);
-  },
-  ding: (c, out) => {
-    for (const [frequency, level] of [
-      [1320, 0.5],
-      [2640, 0.15],
-      [3960, 0.06],
-    ]) {
-      const osc = new OscillatorNode(c, { frequency });
-      const gain = c.createGain();
-      gain.gain.setValueAtTime(level, 0);
-      gain.gain.exponentialRampToValueAtTime(0.001, 1.5);
-      osc.connect(gain).connect(out);
-      osc.start();
-    }
-  },
-  click: (c, out) => {
-    const src = noise(c, 0.08);
-    src
-      .connect(new BiquadFilterNode(c, { type: 'highpass', frequency: 2000 }))
-      .connect(
-        envelope(c, [
-          [0, 1],
-          [0.03, 0],
-        ]),
-      )
-      .connect(out);
-    src.start();
-  },
-  riser: (c, out) => {
-    const osc = tone(c, 'sawtooth', 150, 1200, 2);
-    const filter = new BiquadFilterNode(c, { type: 'lowpass', frequency: 400 });
-    filter.frequency.exponentialRampToValueAtTime(6000, 2);
-    osc
-      .connect(filter)
-      .connect(
-        envelope(c, [
-          [0, 0],
-          [1.9, 0.35],
-          [2, 0],
-        ]),
-      )
-      .connect(out);
-    osc.start();
-  },
-  boom: (c, out) => {
-    const osc = tone(c, 'sine', 90, 32, 1.4);
-    osc
-      .connect(
-        envelope(c, [
-          [0, 1],
-          [1.6, 0],
-        ]),
-      )
-      .connect(out);
-    osc.start();
-    const rumble = noise(c, 1.6);
-    rumble
-      .connect(new BiquadFilterNode(c, { type: 'lowpass', frequency: 180 }))
-      .connect(
-        envelope(c, [
-          [0, 0.8],
-          [1.2, 0],
-        ]),
-      )
-      .connect(out);
-    rumble.start();
-  },
-  shutter: (c, out) => {
-    for (const at of [0, 0.09]) {
-      const src = noise(c, 0.06);
-      src
-        .connect(new BiquadFilterNode(c, { type: 'bandpass', frequency: 2500, Q: 0.8 }))
-        .connect(
-          envelope(c, [
-            [at, 0],
-            [at + 0.003, 0.9],
-            [at + 0.05, 0],
-          ]),
-        )
-        .connect(out);
-      src.start(at);
-    }
-  },
-};
-
-export async function synthesizeSoundEffect(id: SoundEffect): Promise<Blob> {
-  const { duration } = SOUND_EFFECTS.find((s) => s.id === id)!;
-  const context = new OfflineAudioContext(1, Math.ceil(duration * RATE), RATE);
-  const master = new GainNode(context, { gain: 0.8 });
-  master.connect(context.destination);
-  BUILD[id](context, master);
-  const buffer = await context.startRendering();
-  return encodeWav(buffer.getChannelData(0), RATE);
+export async function fetchSound(sound: LibrarySound): Promise<Blob> {
+  const response = await fetch(soundUrl(sound));
+  if (!response.ok) throw new Error(`Could not load sound: ${sound.name}`);
+  return response.blob();
 }

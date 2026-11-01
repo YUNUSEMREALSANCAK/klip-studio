@@ -46,7 +46,7 @@ Working from a clone of this repo instead? Use `node /full/path/to/klip-studio/m
 | --- | --- |
 | `klip_state` | Project summary: assets, clips, duration, aspect ratio, playhead |
 | `klip_commands` | Every editor command with its parameter schema |
-| `klip_execute` | Runs a command (split, add_text, set_transition, set_filter, set_speed, set_keyframe, freeze_frame, reverse_clip, voice_effect, add_sound_effect, run_ai, undo, …) |
+| `klip_execute` | Runs a command (split, add_text, set_transition, set_filter, set_speed, set_keyframe, freeze_frame, reverse_clip, voice_effect, add_sound_effect, list_sounds, auto_sfx, run_ai, undo, …) |
 | `klip_screenshot` | The current preview frame as an image |
 | `klip_import_file` | Adds a local video, audio or image file to the media library |
 | `klip_export` | Renders the timeline and saves an MP4 to a local path |

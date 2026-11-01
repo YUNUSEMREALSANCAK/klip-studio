@@ -23,7 +23,7 @@
 | Picture editing | ~85% | stabilization, overlay/soft-light blend modes |
 | Text and captions | ~75% | per-word styling, animated text effects library |
 | Transitions and effects | ~70% | sticker library, effects on a separate track (custom GLSL effects cover the rest) |
-| Audio | ~75% | music library, more voice effects, Turkish text to speech |
+| Audio | ~82% | music library, more voice effects, Turkish text to speech |
 | AI | ~75% | highlight detection, real-time general object segmentation, Turkish text to speech |
 | Projects and distribution | ~70% | template sharing, cloud sync (intentionally absent: local-first) |
 
@@ -77,6 +77,16 @@ Effort: **S** ≈ 2–6 hours · **M** ≈ 1–3 days · **L** ≈ 1–2 weeks (
 - [x] **Natural-language editing** (M): Assistant tab, Claude Opus 5.5 + command tools (user's own API key)
 - [x] **Effects by description** (M): over MCP the AI writes, compiles, fixes and applies custom GLSL transitions and filters (`create_effect`, `set_filter`, `add_font`)
 - [x] **Use from any AI app** (M): `npx -y klip-studio-mcp` for Claude Desktop/Code, Cursor, Codex, VS Code, Gemini CLI; shared HTTP mode, MP4 export tool, origin checks, in-app setup snippets
+
+### Phase 4.5: Real sound and 3D studio ✅
+
+- [x] **Real sound effect library** (M): 115 CC0 recordings from Freesound in `public/sfx` (whooshes softened above 5.5 kHz), browsable by category with preview; replaces the synthesized sounds (`scripts/build-sfx-library.mjs`)
+- [x] **Sounds tab and sound packs** (S): its own tab under Filter; a pack holds one video's finished sounds with clear names and where they were used (`scripts/build-sfx-pack.mjs`, first pack: the internet reel, 55 sounds)
+- [x] **Automatic sound effects** (S): `auto_sfx` places rotating soft whooshes on main-track cuts and quiet ticks on texts, ducked under speech
+- [x] **Social media loudness** (S): export normalizes the mix to -14 LUFS (BS.1770 gated loudness + look-ahead limiter)
+- [x] **Transparent video overlays** (S): VP9/AV1 alpha video keeps its transparency in export
+- [x] **3D studio** (L): `studio3d/` (Remotion + React Three Fiber) renders clean 3D scenes and every label as its own transparent video, then builds a `.klip` project from them
+- [x] **Tech explainer look** (S): Cinematic glow filter, Tech label / Chapter tag / Glow title / End card templates, JetBrains Mono
 
 ### Phase 5: Distribution and community → v1.0
 

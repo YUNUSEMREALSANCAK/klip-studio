@@ -69,7 +69,7 @@
       <br>
       <sub>"Daire aç" geçişinin tam ortası; hedef kesim ve süre ayarı.</sub>
       <h3>Geçişler, renk ve efektler</h3>
-      21 geçiş, kesimdeki ◆ işaretine tıklayarak eklenir ve otomatik önizlenir. 13 hareketli <b>video efekti</b> (glitch, sarsıntı, VHS, eski film, ışık sızıntısı, kaleydoskop…). Parlaklık, kontrast, doygunluk, sıcaklık, keskinlik, vinyet, 9 filtre ön ayarı ve <b>.cube LUT</b> içe aktarma.
+      21 geçiş, kesimdeki ◆ işaretine tıklayarak eklenir ve otomatik önizlenir. 14 hareketli <b>video efekti</b> (glitch, sarsıntı, VHS, eski film, ışık sızıntısı, sinematik parıltı, kaleydoskop…). Parlaklık, kontrast, doygunluk, sıcaklık, keskinlik, vinyet, 9 filtre ön ayarı ve <b>.cube LUT</b> içe aktarma.
       <br><br>
       <b>Kırpma</b>, üst katmanlar için <b>karışım modları</b>, şekil maskeleri (dikdörtgen, elips, doğrusal), <b>yeşil perde</b> (chroma key) ve dikey videolar için <b>bulanık tuval</b> arka planı.
       <br><br>
@@ -85,12 +85,15 @@
         <li>Sürükle-bırak, kırpma, bölme (S), geri al/yinele</li>
         <li><b>Anahtar kareler:</b> konum, boyut, döndürme, opaklık, ses düzeyi</li>
         <li><b>Hız</b> 0.25×–4× ve <b>hız eğrileri</b> (perde korunur), kareyi dondur, ters çevir</li>
-        <li>Ses fade in/out, konuşmada müziği kısma (ducking), <b>ses değiştirici</b> (sincap, kalın, robot, yankı, telefon), kodla üretilen 7 <b>ses efekti</b></li>
-        <li>10 yazı tipi ve kendi yazı tipleriniz, 12 metin şablonu, karaoke altyazı, kontur, gölge ve harf aralığı</li>
+        <li>Ses fade in/out, konuşmada müziği kısma (ducking), <b>ses değiştirici</b> (sincap, kalın, robot, yankı, telefon), <b>Sesler sekmesi</b>: <b>115 gerçek kayıtlı ses efekti</b> (CC0; geçiş sesleri yumuşatılmış) ve önceki videoların adlandırılmış <b>ses paketleri</b>, tek tıkla <b>otomatik ses efekti</b> (kesimlere whoosh, yazılara tık; konuşmada kısılır)</li>
+        <li>Dışa aktarmada <b>sosyal medya ses seviyesi</b> (-14 LUFS, Instagram/TikTok), <b>şeffaf video</b> (VP9 alfa) üst katmanları</li>
+        <li>11 yazı tipi ve kendi yazı tipleriniz, 16 metin şablonu (teknik etiket ve bölüm etiketi dahil), karaoke altyazı, kontur, gölge ve harf aralığı</li>
       </ul>
     </td>
   </tr>
 </table>
+
+**3D Stüdyo** (`studio3d/`): Remotion + React Three Fiber ile sinematik 3D sahneler üretir; sahneler, her etiket (şeffaf video) ve her ses ayrı parça olarak bir `.klip` projesine dönüşür ve editörde kurgulanır. Ayrıntı: [studio3d/README.md](studio3d/README.md).
 
 **Proje** otomatik kaydedilir (IndexedDB) ve `.klip` dosyası olarak saklanıp açılabilir. Uygulama **yüklenebilir** (PWA) ve çevrimdışı açılır. Arayüz **İngilizce ve Türkçe** (sağ üstteki dil seçicisi).
 
@@ -187,4 +190,4 @@ Açıkları herkese açık issue yerine [SECURITY.md](SECURITY.md) içindeki yol
 
 Klip Stüdyo, [MIT](LICENSE-MIT) veya [Apache-2.0](LICENSE-APACHE) lisanslarından biriyle kullanılabilir. Modeller kendi lisanslarıyla çalışma anında indirilir (yukarıdaki nota bakın).
 
-Kullanılan açık kaynak projeler: [transformers.js](https://github.com/huggingface/transformers.js), [Whisper](https://github.com/openai/whisper), [SlimSAM](https://github.com/czg1225/SlimSAM), [BiRefNet](https://github.com/ZhengPeng7/BiRefNet), [MODNet](https://github.com/ZHKKKe/MODNet), [MediaPipe](https://github.com/google-ai-edge/mediapipe), [RNNoise](https://github.com/xiph/rnnoise), [Mediabunny](https://github.com/Vanilagy/mediabunny), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), [React](https://react.dev), [Zustand](https://github.com/pmndrs/zustand), [Vite](https://vite.dev). Kısa video editörlerinden, özellikle CapCut'ın iş akışından ilham alınmıştır; CapCut kodu veya modeli içermez.
+Kullanılan açık kaynak projeler: [transformers.js](https://github.com/huggingface/transformers.js), [Whisper](https://github.com/openai/whisper), [SlimSAM](https://github.com/czg1225/SlimSAM), [BiRefNet](https://github.com/ZhengPeng7/BiRefNet), [MODNet](https://github.com/ZHKKKe/MODNet), [MediaPipe](https://github.com/google-ai-edge/mediapipe), [RNNoise](https://github.com/xiph/rnnoise), [Mediabunny](https://github.com/Vanilagy/mediabunny), [MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), [React](https://react.dev), [Zustand](https://github.com/pmndrs/zustand), [Vite](https://vite.dev), [Remotion](https://remotion.dev) ve [Three.js](https://threejs.org) (studio3d). Ses efektleri [Freesound](https://freesound.org) CC0 kayıtlarıdır ([public/sfx/CREDITS.md](public/sfx/CREDITS.md)). Kısa video editörlerinden, özellikle CapCut'ın iş akışından ilham alınmıştır; CapCut kodu veya modeli içermez.

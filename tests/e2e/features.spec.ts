@@ -158,12 +158,15 @@ test('effects have parameters and fades, clips have in/out animations, transitio
   await run(page, { name: 'seek', time: 0.1 });
   await expect.poll(async () => (await pixel(page, 0.5, 0.5))[0]).toBeLessThan(120);
 
-  // A fade-in animation starts the second clip from black.
+  // A fade-in animation starts the second clip from black. Compared by brightness, not a fixed threshold:
+  // the preview lands on the nearest frame, so "just after the cut" can be a few percent into the fade.
   await run(page, { name: 'update_clip', clipId: second.id, changes: { animIn: { type: 'fade', duration: 1 } } });
-  await run(page, { name: 'seek', time: second.start + 0.02 });
-  await expect.poll(() => litRatio(page)).toBeLessThan(0.1);
+  const brightness = async () => (await pixel(page, 0.5, 0.5)).reduce((a, b) => a + b, 0);
   await run(page, { name: 'seek', time: second.start + 1.5 });
   await expect.poll(() => litRatio(page)).toBeGreaterThan(0.9);
+  const full = await brightness();
+  await run(page, { name: 'seek', time: second.start + 0.02 });
+  await expect.poll(brightness).toBeLessThan(full * 0.25);
 
   await run(page, { name: 'set_transition', toClipId: second.id, effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });
   expect(await clipField(page, second.id, 'transition')).toMatchObject({ effectId: 'lib_t_swirl', easing: 'easeInOut', params: { strength: 10 } });

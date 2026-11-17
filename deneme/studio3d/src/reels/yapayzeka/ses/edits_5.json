@@ -1,0 +1,56 @@
+[
+ {
+  "at": 4.4,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -15,
+   "t": 4.55,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 13.65,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -17,
+   "t": 13.85,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 26.45,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -10,
+   "t": 26.68,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 40.8,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -8,
+   "t": 41.0,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 50.75,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -20,
+   "t": 50.95,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 68.55,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -10,
+   "t": 68.8,
+   "max_dur": 0.7
+  }
+ }
+]

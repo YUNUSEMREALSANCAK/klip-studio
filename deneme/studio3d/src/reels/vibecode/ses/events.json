@@ -1,0 +1,400 @@
+[
+ {
+  "t": 0.14,
+  "type": "whoosh",
+  "len": 0.4,
+  "g": 0.45,
+  "notes": "Fiti alttan zıplar"
+ },
+ {
+  "t": 0.2,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "uygulama simgeleri"
+ },
+ {
+  "t": 0.62,
+  "type": "pop",
+  "g": 0.4,
+  "notes": "uygulama simgeleri"
+ },
+ {
+  "t": 0.67,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "Fiti yere iner"
+ },
+ {
+  "t": 1.5,
+  "type": "whoosh",
+  "len": 0.6,
+  "g": 0.35,
+  "notes": "kod baloncuğu tarar"
+ },
+ {
+  "t": 3.66,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "fiyat etiketleri"
+ },
+ {
+  "t": 3.95,
+  "type": "ui",
+  "g": 0.4,
+  "notes": "fiyat etiketleri"
+ },
+ {
+  "t": 4.41,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "soru işareti"
+ },
+ {
+  "t": 4.9,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "site sahnesi"
+ },
+ {
+  "t": 5.15,
+  "type": "whoosh",
+  "len": 0.4,
+  "g": 0.4,
+  "notes": "tarayıcı gelir"
+ },
+ {
+  "t": 6.4,
+  "type": "click",
+  "g": 0.45,
+  "notes": "kilit titrer"
+ },
+ {
+  "t": 7.24,
+  "type": "whoosh",
+  "len": 0.5,
+  "g": 0.45,
+  "notes": "perde kalkar"
+ },
+ {
+  "t": 8.55,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "liste sahnesi"
+ },
+ {
+  "t": 8.58,
+  "type": "chime",
+  "g": 0.45,
+  "notes": "başlık çerçevelenir"
+ },
+ {
+  "t": 10.14,
+  "type": "whoosh",
+  "len": 0.5,
+  "g": 0.3,
+  "notes": "liste kayar"
+ },
+ {
+  "t": 10.48,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "sayaç rozeti"
+ },
+ {
+  "t": 10.6,
+  "type": "data",
+  "len": 0.75,
+  "g": 0.35,
+  "notes": "1.000 sayar"
+ },
+ {
+  "t": 10.98,
+  "type": "success",
+  "g": 0.45,
+  "notes": "1.000+"
+ },
+ {
+  "t": 12.6,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "örnek sahnesi"
+ },
+ {
+  "t": 13.36,
+  "type": "whoosh",
+  "len": 0.35,
+  "g": 0.4,
+  "notes": "CapCut kartı"
+ },
+ {
+  "t": 13.88,
+  "type": "whoosh",
+  "len": 0.35,
+  "g": 0.4,
+  "notes": "Canva kartı"
+ },
+ {
+  "t": 14.61,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "boş kart"
+ },
+ {
+  "t": 16.2,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "seçim sahnesi"
+ },
+ {
+  "t": 16.34,
+  "type": "typing",
+  "len": 0.5,
+  "n": 6,
+  "g": 0.45,
+  "notes": "arama: capcut"
+ },
+ {
+  "t": 16.82,
+  "type": "ui",
+  "g": 0.4,
+  "notes": "sonuç açılır"
+ },
+ {
+  "t": 17.26,
+  "type": "click",
+  "g": 0.65,
+  "notes": "sonuca tıklanır"
+ },
+ {
+  "t": 17.5,
+  "type": "whoosh",
+  "len": 0.3,
+  "g": 0.3,
+  "notes": "sayfa açılır"
+ },
+ {
+  "t": 19.09,
+  "type": "chime",
+  "g": 0.4,
+  "notes": "başlık çerçevelenir"
+ },
+ {
+  "t": 19.5,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "terazi sahnesi"
+ },
+ {
+  "t": 19.75,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "terazi gelir"
+ },
+ {
+  "t": 21.53,
+  "type": "whoosh",
+  "len": 0.5,
+  "g": 0.35,
+  "notes": "terazi sola yatar"
+ },
+ {
+  "t": 22.0,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "kefe iner"
+ },
+ {
+  "t": 24.09,
+  "type": "whoosh",
+  "len": 0.5,
+  "g": 0.35,
+  "notes": "terazi sağa yatar"
+ },
+ {
+  "t": 24.56,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "kefe iner"
+ },
+ {
+  "t": 25.05,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "cevap sahnesi"
+ },
+ {
+  "t": 26.52,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "EVET"
+ },
+ {
+  "t": 27.05,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "HAYIR"
+ },
+ {
+  "t": 27.45,
+  "type": "hit",
+  "g": 0.45,
+  "notes": "KINDA damgası"
+ },
+ {
+  "t": 27.8,
+  "type": "pop",
+  "g": 0.4,
+  "notes": "KINDA notu"
+ },
+ {
+  "t": 27.9,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "detay sahnesi"
+ },
+ {
+  "t": 29.49,
+  "type": "whoosh",
+  "len": 0.6,
+  "g": 0.3,
+  "notes": "sayfa kayar"
+ },
+ {
+  "t": 29.94,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "kolay kısımlar"
+ },
+ {
+  "t": 32.05,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "zorlanacağın yerler"
+ },
+ {
+  "t": 32.86,
+  "type": "whoosh",
+  "len": 0.8,
+  "g": 0.3,
+  "notes": "sayfa aşağı kayar"
+ },
+ {
+  "t": 34.02,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "neden hâlâ ödüyorsun"
+ },
+ {
+  "t": 34.42,
+  "type": "ui",
+  "g": 0.4,
+  "notes": "kaybedilenler çerçevesi"
+ },
+ {
+  "t": 35.75,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "kaydet sahnesi"
+ },
+ {
+  "t": 36.3,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "yer imi"
+ },
+ {
+  "t": 37.54,
+  "type": "success",
+  "g": 0.5,
+  "notes": "yer imi dolar"
+ },
+ {
+  "t": 38.56,
+  "type": "paper",
+  "g": 0.5,
+  "notes": "fatura düşer"
+ },
+ {
+  "t": 38.71,
+  "type": "paper",
+  "g": 0.45,
+  "notes": "fatura düşer"
+ },
+ {
+  "t": 38.92,
+  "type": "whoosh",
+  "len": 0.25,
+  "g": 0.3,
+  "notes": "faturaların üstü çizilir"
+ },
+ {
+  "t": 40.42,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "arkadaş"
+ },
+ {
+  "t": 40.57,
+  "type": "whoosh",
+  "len": 0.6,
+  "g": 0.45,
+  "notes": "kâğıt uçak uçar"
+ },
+ {
+  "t": 41.21,
+  "type": "chime",
+  "g": 0.45,
+  "notes": "uçak ulaşır"
+ },
+ {
+  "t": 41.35,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "son sahne"
+ },
+ {
+  "t": 41.8,
+  "type": "typing",
+  "len": 0.8,
+  "n": 18,
+  "g": 0.4,
+  "notes": "adres yazılır"
+ },
+ {
+  "t": 42.33,
+  "type": "chime",
+  "g": 0.4,
+  "notes": "başlık çerçevelenir"
+ },
+ {
+  "t": 42.69,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "adres hapı"
+ },
+ {
+  "t": 44.03,
+  "type": "whoosh",
+  "len": 0.4,
+  "g": 0.45,
+  "notes": "kapanış girer"
+ },
+ {
+  "t": 44.66,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "Fiti iner"
+ },
+ {
+  "t": 45.34,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "Takip et düğmesi"
+ },
+ {
+  "t": 45.94,
+  "type": "click",
+  "g": 1.0,
+  "notes": "düğmeye basılır"
+ }
+]

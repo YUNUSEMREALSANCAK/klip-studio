@@ -1,0 +1,787 @@
+[
+ {
+  "text": "Yapay",
+  "startMs": 100,
+  "endMs": 350
+ },
+ {
+  "text": "zekâ",
+  "startMs": 350,
+  "endMs": 640
+ },
+ {
+  "text": "dünyasında",
+  "startMs": 640,
+  "endMs": 1360
+ },
+ {
+  "text": "bu",
+  "startMs": 1360,
+  "endMs": 1480
+ },
+ {
+  "text": "hafta",
+  "startMs": 1480,
+  "endMs": 1830
+ },
+ {
+  "text": "neler",
+  "startMs": 1830,
+  "endMs": 2180
+ },
+ {
+  "text": "oldu?",
+  "startMs": 2180,
+  "endMs": 2740
+ },
+ {
+  "text": "Son",
+  "startMs": 3140,
+  "endMs": 3240
+ },
+ {
+  "text": "haber",
+  "startMs": 3240,
+  "endMs": 3410
+ },
+ {
+  "text": "Türkiye'den.",
+  "startMs": 3410,
+  "endMs": 4460
+ },
+ {
+  "text": "1.",
+  "startMs": 4800,
+  "endMs": 4920
+ },
+ {
+  "text": "Google'ın",
+  "startMs": 4920,
+  "endMs": 5620
+ },
+ {
+  "text": "yeni",
+  "startMs": 5620,
+  "endMs": 5900
+ },
+ {
+  "text": "modeli",
+  "startMs": 5900,
+  "endMs": 6440
+ },
+ {
+  "text": "Gemini",
+  "startMs": 6440,
+  "endMs": 6820
+ },
+ {
+  "text": "4",
+  "startMs": 6820,
+  "endMs": 7040
+ },
+ {
+  "text": "Carbon",
+  "startMs": 7040,
+  "endMs": 7470
+ },
+ {
+  "text": "duyuruldu.",
+  "startMs": 7470,
+  "endMs": 8480
+ },
+ {
+  "text": "Kodlama",
+  "startMs": 8740,
+  "endMs": 8930
+ },
+ {
+  "text": "ve",
+  "startMs": 8930,
+  "endMs": 9060
+ },
+ {
+  "text": "siber",
+  "startMs": 9060,
+  "endMs": 9380
+ },
+ {
+  "text": "güvenlikte",
+  "startMs": 9380,
+  "endMs": 10020
+ },
+ {
+  "text": "öne",
+  "startMs": 10020,
+  "endMs": 10210
+ },
+ {
+  "text": "çıkıyor.",
+  "startMs": 10210,
+  "endMs": 10940
+ },
+ {
+  "text": "Beta",
+  "startMs": 11260,
+  "endMs": 11350
+ },
+ {
+  "text": "sürümü",
+  "startMs": 11350,
+  "endMs": 11540
+ },
+ {
+  "text": "siber",
+  "startMs": 11540,
+  "endMs": 11900
+ },
+ {
+  "text": "güvenlik",
+  "startMs": 11900,
+  "endMs": 12320
+ },
+ {
+  "text": "ekiplerine",
+  "startMs": 12320,
+  "endMs": 12920
+ },
+ {
+  "text": "açılıyor.",
+  "startMs": 12920,
+  "endMs": 13680
+ },
+ {
+  "text": "2.",
+  "startMs": 14100,
+  "endMs": 14220
+ },
+ {
+  "text": "ChatGPT",
+  "startMs": 14220,
+  "endMs": 14590
+ },
+ {
+  "text": "artık",
+  "startMs": 14590,
+  "endMs": 14950
+ },
+ {
+  "text": "bilgisayarını",
+  "startMs": 14950,
+  "endMs": 15860
+ },
+ {
+  "text": "senin",
+  "startMs": 15860,
+  "endMs": 16220
+ },
+ {
+  "text": "yerine",
+  "startMs": 16220,
+  "endMs": 16620
+ },
+ {
+  "text": "kullanabiliyor.",
+  "startMs": 16620,
+  "endMs": 17940
+ },
+ {
+  "text": "OpenAI,",
+  "startMs": 18380,
+  "endMs": 18650
+ },
+ {
+  "text": "GPT-6.1",
+  "startMs": 18650,
+  "endMs": 19740
+ },
+ {
+  "text": "Terra'yı",
+  "startMs": 19740,
+  "endMs": 20400
+ },
+ {
+  "text": "yayınladı.",
+  "startMs": 20400,
+  "endMs": 21500
+ },
+ {
+  "text": "Ekranı",
+  "startMs": 21820,
+  "endMs": 21930
+ },
+ {
+  "text": "görüyor,",
+  "startMs": 21930,
+  "endMs": 22460
+ },
+ {
+  "text": "uygulamalar",
+  "startMs": 22460,
+  "endMs": 23110
+ },
+ {
+  "text": "arasında",
+  "startMs": 23110,
+  "endMs": 23620
+ },
+ {
+  "text": "geçiş",
+  "startMs": 23620,
+  "endMs": 23930
+ },
+ {
+  "text": "yapıyor",
+  "startMs": 23930,
+  "endMs": 24340
+ },
+ {
+  "text": "ve",
+  "startMs": 24340,
+  "endMs": 24500
+ },
+ {
+  "text": "senin",
+  "startMs": 24500,
+  "endMs": 24960
+ },
+ {
+  "text": "adına",
+  "startMs": 24960,
+  "endMs": 25150
+ },
+ {
+  "text": "işlem",
+  "startMs": 25150,
+  "endMs": 25470
+ },
+ {
+  "text": "gerçekleştiriyor.",
+  "startMs": 25470,
+  "endMs": 26820
+ },
+ {
+  "text": "3.",
+  "startMs": 26920,
+  "endMs": 27250
+ },
+ {
+  "text": "Claude'un",
+  "startMs": 27250,
+  "endMs": 27890
+ },
+ {
+  "text": "arkasındaki",
+  "startMs": 27890,
+  "endMs": 28680
+ },
+ {
+  "text": "şirket",
+  "startMs": 28680,
+  "endMs": 29100
+ },
+ {
+  "text": "halka",
+  "startMs": 29100,
+  "endMs": 29450
+ },
+ {
+  "text": "arz",
+  "startMs": 29450,
+  "endMs": 29880
+ },
+ {
+  "text": "yolunda.",
+  "startMs": 29880,
+  "endMs": 30480
+ },
+ {
+  "text": "Anthropic,",
+  "startMs": 30860,
+  "endMs": 31250
+ },
+ {
+  "text": "halka",
+  "startMs": 31250,
+  "endMs": 31600
+ },
+ {
+  "text": "arz",
+  "startMs": 31600,
+  "endMs": 31810
+ },
+ {
+  "text": "için",
+  "startMs": 31810,
+  "endMs": 32090
+ },
+ {
+  "text": "başvurdu.",
+  "startMs": 32090,
+  "endMs": 32920
+ },
+ {
+  "text": "Yılın",
+  "startMs": 33180,
+  "endMs": 33300
+ },
+ {
+  "text": "ilk",
+  "startMs": 33300,
+  "endMs": 33480
+ },
+ {
+  "text": "yarısında",
+  "startMs": 33480,
+  "endMs": 34110
+ },
+ {
+  "text": "16,3",
+  "startMs": 34110,
+  "endMs": 34890
+ },
+ {
+  "text": "milyar",
+  "startMs": 34890,
+  "endMs": 35310
+ },
+ {
+  "text": "dolar",
+  "startMs": 35310,
+  "endMs": 35660
+ },
+ {
+  "text": "gelir",
+  "startMs": 35660,
+  "endMs": 36300
+ },
+ {
+  "text": "açıkladı.",
+  "startMs": 36300,
+  "endMs": 36880
+ },
+ {
+  "text": "Şirketin",
+  "startMs": 37180,
+  "endMs": 37360
+ },
+ {
+  "text": "hisselerinin",
+  "startMs": 37360,
+  "endMs": 38080
+ },
+ {
+  "text": "Kasım",
+  "startMs": 38080,
+  "endMs": 38400
+ },
+ {
+  "text": "ayında",
+  "startMs": 38400,
+  "endMs": 38820
+ },
+ {
+  "text": "Nasdaq'ta",
+  "startMs": 38820,
+  "endMs": 39280
+ },
+ {
+  "text": "işlem",
+  "startMs": 39280,
+  "endMs": 39580
+ },
+ {
+  "text": "görmesi",
+  "startMs": 39580,
+  "endMs": 40180
+ },
+ {
+  "text": "bekleniyor.",
+  "startMs": 40180,
+  "endMs": 40820
+ },
+ {
+  "text": "4.",
+  "startMs": 41260,
+  "endMs": 41370
+ },
+ {
+  "text": "Google,",
+  "startMs": 41370,
+  "endMs": 41760
+ },
+ {
+  "text": "yazdığın",
+  "startMs": 41760,
+  "endMs": 42290
+ },
+ {
+  "text": "cümleyi",
+  "startMs": 42290,
+  "endMs": 42750
+ },
+ {
+  "text": "yaşayan",
+  "startMs": 42750,
+  "endMs": 43280
+ },
+ {
+  "text": "bir",
+  "startMs": 43280,
+  "endMs": 43420
+ },
+ {
+  "text": "dünyaya",
+  "startMs": 43420,
+  "endMs": 43880
+ },
+ {
+  "text": "dönüştürüyor.",
+  "startMs": 43880,
+  "endMs": 45080
+ },
+ {
+  "text": "DeepMind,",
+  "startMs": 45460,
+  "endMs": 45820
+ },
+ {
+  "text": "Genie",
+  "startMs": 45820,
+  "endMs": 46190
+ },
+ {
+  "text": "4'ü",
+  "startMs": 46190,
+  "endMs": 46550
+ },
+ {
+  "text": "tanıttı.",
+  "startMs": 46550,
+  "endMs": 47360
+ },
+ {
+  "text": "Tek",
+  "startMs": 47620,
+  "endMs": 47710
+ },
+ {
+  "text": "bir",
+  "startMs": 47710,
+  "endMs": 47720
+ },
+ {
+  "text": "cümleyle",
+  "startMs": 47720,
+  "endMs": 48260
+ },
+ {
+  "text": "içinde",
+  "startMs": 48260,
+  "endMs": 48570
+ },
+ {
+  "text": "gezebileceğin",
+  "startMs": 48570,
+  "endMs": 49350
+ },
+ {
+  "text": "bir",
+  "startMs": 49350,
+  "endMs": 49640
+ },
+ {
+  "text": "dünya",
+  "startMs": 49640,
+  "endMs": 49830
+ },
+ {
+  "text": "oluşturuyor.",
+  "startMs": 49830,
+  "endMs": 50820
+ },
+ {
+  "text": "Ve",
+  "startMs": 51220,
+  "endMs": 51320
+ },
+ {
+  "text": "5.",
+  "startMs": 51320,
+  "endMs": 51860
+ },
+ {
+  "text": "Türkiye'den",
+  "startMs": 51860,
+  "endMs": 52610
+ },
+ {
+  "text": "iki",
+  "startMs": 52610,
+  "endMs": 52850
+ },
+ {
+  "text": "önemli",
+  "startMs": 52850,
+  "endMs": 53240
+ },
+ {
+  "text": "gelişme.",
+  "startMs": 53240,
+  "endMs": 53980
+ },
+ {
+  "text": "Rekabet",
+  "startMs": 54040,
+  "endMs": 54470
+ },
+ {
+  "text": "Kurumu,",
+  "startMs": 54470,
+  "endMs": 54960
+ },
+ {
+  "text": "Google'ın",
+  "startMs": 54960,
+  "endMs": 55620
+ },
+ {
+  "text": "yapay",
+  "startMs": 55620,
+  "endMs": 55920
+ },
+ {
+  "text": "zekâ",
+  "startMs": 55920,
+  "endMs": 56140
+ },
+ {
+  "text": "özetleri",
+  "startMs": 56140,
+  "endMs": 56650
+ },
+ {
+  "text": "hakkında",
+  "startMs": 56650,
+  "endMs": 57190
+ },
+ {
+  "text": "soruşturma",
+  "startMs": 57190,
+  "endMs": 57850
+ },
+ {
+  "text": "başlattı",
+  "startMs": 57850,
+  "endMs": 58650
+ },
+ {
+  "text": "ve",
+  "startMs": 58650,
+  "endMs": 58780
+ },
+ {
+  "text": "geçici",
+  "startMs": 58780,
+  "endMs": 58970
+ },
+ {
+  "text": "tedbir",
+  "startMs": 58970,
+  "endMs": 59540
+ },
+ {
+  "text": "kararı",
+  "startMs": 59540,
+  "endMs": 59970
+ },
+ {
+  "text": "aldı.",
+  "startMs": 59970,
+  "endMs": 60520
+ },
+ {
+  "text": "Haber",
+  "startMs": 60620,
+  "endMs": 60800
+ },
+ {
+  "text": "siteleri,",
+  "startMs": 60800,
+  "endMs": 61360
+ },
+ {
+  "text": "içeriklerinin",
+  "startMs": 61360,
+  "endMs": 62080
+ },
+ {
+  "text": "bu",
+  "startMs": 62080,
+  "endMs": 62260
+ },
+ {
+  "text": "özetlerde",
+  "startMs": 62260,
+  "endMs": 62690
+ },
+ {
+  "text": "kullanılmasını",
+  "startMs": 62690,
+  "endMs": 63650
+ },
+ {
+  "text": "reddedebilecek.",
+  "startMs": 63650,
+  "endMs": 64520
+ },
+ {
+  "text": "Üstelik",
+  "startMs": 64820,
+  "endMs": 64940
+ },
+ {
+  "text": "bu",
+  "startMs": 64940,
+  "endMs": 65090
+ },
+ {
+  "text": "nedenle",
+  "startMs": 65090,
+  "endMs": 65480
+ },
+ {
+  "text": "arama",
+  "startMs": 65480,
+  "endMs": 65780
+ },
+ {
+  "text": "sonuçlarında",
+  "startMs": 65780,
+  "endMs": 66500
+ },
+ {
+  "text": "geri",
+  "startMs": 66500,
+  "endMs": 66840
+ },
+ {
+  "text": "plana",
+  "startMs": 66840,
+  "endMs": 67040
+ },
+ {
+  "text": "düşmemeleri",
+  "startMs": 67040,
+  "endMs": 67760
+ },
+ {
+  "text": "hedefleniyor.",
+  "startMs": 67760,
+  "endMs": 68680
+ },
+ {
+  "text": "Peki",
+  "startMs": 69080,
+  "endMs": 69130
+ },
+ {
+  "text": "bu",
+  "startMs": 69130,
+  "endMs": 69200
+ },
+ {
+  "text": "haberlerden",
+  "startMs": 69200,
+  "endMs": 69940
+ },
+ {
+  "text": "hangisi",
+  "startMs": 69940,
+  "endMs": 70460
+ },
+ {
+  "text": "seni",
+  "startMs": 70460,
+  "endMs": 70760
+ },
+ {
+  "text": "en",
+  "startMs": 70760,
+  "endMs": 70910
+ },
+ {
+  "text": "çok",
+  "startMs": 70910,
+  "endMs": 71130
+ },
+ {
+  "text": "şaşırttı?",
+  "startMs": 71130,
+  "endMs": 72000
+ },
+ {
+  "text": "Yorumlara",
+  "startMs": 72280,
+  "endMs": 72560
+ },
+ {
+  "text": "yaz.",
+  "startMs": 72560,
+  "endMs": 72940
+ },
+ {
+  "text": "Her",
+  "startMs": 73280,
+  "endMs": 73370
+ },
+ {
+  "text": "hafta",
+  "startMs": 73370,
+  "endMs": 73550
+ },
+ {
+  "text": "yapay",
+  "startMs": 73550,
+  "endMs": 73920
+ },
+ {
+  "text": "zekâ",
+  "startMs": 73920,
+  "endMs": 74130
+ },
+ {
+  "text": "dünyasında",
+  "startMs": 74130,
+  "endMs": 74900
+ },
+ {
+  "text": "neler",
+  "startMs": 74900,
+  "endMs": 75300
+ },
+ {
+  "text": "olduğunu",
+  "startMs": 75300,
+  "endMs": 75750
+ },
+ {
+  "text": "öğrenmek",
+  "startMs": 75750,
+  "endMs": 76490
+ },
+ {
+  "text": "için",
+  "startMs": 76490,
+  "endMs": 76590
+ },
+ {
+  "text": "takip",
+  "startMs": 76590,
+  "endMs": 76940
+ },
+ {
+  "text": "et.",
+  "startMs": 76940,
+  "endMs": 77380
+ }
+]

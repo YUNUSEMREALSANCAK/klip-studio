@@ -1,0 +1,1037 @@
+{
+ "keep_audio": "yes",
+ "cues": [
+  {
+   "t": 0.12,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.4,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -8.9,
+   "lowpass": 5500
+  },
+  {
+   "t": 0.3,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -5.2
+  },
+  {
+   "t": 0.56,
+   "label": "thump x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.5
+   },
+   "gain_db": -2,
+   "pitch": -5,
+   "lowpass": 1800
+  },
+  {
+   "t": 0.65,
+   "label": "pop x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "pitch": -2,
+   "id": 42
+  },
+  {
+   "t": 1.36,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.35,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -11.1,
+   "pitch": -2,
+   "lowpass": 5500
+  },
+  {
+   "t": 1.83,
+   "label": "pop x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "pitch": -2,
+   "id": 45
+  },
+  {
+   "t": 3.14,
+   "label": "chime x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -6.0
+  },
+  {
+   "t": 4.55,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -15,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 5.0,
+   "label": "thump x0.30",
+   "_g": 0.3,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.5
+   },
+   "gain_db": -16,
+   "pitch": -5,
+   "lowpass": 1800
+  },
+  {
+   "t": 6.44,
+   "label": "magic x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "chime",
+    "max_dur": 2.5
+   },
+   "gain_db": -8.9
+  },
+  {
+   "t": 8.74,
+   "label": "pop x0.60",
+   "_g": 0.6,
+   "gain_db": -4.4,
+   "pitch": -3,
+   "id": 45
+  },
+  {
+   "t": 9.06,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -5.2,
+   "pitch": 1
+  },
+  {
+   "t": 11.26,
+   "label": "success x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -6.0
+  },
+  {
+   "t": 12.92,
+   "label": "click x0.90",
+   "_g": 0.9,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -0.9
+  },
+  {
+   "t": 13.85,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -17,
+   "pitch": -2,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 14.55,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "pitch": -1,
+   "id": 43
+  },
+  {
+   "t": 14.95,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "id": 28
+  },
+  {
+   "t": 15.5,
+   "label": "click x0.90",
+   "_g": 0.9,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -0.9
+  },
+  {
+   "t": 16.4,
+   "label": "click x0.85",
+   "_g": 0.85,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": 1.6
+  },
+  {
+   "t": 17.3,
+   "label": "click x0.85",
+   "_g": 0.85,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -1.4
+  },
+  {
+   "t": 21.82,
+   "label": "data x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "data",
+    "max_dur": 1.5
+   },
+   "gain_db": -8.9
+  },
+  {
+   "t": 22.56,
+   "label": "click x0.85",
+   "_g": 0.85,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -1.4
+  },
+  {
+   "t": 23.72,
+   "label": "click x0.85",
+   "_g": 0.85,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -1.4
+  },
+  {
+   "t": 24.405,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    19.179,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.8
+  },
+  {
+   "t": 24.466,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    9.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.0
+  },
+  {
+   "t": 24.565,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.384,
+    0.071
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.8
+  },
+  {
+   "t": 24.639,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.834,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.3
+  },
+  {
+   "t": 24.761,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    20.499,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.5
+  },
+  {
+   "t": 24.847,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    0.804,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -4.8
+  },
+  {
+   "t": 24.898,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    26.234,
+    0.051
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.5
+  },
+  {
+   "t": 25.3,
+   "label": "click x0.90",
+   "_g": 0.9,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -0.9
+  },
+  {
+   "t": 25.45,
+   "label": "success x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -5.2
+  },
+  {
+   "t": 26.68,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -13,
+   "pitch": 2,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 30.86,
+   "label": "riser x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "riser",
+    "target_dur": 2.2,
+    "max_dur": 3.0
+   },
+   "gain_db": -12.0,
+   "anchor": "start",
+   "max_dur": 2.3
+  },
+  {
+   "t": 34.11,
+   "label": "data x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "data",
+    "max_dur": 1.5
+   },
+   "gain_db": -8.0
+  },
+  {
+   "t": 35.66,
+   "label": "chime x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -5.2
+  },
+  {
+   "t": 37.98,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -5.2,
+   "pitch": -2
+  },
+  {
+   "t": 41.0,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -4,
+   "pitch": -3,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 42.303,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    14.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.2
+  },
+  {
+   "t": 42.379,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    16.559,
+    0.081
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -2.5
+  },
+  {
+   "t": 42.44,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    8.099,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -5.3
+  },
+  {
+   "t": 42.517,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    11.949,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -2.3
+  },
+  {
+   "t": 42.598,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    28.689,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.1
+  },
+  {
+   "t": 42.684,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    13.084,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.0
+  },
+  {
+   "t": 42.751,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    28.104,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": 0.3
+  },
+  {
+   "t": 42.826,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    0.994,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.1
+  },
+  {
+   "t": 42.932,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    17.359,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.0
+  },
+  {
+   "t": 43.006,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    3.474,
+    0.081
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -3.7
+  },
+  {
+   "t": 43.078,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    30.459,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -5.2
+  },
+  {
+   "t": 43.159,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    16.919,
+    0.081
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.4
+  },
+  {
+   "t": 43.244,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    25.219,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -1.3
+  },
+  {
+   "t": 43.323,
+   "label": "key",
+   "_g": 1.0,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    10.494,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -2.6
+  },
+  {
+   "t": 43.78,
+   "label": "click",
+   "_g": 1.0,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": 0.0
+  },
+  {
+   "t": 43.9,
+   "label": "magic x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "chime",
+    "max_dur": 2.5
+   },
+   "gain_db": -7.2,
+   "pitch": -2
+  },
+  {
+   "t": 44.6,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -8.0,
+   "pitch": 2
+  },
+  {
+   "t": 47.62,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 1.5,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -11.1,
+   "pitch": 2,
+   "lowpass": 5500
+  },
+  {
+   "t": 50.95,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -14,
+   "pitch": 1,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 51.2,
+   "label": "pop x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "pitch": -2,
+   "id": 42
+  },
+  {
+   "t": 54.04,
+   "label": "thump x0.50",
+   "_g": 0.5,
+   "gain_db": -2,
+   "pitch": -5,
+   "lowpass": 1800,
+   "id": 28
+  },
+  {
+   "t": 57.19,
+   "label": "whoosh x0.30",
+   "_g": 0.3,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 1.2,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -12.5,
+   "pitch": -3,
+   "lowpass": 5500
+  },
+  {
+   "t": 58.97,
+   "label": "hit x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "hit",
+    "max_dur": 1.5
+   },
+   "gain_db": -8,
+   "highpass": 170,
+   "max_dur": 0.9
+  },
+  {
+   "t": 60.62,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -6.0,
+   "pitch": 1
+  },
+  {
+   "t": 63.65,
+   "label": "click x0.90",
+   "_g": 0.9,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -0.9
+  },
+  {
+   "t": 65.48,
+   "label": "whoosh x0.30",
+   "_g": 0.3,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -12.5,
+   "pitch": 1,
+   "lowpass": 5500
+  },
+  {
+   "t": 66.5,
+   "label": "success x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -6.0
+  },
+  {
+   "t": 68.8,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10,
+   "pitch": -1,
+   "lowpass": 5500,
+   "max_dur": 0.7,
+   "fade_out": 0.2
+  },
+  {
+   "t": 69.2,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "pitch": 2,
+   "id": 45
+  },
+  {
+   "t": 69.55,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -8.0
+  },
+  {
+   "t": 69.94,
+   "label": "data x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "data",
+    "max_dur": 1.5
+   },
+   "gain_db": -11.1
+  },
+  {
+   "t": 72.28,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "gain_db": -5.2,
+   "pitch": -2,
+   "id": 32
+  },
+  {
+   "t": 73.28,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "pitch": 2,
+   "id": 28
+  },
+  {
+   "t": 77.1,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.4,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -8.9,
+   "pitch": -1,
+   "lowpass": 5500
+  },
+  {
+   "t": 77.72,
+   "label": "thump x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.5
+   },
+   "gain_db": -2,
+   "pitch": -5,
+   "lowpass": 1800
+  },
+  {
+   "t": 77.9,
+   "label": "pop x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -6.9,
+   "pitch": -3
+  },
+  {
+   "t": 78.4,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "pop",
+    "max_dur": 0.6,
+    "onsets_max": 1
+   },
+   "gain_db": -6.0,
+   "pitch": 1
+  },
+  {
+   "t": 79.0,
+   "label": "click",
+   "_g": 1.0,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": 0.0
+  }
+ ],
+ "_draft": {
+  "source": "/Users/yunusemre/Desktop/side_project/deneme/studio3d/src/reels/yapayzeka/ses/events.json",
+  "events": 76,
+  "thinned": 0,
+  "thinned_by_kind": {},
+  "fused": 0,
+  "routed": {
+   "whoosh": 6,
+   "pop": 17,
+   "thump": 4,
+   "chime": 2,
+   "wipe": 6,
+   "magic": 2,
+   "success": 3,
+   "click": 10,
+   "data": 3,
+   "key": 21,
+   "riser": 1,
+   "hit": 1
+  },
+  "unmapped": {},
+  "sync": null,
+  "stems": null,
+  "voice": null,
+  "retimed": null,
+  "baked": null,
+  "baked_strong": false,
+  "keep_audio_decision": null,
+  "declared": 57,
+  "voiced": 76,
+  "clamped_quiet": 0,
+  "layer_lufs": null,
+  "base_kind": null,
+  "screen_rec": false,
+  "music_ref": [],
+  "reference_layer": [],
+  "typing_runs": [],
+  "first_event_t": 0.12,
+  "time_map": null,
+  "unlisted_synth_onsets": [],
+  "kinds_user": {
+   "thump": {
+    "pick": {
+     "role": "pop",
+     "max_dur": 0.5
+    }
+   },
+   "hit": {
+    "pick": {
+     "role": "hit",
+     "max_dur": 1.5
+    }
+   }
+  }
+ },
+ "duration": 80.6,
+ "video": "/Users/yunusemre/Desktop/side_project/deneme/studio3d/out/yapayzeka/YapayZeka_ham.mp4"
+}

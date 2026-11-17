@@ -1,0 +1,44 @@
+[
+ {
+  "at": 4.4,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -13
+  }
+ },
+ {
+  "at": 13.65,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -15
+  }
+ },
+ {
+  "at": 26.45,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -7
+  }
+ },
+ {
+  "at": 40.8,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -6
+  }
+ },
+ {
+  "at": 50.75,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -17
+  }
+ },
+ {
+  "at": 68.55,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -7
+  }
+ }
+]

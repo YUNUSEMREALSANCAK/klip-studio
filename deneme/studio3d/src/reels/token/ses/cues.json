@@ -1,0 +1,921 @@
+{
+ "video": "/Users/yunusemre/Desktop/side_project/deneme/studio3d/out/token/TokenReel_seslendirme.mp4",
+ "keep_audio": "auto",
+ "cues": [
+  {
+   "t": 0.14,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.4,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -8.9,
+   "lowpass": 5500
+  },
+  {
+   "t": 0.42,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "id": 47
+  },
+  {
+   "t": 0.67,
+   "label": "thump x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "id": 50,
+   "lowpass": 1800
+  },
+  {
+   "t": 2.92,
+   "label": "coin x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -6.9
+  },
+  {
+   "t": 3.69,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.35,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -11.1,
+   "pitch": -2,
+   "lowpass": 5500
+  },
+  {
+   "t": 4.23,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 28
+  },
+  {
+   "t": 5.18,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10.0,
+   "lowpass": 5500
+  },
+  {
+   "t": 5.688,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    19.179,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -13.7
+  },
+  {
+   "t": 5.785,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    9.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -12.9
+  },
+  {
+   "t": 5.874,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.384,
+    0.071
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -13.7
+  },
+  {
+   "t": 6.021,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    12.834,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -8.2
+  },
+  {
+   "t": 6.098,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    20.499,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -10.4
+  },
+  {
+   "t": 6.247,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    0.804,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -11.7
+  },
+  {
+   "t": 6.307,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    26.234,
+    0.051
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -10.4
+  },
+  {
+   "t": 6.438,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    14.864,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -13.1
+  },
+  {
+   "t": 6.577,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    16.559,
+    0.081
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -9.4
+  },
+  {
+   "t": 6.652,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    8.099,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -12.2
+  },
+  {
+   "t": 6.788,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    11.949,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -9.2
+  },
+  {
+   "t": 6.912,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    28.689,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -13.0
+  },
+  {
+   "t": 6.984,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    13.084,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -7.9
+  },
+  {
+   "t": 7.103,
+   "label": "typing x0.45",
+   "_g": 0.45,
+   "file": "/Users/yunusemre/Desktop/Fityazilim_Instagram/araclar/sfx_kutuphane/typing/Computer_keyboard_typing_snippet_mono_loop_361639.mp3",
+   "slice": [
+    28.104,
+    0.085
+   ],
+   "role": "click",
+   "anchor": "start",
+   "same_source": true,
+   "gain_db": -6.6
+  },
+  {
+   "t": 10.24,
+   "label": "paper x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "max_dur": 0.5,
+    "dark": true
+   },
+   "gain_db": -6.0,
+   "lowpass": 5500
+  },
+  {
+   "t": 12.09,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 42
+  },
+  {
+   "t": 12.75,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10.0,
+   "pitch": -2,
+   "lowpass": 5500
+  },
+  {
+   "t": 13.13,
+   "label": "pop x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "pitch": -2,
+   "id": 45
+  },
+  {
+   "t": 14.39,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 43
+  },
+  {
+   "t": 14.86,
+   "label": "thump x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 52,
+   "lowpass": 1800
+  },
+  {
+   "t": 15.39,
+   "label": "chime x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -6.9
+  },
+  {
+   "t": 16.64,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -15.0,
+   "pitch": 2,
+   "lowpass": 5500
+  },
+  {
+   "t": 18.13,
+   "label": "click x0.70",
+   "_g": 0.7,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -3.1
+  },
+  {
+   "t": 18.76,
+   "label": "click x0.65",
+   "_g": 0.65,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -3.7
+  },
+  {
+   "t": 19.36,
+   "label": "data x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "data",
+    "max_dur": 1.5
+   },
+   "gain_db": -6.1
+  },
+  {
+   "t": 19.95,
+   "label": "coin x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": 0.0
+  },
+  {
+   "t": 20.66,
+   "label": "coin x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -8.0
+  },
+  {
+   "t": 21.26,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10.0,
+   "pitch": -3,
+   "lowpass": 5500
+  },
+  {
+   "t": 23.48,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 53
+  },
+  {
+   "t": 24.31,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 51
+  },
+  {
+   "t": 24.81,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 41
+  },
+  {
+   "t": 25.47,
+   "label": "success x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -6.9
+  },
+  {
+   "t": 25.82,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -19.0,
+   "pitch": 1,
+   "lowpass": 5500,
+   "fit_dur": 0.4
+  },
+  {
+   "t": 28.05,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "pitch": 2,
+   "id": 35
+  },
+  {
+   "t": 29.06,
+   "label": "ui x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "id": 45
+  },
+  {
+   "t": 31.76,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.8,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -11.1,
+   "pitch": 2,
+   "lowpass": 5500
+  },
+  {
+   "t": 34.0,
+   "label": "success x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -17.2,
+   "fit_dur": 0.4
+  },
+  {
+   "t": 34.88,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -14.0,
+   "pitch": -1,
+   "lowpass": 5500
+  },
+  {
+   "t": 36.11,
+   "label": "pop x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "pitch": -3,
+   "id": 30
+  },
+  {
+   "t": 37.57,
+   "label": "whoosh x0.30",
+   "_g": 0.3,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.3,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -12.5,
+   "pitch": -3,
+   "lowpass": 5500
+  },
+  {
+   "t": 38.19,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "pitch": 1,
+   "id": 47
+  },
+  {
+   "t": 38.54,
+   "label": "coin x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -8.0
+  },
+  {
+   "t": 38.96,
+   "label": "paper x0.40",
+   "_g": 0.4,
+   "pick": {
+    "role": "whoosh",
+    "max_dur": 0.5,
+    "dark": true
+   },
+   "gain_db": -8.0,
+   "lowpass": 5500
+  },
+  {
+   "t": 40.75,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10.0,
+   "lowpass": 5500
+  },
+  {
+   "t": 41.56,
+   "label": "data x0.35",
+   "_g": 0.35,
+   "gain_db": -2.0999999999999996,
+   "id": 35
+  },
+  {
+   "t": 42.23,
+   "label": "click x0.45",
+   "_g": 0.45,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -6.9
+  },
+  {
+   "t": 43.05,
+   "label": "hit x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "hit",
+    "max_dur": 1.5
+   },
+   "gain_db": -10.9,
+   "highpass": 200
+  },
+  {
+   "t": 44.4,
+   "label": "whoosh x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.5,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -11.1,
+   "pitch": 1,
+   "lowpass": 5500
+  },
+  {
+   "t": 45.2,
+   "label": "click x0.55",
+   "_g": 0.55,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": -1.2000000000000002
+  },
+  {
+   "t": 46.82,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -10.0,
+   "pitch": -2,
+   "lowpass": 5500
+  },
+  {
+   "t": 47.43,
+   "label": "ui x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "id": 42
+  },
+  {
+   "t": 47.93,
+   "label": "whoosh x0.25",
+   "_g": 0.25,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 1.4,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -14.0,
+   "pitch": -1,
+   "lowpass": 5500
+  },
+  {
+   "t": 49.79,
+   "label": "chime x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "bell",
+    "max_dur": 2.0
+   },
+   "gain_db": -1.0
+  },
+  {
+   "t": 51.75,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -19.0,
+   "pitch": 2,
+   "lowpass": 5500,
+   "fit_dur": 0.35
+  },
+  {
+   "t": 53.2,
+   "label": "ui x0.40",
+   "_g": 0.4,
+   "gain_db": -8.0,
+   "id": 53
+  },
+  {
+   "t": 55.67,
+   "label": "riser x0.35",
+   "_g": 0.35,
+   "pick": {
+    "role": "riser",
+    "target_dur": 0.8,
+    "max_dur": 3.0
+   },
+   "gain_db": -13.1,
+   "anchor": "start",
+   "max_dur": 0.9
+  },
+  {
+   "t": 57.4,
+   "label": "success x0.55",
+   "_g": 0.55,
+   "pick": {
+    "role": "chime",
+    "prefer_tag": "ding",
+    "max_dur": 1.8
+   },
+   "gain_db": -5.2
+  },
+  {
+   "t": 58.0,
+   "label": "wipe x0.50",
+   "_g": 0.5,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.7,
+    "max_dur": 1.4,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -19.0,
+   "pitch": -3,
+   "lowpass": 5500
+  },
+  {
+   "t": 59.59,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 28
+  },
+  {
+   "t": 60.88,
+   "label": "ui x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 43
+  },
+  {
+   "t": 62.15,
+   "label": "pop x0.55",
+   "_g": 0.55,
+   "gain_db": -5.2,
+   "pitch": -1,
+   "id": 32
+  },
+  {
+   "t": 63.09,
+   "label": "whoosh x0.45",
+   "_g": 0.45,
+   "pick": {
+    "role": "whoosh",
+    "target_dur": 0.4,
+    "max_dur": 1.3,
+    "prefer_tag": "whoosh",
+    "dark": true
+   },
+   "gain_db": -8.9,
+   "lowpass": 5500
+  },
+  {
+   "t": 63.72,
+   "label": "thump x0.45",
+   "_g": 0.45,
+   "gain_db": -6.9,
+   "id": 50,
+   "lowpass": 1800
+  },
+  {
+   "t": 64.4,
+   "label": "pop x0.50",
+   "_g": 0.5,
+   "gain_db": -6.0,
+   "pitch": -2,
+   "id": 54
+  },
+  {
+   "t": 65.0,
+   "label": "click",
+   "_g": 1.0,
+   "slice": "first",
+   "anchor": "start",
+   "pick": {
+    "role": "click",
+    "max_dur": 0.7,
+    "onsets_max": 3,
+    "tier": "main"
+   },
+   "same_source": true,
+   "gain_db": 0.0
+  }
+ ],
+ "_draft": {
+  "source": "/Users/yunusemre/Desktop/side_project/deneme/studio3d/src/reels/token/ses/events.json",
+  "events": 73,
+  "thinned": 0,
+  "thinned_by_kind": {},
+  "fused": 0,
+  "routed": {
+   "whoosh": 7,
+   "pop": 8,
+   "thump": 3,
+   "chime": 6,
+   "ui": 11,
+   "wipe": 10,
+   "key": 14,
+   "paper": 2,
+   "click": 5,
+   "data": 2,
+   "success": 3,
+   "hit": 1,
+   "riser": 1
+  },
+  "unmapped": {},
+  "sync": null,
+  "stems": null,
+  "voice": null,
+  "retimed": null,
+  "baked": null,
+  "baked_strong": false,
+  "keep_audio_decision": null,
+  "declared": 60,
+  "voiced": 73,
+  "clamped_quiet": 0,
+  "layer_lufs": null,
+  "base_kind": null,
+  "screen_rec": false,
+  "music_ref": [],
+  "reference_layer": [],
+  "typing_runs": [],
+  "first_event_t": 0.14,
+  "time_map": null,
+  "unlisted_synth_onsets": [],
+  "kinds_user": {
+   "coin": "chime",
+   "thump": {
+    "pick": {
+     "role": "pop",
+     "max_dur": 0.5
+    }
+   },
+   "hit": {
+    "pick": {
+     "role": "hit",
+     "max_dur": 1.5
+    }
+   },
+   "paper": {
+    "pick": {
+     "role": "whoosh",
+     "max_dur": 0.5,
+     "dark": true
+    }
+   },
+   "ui": {
+    "pick": {
+     "role": "ui",
+     "max_dur": 0.4
+    }
+   }
+  }
+ }
+}

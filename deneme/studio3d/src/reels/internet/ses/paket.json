@@ -1,0 +1,513 @@
+{
+ "id": "internet",
+ "title": "İnternet videosu",
+ "description": "Fityazılım 03 · İnternet nasıl çalışır reels'inin sesleri (seviyeleri seslendirmeye göre ayarlı)",
+ "sounds": [
+  {
+   "name": "Klavye: kısa yazı",
+   "category": "typing",
+   "use": "URL yazılırken (12 tuş, tek ses)",
+   "moment": 3.062,
+   "clips": [
+    "sfx_001_click.wav",
+    "sfx_002_click.wav",
+    "sfx_003_click.wav",
+    "sfx_004_click.wav",
+    "sfx_005_click.wav",
+    "sfx_006_click.wav",
+    "sfx_007_click.wav",
+    "sfx_008_click.wav",
+    "sfx_009_click.wav",
+    "sfx_010_click.wav",
+    "sfx_011_click.wav",
+    "sfx_012_click.wav"
+   ]
+  },
+  {
+   "name": "Enter tuşu (mekanik)",
+   "category": "click",
+   "use": "Enter'a basılınca",
+   "moment": 4.75,
+   "clips": [
+    "sfx_013_click.wav"
+   ]
+  },
+  {
+   "name": "Kısa tık",
+   "category": "click",
+   "use": "Router karar verirken",
+   "moment": 57.9,
+   "clips": [
+    "sfx_047_click.wav"
+   ]
+  },
+  {
+   "name": "Yumuşak Enter tıkı",
+   "category": "click",
+   "use": "İkinci router kararı",
+   "moment": 59.7,
+   "clips": [
+    "sfx_050_click.wav"
+   ]
+  },
+  {
+   "name": "Açılış yükselişi (sinematik)",
+   "category": "riser",
+   "use": "Videonun ilk saniyesi",
+   "moment": 0.2,
+   "clips": [
+    "sfx_000_riser.wav"
+   ]
+  },
+  {
+   "name": "Dalış öncesi yükseliş",
+   "category": "riser",
+   "use": "Kamera ekrana dalmadan önce",
+   "moment": 5.9,
+   "clips": [
+    "sfx_014_riser.wav"
+   ]
+  },
+  {
+   "name": "Tünel kurulumu (sweep)",
+   "category": "riser",
+   "use": "Şifreli tünel örülürken",
+   "moment": 46.8,
+   "clips": [
+    "sfx_043_riser.wav"
+   ]
+  },
+  {
+   "name": "Kısa yükseliş: varış",
+   "category": "riser",
+   "use": "Yanıt ekrana varırken",
+   "moment": 71.6,
+   "clips": [
+    "sfx_058_riser.wav"
+   ]
+  },
+  {
+   "name": "Kısa yükseliş: ortaya çıkış",
+   "category": "riser",
+   "use": "Web sitesi belirirken",
+   "moment": 79.1,
+   "clips": [
+    "sfx_068_riser.wav"
+   ]
+  },
+  {
+   "name": "Final geri çekiliş (logo efekti)",
+   "category": "riser",
+   "use": "Kapanıştan önceki büyük geri çekiliş",
+   "moment": 83.0,
+   "clips": [
+    "sfx_070_riser.wav"
+   ]
+  },
+  {
+   "name": "Yumuşak ortam darbesi",
+   "category": "impact",
+   "use": "Ekrana dalış anı",
+   "moment": 7.0,
+   "clips": [
+    "sfx_015_hit.wav"
+   ]
+  },
+  {
+   "name": "Derin sinematik darbe",
+   "category": "impact",
+   "use": "Resolver halkası / paketler birleşirken",
+   "moment": 23.3,
+   "clips": [
+    "sfx_027_hit.wav"
+   ]
+  },
+  {
+   "name": "Boğuk uzak patlama",
+   "category": "impact",
+   "use": "Render bölümüne geçiş",
+   "moment": 72.25,
+   "clips": [
+    "sfx_059_hit.wav"
+   ]
+  },
+  {
+   "name": "Yumuşak bas darbe",
+   "category": "impact",
+   "use": "Katmanlar birleşip site oluşurken",
+   "moment": 78.9,
+   "clips": [
+    "sfx_067_hit.wav"
+   ]
+  },
+  {
+   "name": "Işık tüneli whoosh (uzun)",
+   "category": "whoosh",
+   "use": "Ekranın içindeki ışık tüneli",
+   "moment": 7.1,
+   "clips": [
+    "sfx_016_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Çift whoosh (hızlı geçiş)",
+   "category": "whoosh",
+   "use": "Bilgisayardan dünyaya geçiş",
+   "moment": 9.1,
+   "clips": [
+    "sfx_017_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Alçak whoosh",
+   "category": "whoosh",
+   "use": "Dünya üzerindeki ışık yayı",
+   "moment": 10.3,
+   "clips": [
+    "sfx_018_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Yumuşak geçiş whoosh",
+   "category": "whoosh",
+   "use": "DNS bölümüne geçiş",
+   "moment": 14.2,
+   "clips": [
+    "sfx_020_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Hava whoosh (gönderme)",
+   "category": "whoosh",
+   "use": "Sorgu Resolver'a giderken",
+   "moment": 20.9,
+   "clips": [
+    "sfx_026_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Sentetik yumuşak whoosh",
+   "category": "whoosh",
+   "use": "DNS kulelerine geçiş",
+   "moment": 25.6,
+   "clips": [
+    "sfx_028_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Whip zoom whoosh",
+   "category": "whoosh",
+   "use": "IP kristali geri dönerken",
+   "moment": 30.6,
+   "clips": [
+    "sfx_032_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Ters nefes whoosh (yaklaşma)",
+   "category": "whoosh",
+   "use": "Kristal istemciye yaklaşırken",
+   "moment": 33.6,
+   "clips": [
+    "sfx_034_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Kesik whoosh (bölüm geçişi)",
+   "category": "whoosh",
+   "use": "Bağlantı bölümüne geçiş",
+   "moment": 37.7,
+   "clips": [
+    "sfx_035_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Dijital whoosh (gidiş)",
+   "category": "whoosh",
+   "use": "El sıkışma paketi giderken",
+   "moment": 45.6,
+   "clips": [
+    "sfx_041_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Hava kesme whoosh (dönüş)",
+   "category": "whoosh",
+   "use": "El sıkışma paketi dönerken",
+   "moment": 46.5,
+   "clips": [
+    "sfx_042_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Kısa geçiş whoosh",
+   "category": "whoosh",
+   "use": "İstek bölümüne geçiş",
+   "moment": 49.66,
+   "clips": [
+    "sfx_045_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Mini whoosh",
+   "category": "whoosh",
+   "use": "Paket bir sonraki router'a",
+   "moment": 58.2,
+   "clips": [
+    "sfx_048_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Uzun swoosh (yolculuk)",
+   "category": "whoosh",
+   "use": "Paketler yolda",
+   "moment": 60.0,
+   "clips": [
+    "sfx_051_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Çok kısa swoosh",
+   "category": "whoosh",
+   "use": "Sunucu bölümüne geçiş",
+   "moment": 61.6,
+   "clips": [
+    "sfx_052_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Orta whoosh (fırlatma)",
+   "category": "whoosh",
+   "use": "Yanıt kapsülü fırlarken",
+   "moment": 67.8,
+   "clips": [
+    "sfx_056_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Büyük whoosh (yüksek hız)",
+   "category": "whoosh",
+   "use": "Yanıtın hızlı dönüşü",
+   "moment": 69.1,
+   "clips": [
+    "sfx_057_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Küçük salınım whoosh",
+   "category": "whoosh",
+   "use": "Layout adımı",
+   "moment": 75.08,
+   "clips": [
+    "sfx_063_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Zıplama whoosh",
+   "category": "whoosh",
+   "use": "Compositing adımı",
+   "moment": 76.2,
+   "clips": [
+    "sfx_065_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Toparlanma whoosh",
+   "category": "whoosh",
+   "use": "Katmanlar birleşirken",
+   "moment": 78.0,
+   "clips": [
+    "sfx_066_whoosh.wav"
+   ]
+  },
+  {
+   "name": "Başarı zili",
+   "category": "chime",
+   "use": "Sunucuya ulaşıldı / bağlantı hazır",
+   "moment": 12.6,
+   "clips": [
+    "sfx_019_chime.wav"
+   ]
+  },
+  {
+   "name": "Bildirim tıngırtısı",
+   "category": "chime",
+   "use": "Root DNS yanınca / kapanış",
+   "moment": 26.95,
+   "clips": [
+    "sfx_029_chime.wav"
+   ]
+  },
+  {
+   "name": "Doğru cevap çanı",
+   "category": "chime",
+   "use": "TLD DNS yanınca",
+   "moment": 28.25,
+   "clips": [
+    "sfx_030_chime.wav"
+   ]
+  },
+  {
+   "name": "Parlak bildirim çanı",
+   "category": "chime",
+   "use": "Authoritative DNS yanınca",
+   "moment": 29.55,
+   "clips": [
+    "sfx_031_chime.wav"
+   ]
+  },
+  {
+   "name": "Başarı pırıltısı (uzun)",
+   "category": "chime",
+   "use": "IP bulundu / site ekranda",
+   "moment": 33.18,
+   "clips": [
+    "sfx_033_chime.wav"
+   ]
+  },
+  {
+   "name": "Gizemli pırıltı (kaynaşma)",
+   "category": "chime",
+   "use": "TLS 1.3, QUIC'e kaynaşırken",
+   "moment": 45.45,
+   "clips": [
+    "sfx_040_chime.wav"
+   ]
+  },
+  {
+   "name": "Rüzgar çanları",
+   "category": "chime",
+   "use": "HTTP Response oluşurken",
+   "moment": 67.08,
+   "clips": [
+    "sfx_055_chime.wav"
+   ]
+  },
+  {
+   "name": "Kısa pırıltı",
+   "category": "chime",
+   "use": "Paint adımı",
+   "moment": 75.67,
+   "clips": [
+    "sfx_064_chime.wav"
+   ]
+  },
+  {
+   "name": "Tarama sesi",
+   "category": "ui",
+   "use": "Önbellek taranırken / routing tablosu",
+   "moment": 16.7,
+   "clips": [
+    "sfx_022_data.wav"
+   ]
+  },
+  {
+   "name": "Arayüz veri sesi",
+   "category": "ui",
+   "use": "İkinci tarama / router 2",
+   "moment": 18.15,
+   "clips": [
+    "sfx_024_data.wav"
+   ]
+  },
+  {
+   "name": "Adım sesi 1/4 (yükselen dizi)",
+   "category": "ui",
+   "use": "HTTP/3 katmanı",
+   "moment": 39.96,
+   "clips": [
+    "sfx_036_ui.wav"
+   ]
+  },
+  {
+   "name": "Adım sesi 2/4",
+   "category": "ui",
+   "use": "UDP katmanı",
+   "moment": 41.22,
+   "clips": [
+    "sfx_037_ui.wav"
+   ]
+  },
+  {
+   "name": "Adım sesi 3/4",
+   "category": "ui",
+   "use": "QUIC katmanı",
+   "moment": 42.12,
+   "clips": [
+    "sfx_038_ui.wav"
+   ]
+  },
+  {
+   "name": "Adım sesi 4/4",
+   "category": "ui",
+   "use": "TLS 1.3 katmanı",
+   "moment": 43.56,
+   "clips": [
+    "sfx_039_ui.wav"
+   ]
+  },
+  {
+   "name": "Veri aktarımı",
+   "category": "ui",
+   "use": "Database'den veri akarken",
+   "moment": 64.73,
+   "clips": [
+    "sfx_054_ui.wav"
+   ]
+  },
+  {
+   "name": "Parazit (kayıt yok)",
+   "category": "glitch",
+   "use": "Tarayıcı önbelleğinde kayıt yok",
+   "moment": 17.5,
+   "clips": [
+    "sfx_023_glitch.wav"
+   ]
+  },
+  {
+   "name": "Statik glitch (hata)",
+   "category": "glitch",
+   "use": "İşletim sistemi önbelleğinde kayıt yok",
+   "moment": 18.95,
+   "clips": [
+    "sfx_025_glitch.wav"
+   ]
+  },
+  {
+   "name": "Yumuşak pop",
+   "category": "pop",
+   "use": "Önbellek kasası belirirken",
+   "moment": 16.05,
+   "clips": [
+    "sfx_021_pop.wav"
+   ]
+  },
+  {
+   "name": "Damla pop",
+   "category": "pop",
+   "use": "Render ağacı düğümü 1",
+   "moment": 74.0,
+   "clips": [
+    "sfx_060_pop.wav"
+   ]
+  },
+  {
+   "name": "Orta pop",
+   "category": "pop",
+   "use": "Render ağacı düğümü 2",
+   "moment": 74.28,
+   "clips": [
+    "sfx_061_pop.wav"
+   ]
+  },
+  {
+   "name": "Tok pop",
+   "category": "pop",
+   "use": "Render ağacı düğümü 3",
+   "moment": 74.56,
+   "clips": [
+    "sfx_062_pop.wav"
+   ]
+  }
+ ]
+}

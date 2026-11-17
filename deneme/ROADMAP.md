@@ -1,0 +1,123 @@
+# Klip Studio roadmap
+
+**Stage: beta (v0.5)** · next target: v1.0 (remaining AI work, quality and stability)
+
+> **Last updated:** 2026-10-23 · **Reference app:** CapCut desktop 9.6 (for inspiration and comparison) · Percentages are estimates, not measurements.
+
+## Where things stand
+
+| | Value | Notes |
+| --- | --- | --- |
+| Core editing flow | ✅ | import → cut/split → keyframes → transitions → text → export |
+| Local AI | 16 features | captions, translation, text to speech, smart cut, background removal, foreground selection, object removal (image + video, LaMa), object isolation in video, frame interpolation (RIFE), noise reduction, scenes, reframing, auto color, beats |
+| Automated tests | ✅ | 42 unit + 43 end-to-end tests on every push in CI; 8 model tests run locally (`--grep @models`) |
+| Project saving | ✅ | IndexedDB autosave + `.klip` files |
+| Performance (Apple M5, `npm run perf`) | ✅ | 60 fps preview (budget ≥ 30) · 1 min 1080p export in 9.4 s (budget < 60 s) |
+| Coverage of CapCut's core features | ~88% | weighted estimate from the table below |
+
+### Coverage by area (vs. CapCut, estimated)
+
+| Area | Coverage | Missing |
+| --- | ---: | --- |
+| Timeline | ~93% | nested sequences |
+| Picture editing | ~95% | stabilization |
+| Text and captions | ~88% | curved text, per-letter animations |
+| Transitions and effects | ~80% | animated stickers, effects on a separate track (custom GLSL effects cover the rest) |
+| Audio | ~93% | Turkish text to speech |
+| AI | ~75% | highlight detection, real-time general object segmentation, Turkish text to speech |
+| Projects and distribution | ~70% | template sharing, cloud sync (intentionally absent: local-first) |
+
+## Plan
+
+Effort: **S** ≈ 2–6 hours · **M** ≈ 1–3 days · **L** ≈ 1–2 weeks (one developer + an AI agent).
+
+### Phase 1: Solid foundation → v0.2 ✅
+
+- [x] **Save/load projects** (M): IndexedDB autosave (project + media), export/import as `.klip` files
+- [x] **Unit tests** (S): Vitest for timeline, keyframes, speed, fades and LUTs
+- [x] **End-to-end tests** (M): Playwright for import, transitions, split, saving, export and more; in CI
+- [x] **Multiple text and overlay lanes** (M): overlapping clips are laid out in lanes automatically
+- [x] **Error boundaries and browser checks** (S): recovery screen on crash, warning for missing WebGL2/WebCodecs
+- [x] **Live demo** (S): automatic deploy to GitHub Pages
+
+### Phase 2: Editing depth → v0.3 ✅
+
+- [x] **Speed** (M): 0.25×–4× with pitch preserved (browser in preview, WSOLA on export); freeze frame, reverse
+- [x] **Speed curves** (M): Montage, Hero, Bullet time, Ease in/out; pitch preserved
+- [x] **Keyframe animation** (L): position, size, rotation, opacity, volume
+- [x] **Blurred canvas background** (S)
+- [x] **Masks and chroma key** (M): rectangle, ellipse and linear masks; green screen
+- [x] **Audio tools** (M): fade in/out, music ducking under speech, waveforms on video clips
+- [x] **Text templates and fonts** (M): 12 templates, 10 Google Fonts families
+- [x] **LUT (.cube) import** (S)
+- [x] **Effects library** (M): 13 animated video effects and 9 extra transitions, built on the custom effect engine
+- [x] **Crop and blend modes** (M): per-clip crop; normal, multiply, screen, add, lighten, darken for overlays
+- [x] **Text styling** (S): outline color and width, drop shadow, box color, letter spacing
+- [x] **Voice changer and sound effects** (M): chipmunk, deep, robot, echo, telephone; whoosh, pop, ding, click, riser, boom, shutter (synthesized)
+- [x] **Custom transitions, filters and fonts** (M): GLSL effects (gl-transitions compatible) with inline compile errors, fonts from files or Google Fonts; all saved in the project
+
+### Phase 3: AI depth → v0.4
+
+- [x] **Object removal in video** (L): frame-by-frame tracking with SlimSAM + multi-scale fill (experimental)
+- [x] **Better fill** (M): "High" fill quality with LaMa (big-lama ONNX), for images and video
+- [x] **General object segmentation** (M): one-click foreground selection in images with BiRefNet (capable GPU) / MODNet
+- [x] **General object isolation in video** (M): any object via SlimSAM tracking; the background is painted a key color and chroma-keyed (experimental)
+- [x] **Caption translation** (M): opus-mt, NLLB for other languages; bilingual captions
+- [x] **Text to speech** (M): 11 languages with MMS-TTS
+- [ ] **Turkish text to speech** (M): possible if `facebook/mms-tts-tur` is converted to ONNX and hosted (Piper voices need GPL espeak-ng)
+- [x] **Heavy AI work in workers** (M): export-time person segmentation runs in its own worker (falls back to the main thread)
+- [x] **Smooth slow motion** (M): frame blending (on export)
+- [x] **AI frame interpolation** (L): optical-flow slow motion with RIFE 4.22 lite (on export)
+
+### Phase 4: Built for agents → v0.5 ✅
+
+- [x] **Command layer** (L): every edit is a typed JSON command (`src/core/commands.ts`), and every command is undoable
+- [x] **Control channel** (M): `window.klip` API for commands, state, screenshots and import from URL
+- [x] **MCP server** (M): `npm run mcp`; tools for state, commands, screenshots and file import
+- [x] **Natural-language editing** (M): Assistant tab, Claude Opus 5.5 + command tools (user's own API key)
+- [x] **Effects by description** (M): over MCP the AI writes, compiles, fixes and applies custom GLSL transitions and filters (`create_effect`, `set_filter`, `add_font`)
+- [x] **Use from any AI app** (M): `npx -y klip-studio-mcp` for Claude Desktop/Code, Cursor, Codex, VS Code, Gemini CLI; shared HTTP mode, MP4 export tool, origin checks, in-app setup snippets
+
+### Phase 4.5: Real sound and 3D studio ✅
+
+- [x] **Real sound effect library** (M): 115 CC0 recordings from Freesound in `public/sfx` (whooshes softened above 5.5 kHz), browsable by category with preview; replaces the synthesized sounds (`scripts/build-sfx-library.mjs`)
+- [x] **Sounds tab and sound packs** (S): its own tab under Filter; a pack holds one video's finished sounds with clear names and where they were used (`scripts/build-sfx-pack.mjs`, first pack: the internet reel, 55 sounds)
+- [x] **Automatic sound effects** (S): `auto_sfx` places rotating soft whooshes on main-track cuts and quiet ticks on texts, ducked under speech
+- [x] **Social media loudness** (S): export normalizes the mix to -14 LUFS (BS.1770 gated loudness + look-ahead limiter)
+- [x] **Transparent video overlays** (S): VP9/AV1 alpha video keeps its transparency in export
+- [x] **3D studio** (L): `studio3d/` (Remotion + React Three Fiber) renders clean 3D scenes and every label as its own transparent video, then builds a `.klip` project from them
+- [x] **Tech explainer look** (S): Cinematic glow filter, Tech label / Chapter tag / Glow title / End card templates, JetBrains Mono
+
+### Phase 4.6: CapCut essentials ✅
+
+- [x] **More color controls** (S): exposure, highlights, shadows, hue, fade and film grain next to the existing adjustments
+- [x] **Text animations** (S): bounce, zoom, blur, drop and two word-by-word animations (rise, word pop), in and out
+- [x] **Caption styles** (S): word box (the spoken word on a colored box) and one word at a time; both follow Whisper timings or split the text evenly
+- [x] **Stickers** (S): emoji sticker panel (reactions, pointers, signs, tech) and any emoji, placed as a popping overlay
+- [x] **Motion presets** (S): Ken Burns slow zoom in/out and pans, built on keyframes
+- [x] **Layouts** (S): split screen halves (cropped to fill) and corner windows for overlays
+- [x] **Audio tools** (S): extract audio from a video, normalize a clip's loudness
+- [x] **Music library** (S): 17 CC0 music beds (lofi, upbeat, corporate, cinematic, electronic, acoustic, hip-hop), loudness-matched; added as a bed that fades, ducks under speech and ends with the video
+- [x] **Clip tools** (S): duplicate (⌘D), copy/paste (⌘C/⌘V), cut at markers (beats)
+- [x] **Dragging between tracks** (S): a picture clip dragged from the overlay track onto the main track (or back) changes track
+- [x] **More voice effects** (S): monster, megaphone, radio and cave (synthetic room reverb)
+- [x] **Group selection** (S): shift/⌘-click selects several clips; they delete together and move together when one is dragged
+- [x] **Save frame** (S): the frame under the playhead as a full-size PNG, e.g. a cover
+- [x] **Overlay and soft light blend modes** (S): the picture underneath is copied to a texture and blended in the layer shader
+
+### Phase 5: Distribution and community → v1.0
+
+- [x] **PWA** (S): installable app that opens offline
+- [x] **English UI and docs** (M): English by default, Turkish selectable; English README with a Turkish translation
+- [x] **Translated error and task messages** (S): task, progress and error messages follow the UI language
+- [x] **Performance budgets** (M): `npm run perf`; preview ≥ 30 fps, 1 min 1080p export < 60 s
+- [x] **Desktop packaging** (M): installable as a PWA; a double-click macOS launcher exists locally
+- [x] **Minimal pro theme** (S): neutral dark palette with a single accent color
+
+## Known issues
+
+- Object removal in video is experimental: tracking can drift on fast-moving objects, and fills on large objects look blurry.
+- Real-time background removal in video only works on people; for other objects use "Isolate object in video" (preprocessed).
+- BiRefNet doesn't run on weaker GPUs; MODNet takes over (works best on people).
+- There is no Turkish text-to-speech model.
+- NLLB-200 and MMS-TTS are licensed for non-commercial use.

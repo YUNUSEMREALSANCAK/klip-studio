@@ -1,0 +1,480 @@
+import { tr } from '../i18n';
+import { useRef } from 'react';
+import { useEditor } from '../core/store';
+import { SPEED_CURVES } from '../core/speed';
+import { formatTime } from '../core/timeline';
+import {
+  DEFAULT_CHROMA,
+  DEFAULT_FILTER,
+  DEFAULT_MASK,
+  DEFAULT_TRANSFORM,
+  type BlendMode,
+  type FilterSettings,
+  type MaskSettings,
+  type MediaClip,
+} from '../core/types';
+import { VOICE_PRESETS } from '../media/voice';
+import { BLEND_MODES, COLOR_ADJUSTMENTS, CROP_SIDES, cropFromSides, cropSides, percent, seconds } from './clipOptions';
+import { KeySlider, Section, Slider, Toggle } from './controls';
+import {
+  applyLayout,
+  applyMotion,
+  extractAudio,
+  freezeFrame,
+  importLut,
+  normalizeVolumeWithTask,
+  reverse,
+  setSpeed,
+  setSpeedCurve,
+  voiceEffect,
+} from './editActions';
+import { LAYOUT_PRESETS, MOTION_PRESETS } from '../core/presets';
+import { Icon } from './icons';
+import { targetCut } from './transitions';
+import { EffectSettings, MotionSettings, TransitionSettings } from './settings';
+import { useUi } from './uiStore';
+
+const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 3];
+
+export function MediaInspector({ clip }: { clip: MediaClip }) {
+  const asset = useEditor((s) => s.assets[clip.assetId]);
+  const luts = useEditor((s) => s.project.luts);
+  useEditor((s) => s.project.clips); // recompute when cuts change
+  const lutInput = useRef<HTMLInputElement>(null);
+  const cut = clip.track === 'main' ? targetCut() : null;
+  const update = (patch: Partial<MediaClip>, record = false) => useEditor.getState().updateClip(clip.id, patch, record);
+  const checkpoint = () => useEditor.getState().checkpoint();
+  const setFilter = (patch: Partial<FilterSettings>) => update({ filter: { ...clip.filter, ...patch } });
+  const setMask = (patch: Partial<MaskSettings>) => update({ mask: { ...(clip.mask ?? DEFAULT_MASK), ...patch } });
+  const visual = asset.kind !== 'audio';
+  const isVideo = asset.kind === 'video';
+
+  return (
+    <>
+      <h3>{asset.name}</h3>
+      <div className="sub">
+        {clip.track === 'main' ? tr('Main track') : clip.track === 'overlay' ? tr('Overlay') : tr('Audio track')} · {formatTime(clip.duration)}
+        {clip.speed !== 1 && ` · ${Number(clip.speed.toFixed(2))}×`}
+      </div>
+
+      {asset.kind !== 'image' && (
+        <Section title={tr('Speed')}>
+          <div className="chips" style={{ marginBottom: 10 }}>
+            {SPEEDS.map((v) => (
+              <button key={v} className={`chip ${clip.speed === v ? 'active' : ''}`} onClick={() => setSpeed(clip, v)}>
+                {v}×
+              </button>
+            ))}
+          </div>
+          <div className="field-label" style={{ marginBottom: 6 }}>
+            {tr('Speed curve')}
+          </div>
+          <div className="chips" style={{ marginBottom: 10 }}>
+            <button className={`chip ${!clip.speedCurve ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, null)}>
+              {tr('None')}
+            </button>
+            {SPEED_CURVES.map((curve) => (
+              <button key={curve.name} className={`chip ${clip.speedCurve?.name === curve.name ? 'active' : ''}`} onClick={() => setSpeedCurve(clip, curve)}>
+                {tr(curve.name)}
+              </button>
+            ))}
+          </div>
+          {clip.speed < 1 && isVideo && (
+            <>
+              <div className="field-label" style={{ marginBottom: 6 }}>
+                {tr('Smooth slow motion (on export)')}
+              </div>
+              <div className="chips" style={{ marginBottom: 10 }}>
+                {(
+                  [
+                    [undefined, 'Off'],
+                    ['blend', 'Frame blending'],
+                    ['ai', 'AI (RIFE)'],
+                  ] as const
+                ).map(([mode, label]) => (
+                  <button key={label} className={`chip ${clip.slowMotion === mode ? 'active' : ''}`} onClick={() => update({ slowMotion: mode }, true)}>
+                    {tr(label)}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          <Slider
+            label={tr('Custom speed')}
+            value={clip.speed}
+            min={0.25}
+            max={4}
+            step={0.05}
+            format={(v) => `${v.toFixed(2)}×`}
+            onCommit={() => {}}
+            onChange={(v) => setSpeed(clip, v)}
+          />
+          {isVideo && (
+            <div className="row">
+              <button
+                className="btn small"
+                disabled={clip.track !== 'main'}
+                title={clip.track !== 'main' ? tr('Works on main-track clips') : ''}
+                onClick={() => void freezeFrame(clip)}
+              >
+                {tr('Freeze frame')}
+              </button>
+              <button className="btn small" onClick={() => void reverse(clip)}>
+                {tr('Reverse')}
+              </button>
+            </div>
+          )}
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Position & size')}>
+          <KeySlider clip={clip} prop="scale" label={tr('Size')} min={0.05} max={2} format={percent} />
+          <KeySlider clip={clip} prop="x" label={tr('Horizontal position')} min={0} max={1} format={percent} />
+          <KeySlider clip={clip} prop="y" label={tr('Vertical position')} min={0} max={1} format={percent} />
+          <KeySlider clip={clip} prop="rotation" label={tr('Rotation')} min={-180} max={180} format={(v) => `${Math.round(v)}°`} />
+          <KeySlider clip={clip} prop="opacity" label={tr('Opacity')} min={0} max={1} format={percent} />
+          <div className="row">
+            <button className="btn small" onClick={() => update({ transform: { ...clip.transform, x: 0.5, y: 0.5 } }, true)}>
+              {tr('Center')}
+            </button>
+            {clip.track === 'main' && (
+              <button className="btn small" onClick={() => update({ transform: { ...DEFAULT_TRANSFORM } }, true)}>
+                {tr('Fit to canvas')}
+              </button>
+            )}
+          </div>
+          {clip.track === 'overlay' && (
+            <div className="field" style={{ marginTop: 10 }}>
+              <label htmlFor="blend-mode">{tr('Blend')}</label>
+              <select id="blend-mode" value={clip.blend ?? 'normal'} onChange={(e) => update({ blend: e.target.value as BlendMode }, true)}>
+                {BLEND_MODES.map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {tr(label)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="hint" style={{ marginTop: 8 }}>
+            {tr('Add a keyframe at the playhead with ◆; values ease smoothly between keyframes.')}
+          </div>
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Inner zoom')}>
+          <KeySlider clip={clip} prop="zoom" label={tr('Inner zoom')} min={1} max={5} format={(v) => `${v.toFixed(2)}×`} />
+          <KeySlider clip={clip} prop="panX" label={tr('Zoom horizontal')} min={0} max={1} format={percent} />
+          <KeySlider clip={clip} prop="panY" label={tr('Zoom vertical')} min={0} max={1} format={percent} />
+          <div className="row">
+            <button className="btn small" onClick={() => update({ transform: { ...clip.transform, zoom: 1, panX: 0.5, panY: 0.5 } }, true)}>
+              {tr('Reset zoom')}
+            </button>
+          </div>
+          <div className="hint" style={{ marginTop: 8 }}>
+            {tr('Zooms into the picture while the frame keeps its size. Add ◆ keyframes for a smooth zoom.')}
+          </div>
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Motion')} open={false}>
+          <div className="chips">
+            {MOTION_PRESETS.map(([id, label]) => (
+              <button key={id} className="chip" onClick={() => applyMotion(clip, id)}>
+                {tr(label)}
+              </button>
+            ))}
+          </div>
+          <div className="hint" style={{ marginTop: 8 }}>
+            {tr('Moves the picture slowly across the whole clip (Ken Burns); uses position and size keyframes.')}
+          </div>
+        </Section>
+      )}
+
+      {clip.track === 'overlay' && (
+        <Section title={tr('Layout')} open={false}>
+          <div className="chips">
+            {LAYOUT_PRESETS.map(([id, label]) => (
+              <button key={id} className="chip" onClick={() => applyLayout(clip, id)}>
+                {tr(label)}
+              </button>
+            ))}
+          </div>
+          <div className="hint" style={{ marginTop: 8 }}>
+            {tr('Halves crop the picture to fill them (split screen); corners show it as a small window.')}
+          </div>
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Crop')} open={!!clip.crop}>
+          {CROP_SIDES.map(([side, label]) => (
+            <Slider
+              key={side}
+              label={tr(label)}
+              value={cropSides(clip.crop)[side]}
+              min={0}
+              max={0.45}
+              format={percent}
+              onCommit={checkpoint}
+              onChange={(value) => update({ crop: cropFromSides({ ...cropSides(clip.crop), [side]: value }) })}
+            />
+          ))}
+          <button className="btn small" onClick={() => update({ crop: undefined }, true)}>
+            {tr('Reset')}
+          </button>
+        </Section>
+      )}
+
+      {asset.hasAudio && (
+        <Section title={tr('Audio')}>
+          <KeySlider clip={clip} prop="volume" label={tr('Volume')} min={0} max={2} format={percent} />
+          <Toggle label={tr('Mute')} on={clip.muted} onChange={(muted) => update({ muted }, true)} />
+          <div className="row" style={{ marginBottom: 10 }}>
+            {isVideo && clip.track !== 'audio' && !clip.muted && (
+              <button className="btn small" title={tr('Moves the sound to its own clip on the audio track')} onClick={() => extractAudio(clip)}>
+                {tr('Extract audio')}
+              </button>
+            )}
+            <button
+              className="btn small"
+              title={tr('Sets the volume so speech sits well in the mix (-16 LUFS)')}
+              onClick={() => void normalizeVolumeWithTask(clip)}
+            >
+              {tr('Normalize loudness')}
+            </button>
+          </div>
+          <Slider
+            label={tr('Fade in')}
+            value={clip.fadeIn}
+            min={0}
+            max={Math.min(5, clip.duration / 2)}
+            step={0.1}
+            format={seconds}
+            onCommit={checkpoint}
+            onChange={(fadeIn) => update({ fadeIn })}
+          />
+          <Slider
+            label={tr('Fade out')}
+            value={clip.fadeOut}
+            min={0}
+            max={Math.min(5, clip.duration / 2)}
+            step={0.1}
+            format={seconds}
+            onCommit={checkpoint}
+            onChange={(fadeOut) => update({ fadeOut })}
+          />
+          <Toggle label={tr('Duck music under speech')} on={clip.duck} onChange={(duck) => update({ duck }, true)} />
+          <div className="field-label" style={{ marginTop: 10 }}>
+            {tr('Voice effect')}
+          </div>
+          <div className="chips" style={{ marginTop: 4 }}>
+            {VOICE_PRESETS.map((p) => (
+              <button key={p.id} className="chip" onClick={() => void voiceEffect(clip, p.id)}>
+                {tr(p.label)}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {cut && (
+        <Section title={`${tr('Transition')} · ${tr('Cut')} ${cut.index}`}>
+          <TransitionSettings cut={cut} allowNone />
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Animation')} open={!!clip.animIn || !!clip.animOut}>
+          <MotionSettings clip={clip} />
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Effect')} open={!!clip.filter.effectId}>
+          <EffectSettings clip={clip} allowNone />
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Color')}>
+          {COLOR_ADJUSTMENTS.map(([key, label, min]) => (
+            <Slider
+              key={key}
+              label={tr(label)}
+              value={clip.filter[key] ?? 0}
+              min={min}
+              max={1}
+              onCommit={checkpoint}
+              onChange={(value) => setFilter({ [key]: value })}
+            />
+          ))}
+          <Toggle label={tr('Black & white')} on={clip.filter.grayscale} onChange={(grayscale) => update({ filter: { ...clip.filter, grayscale } }, true)} />
+          <div className="field">
+            <label>{tr('LUT (color table)')}</label>
+            <div className="row">
+              <select value={clip.filter.lutId ?? ''} onChange={(e) => update({ filter: { ...clip.filter, lutId: e.target.value || undefined } }, true)}>
+                <option value="">{tr('None')}</option>
+                {Object.values(luts).map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+              <button className="btn small" style={{ flex: 'none' }} onClick={() => lutInput.current?.click()}>
+                {tr('Load .cube')}
+              </button>
+            </div>
+            <input ref={lutInput} type="file" accept=".cube" hidden onChange={(e) => e.target.files?.[0] && void importLut(e.target.files[0], clip)} />
+          </div>
+          {clip.filter.lutId && (
+            <Slider
+              label={tr('LUT intensity')}
+              value={clip.filter.lutIntensity}
+              min={0}
+              max={1}
+              onCommit={checkpoint}
+              format={percent}
+              onChange={(lutIntensity) => setFilter({ lutIntensity })}
+            />
+          )}
+          <button className="btn small" onClick={() => update({ filter: { ...DEFAULT_FILTER } }, true)}>
+            {tr('Reset')}
+          </button>
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Mask')} open={!!clip.mask}>
+          <div className="chips" style={{ marginBottom: 10 }}>
+            {(
+              [
+                ['', 'None'],
+                ['rect', 'Rectangle'],
+                ['ellipse', 'Ellipse'],
+                ['linear', 'Linear'],
+              ] as const
+            ).map(([shape, label]) => (
+              <button
+                key={shape}
+                className={`chip ${(clip.mask?.shape ?? '') === shape ? 'active' : ''}`}
+                onClick={() => update({ mask: shape ? { ...(clip.mask ?? DEFAULT_MASK), shape } : undefined }, true)}
+              >
+                {tr(label)}
+              </button>
+            ))}
+          </div>
+          {clip.mask && (
+            <>
+              <Slider
+                label={tr('Horizontal center')}
+                value={clip.mask.x}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(x) => setMask({ x })}
+              />
+              <Slider
+                label={tr('Vertical center')}
+                value={clip.mask.y}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(y) => setMask({ y })}
+              />
+              {clip.mask.shape !== 'linear' && (
+                <>
+                  <Slider
+                    label={tr('Width')}
+                    value={clip.mask.width}
+                    min={0.05}
+                    max={1.5}
+                    format={percent}
+                    onCommit={checkpoint}
+                    onChange={(width) => setMask({ width })}
+                  />
+                  <Slider
+                    label={tr('Height')}
+                    value={clip.mask.height}
+                    min={0.05}
+                    max={1.5}
+                    format={percent}
+                    onCommit={checkpoint}
+                    onChange={(height) => setMask({ height })}
+                  />
+                </>
+              )}
+              <Slider
+                label={tr('Feather')}
+                value={clip.mask.feather}
+                min={0}
+                max={0.5}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(feather) => setMask({ feather })}
+              />
+              <Toggle label={tr('Reverse')} on={clip.mask.invert} onChange={(invert) => setMask({ invert })} />
+            </>
+          )}
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('Green screen (chroma key)')} open={!!clip.chroma}>
+          <Toggle label={tr('Enable color key')} on={!!clip.chroma} onChange={(on) => update({ chroma: on ? { ...DEFAULT_CHROMA } : undefined }, true)} />
+          {clip.chroma && (
+            <>
+              <div className="toggle">
+                <span>{tr('Key color')}</span>
+                <input
+                  type="color"
+                  value={clip.chroma.color}
+                  onFocus={checkpoint}
+                  onChange={(e) => update({ chroma: { ...clip.chroma!, color: e.target.value } })}
+                />
+              </div>
+              <Slider
+                label={tr('Similarity')}
+                value={clip.chroma.similarity}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(similarity) => update({ chroma: { ...clip.chroma!, similarity } })}
+              />
+              <Slider
+                label={tr('Edge softness')}
+                value={clip.chroma.smoothness}
+                min={0}
+                max={1}
+                format={percent}
+                onCommit={checkpoint}
+                onChange={(smoothness) => update({ chroma: { ...clip.chroma!, smoothness } })}
+              />
+            </>
+          )}
+        </Section>
+      )}
+
+      {visual && (
+        <Section title={tr('AI')}>
+          <Toggle label={tr('Remove background')} on={clip.removeBackground} onChange={(removeBackground) => update({ removeBackground }, true)} />
+          {clip.reframe && <Toggle label={tr('Smart reframe')} on onChange={() => update({ reframe: undefined }, true)} />}
+          <button className="btn block" onClick={() => useUi.getState().openObjectEditor(clip.id)}>
+            <Icon name="wand" size={16} /> {tr('Select & remove object')}
+          </button>
+        </Section>
+      )}
+
+      <div style={{ marginTop: 16 }}>
+        <button className="btn block" onClick={() => useEditor.getState().removeClip(clip.id)}>
+          <Icon name="trash" size={16} /> {tr('Delete clip')}
+        </button>
+      </div>
+    </>
+  );
+}

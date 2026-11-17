@@ -1,0 +1,30 @@
+[
+ {
+  "at": 41.0,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -4
+  }
+ },
+ {
+  "at": 50.95,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -14
+  }
+ },
+ {
+  "at": 26.68,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -13
+  }
+ },
+ {
+  "at": 16.4,
+  "label": "click x0.85",
+  "set": {
+   "gain_db": 1.6
+  }
+ }
+]

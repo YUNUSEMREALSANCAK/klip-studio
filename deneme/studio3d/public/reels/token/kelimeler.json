@@ -1,0 +1,782 @@
+[
+ {
+  "text": "Sadece",
+  "startMs": 60,
+  "endMs": 360
+ },
+ {
+  "text": "iyi",
+  "startMs": 360,
+  "endMs": 540
+ },
+ {
+  "text": "bir",
+  "startMs": 540,
+  "endMs": 720
+ },
+ {
+  "text": "yazılımcı",
+  "startMs": 720,
+  "endMs": 1260
+ },
+ {
+  "text": "olmak",
+  "startMs": 1260,
+  "endMs": 1590
+ },
+ {
+  "text": "artık",
+  "startMs": 1590,
+  "endMs": 1860
+ },
+ {
+  "text": "yazılım",
+  "startMs": 1860,
+  "endMs": 2280
+ },
+ {
+  "text": "sektöründe",
+  "startMs": 2280,
+  "endMs": 2880
+ },
+ {
+  "text": "para",
+  "startMs": 2880,
+  "endMs": 3120
+ },
+ {
+  "text": "kazanmak",
+  "startMs": 3120,
+  "endMs": 3600
+ },
+ {
+  "text": "için",
+  "startMs": 3600,
+  "endMs": 3840
+ },
+ {
+  "text": "yeterli",
+  "startMs": 3840,
+  "endMs": 4260
+ },
+ {
+  "text": "olmayabilir.",
+  "startMs": 4260,
+  "endMs": 5120
+ },
+ {
+  "text": "Yapay",
+  "startMs": 5440,
+  "endMs": 5500
+ },
+ {
+  "text": "zekâdan",
+  "startMs": 5500,
+  "endMs": 5960
+ },
+ {
+  "text": "sonra",
+  "startMs": 5960,
+  "endMs": 6310
+ },
+ {
+  "text": "kod",
+  "startMs": 6310,
+  "endMs": 6520
+ },
+ {
+  "text": "yazma",
+  "startMs": 6520,
+  "endMs": 6870
+ },
+ {
+  "text": "şeklimiz",
+  "startMs": 6870,
+  "endMs": 7500
+ },
+ {
+  "text": "tamamen",
+  "startMs": 7500,
+  "endMs": 7920
+ },
+ {
+  "text": "değişti.",
+  "startMs": 7920,
+  "endMs": 8660
+ },
+ {
+  "text": "Ben",
+  "startMs": 8880,
+  "endMs": 8940
+ },
+ {
+  "text": "en",
+  "startMs": 8940,
+  "endMs": 8960
+ },
+ {
+  "text": "son",
+  "startMs": 8960,
+  "endMs": 9140
+ },
+ {
+  "text": "ne",
+  "startMs": 9140,
+  "endMs": 9260
+ },
+ {
+  "text": "zaman",
+  "startMs": 9260,
+  "endMs": 9560
+ },
+ {
+  "text": "oturup",
+  "startMs": 9560,
+  "endMs": 9920
+ },
+ {
+  "text": "sıfırdan",
+  "startMs": 9920,
+  "endMs": 10400
+ },
+ {
+  "text": "bir",
+  "startMs": 10400,
+  "endMs": 10580
+ },
+ {
+  "text": "for",
+  "startMs": 10580,
+  "endMs": 10760
+ },
+ {
+  "text": "döngüsü",
+  "startMs": 10760,
+  "endMs": 11270
+ },
+ {
+  "text": "yazdım",
+  "startMs": 11270,
+  "endMs": 11540
+ },
+ {
+  "text": "hatırlamıyorum",
+  "startMs": 11540,
+  "endMs": 12430
+ },
+ {
+  "text": "bile.",
+  "startMs": 12430,
+  "endMs": 12820
+ },
+ {
+  "text": "Artık",
+  "startMs": 13040,
+  "endMs": 13120
+ },
+ {
+  "text": "kod",
+  "startMs": 13120,
+  "endMs": 13300
+ },
+ {
+  "text": "yazmak",
+  "startMs": 13300,
+  "endMs": 13710
+ },
+ {
+  "text": "değil,",
+  "startMs": 13710,
+  "endMs": 14080
+ },
+ {
+  "text": "ne",
+  "startMs": 14080,
+  "endMs": 14200
+ },
+ {
+  "text": "yazacağını",
+  "startMs": 14200,
+  "endMs": 14790
+ },
+ {
+  "text": "bilmek",
+  "startMs": 14790,
+  "endMs": 15160
+ },
+ {
+  "text": "daha",
+  "startMs": 15160,
+  "endMs": 15440
+ },
+ {
+  "text": "değerli",
+  "startMs": 15440,
+  "endMs": 15820
+ },
+ {
+  "text": "hale",
+  "startMs": 15820,
+  "endMs": 16060
+ },
+ {
+  "text": "geliyor.",
+  "startMs": 16060,
+  "endMs": 16680
+ },
+ {
+  "text": "Bence",
+  "startMs": 16940,
+  "endMs": 17010
+ },
+ {
+  "text": "artık",
+  "startMs": 17010,
+  "endMs": 17290
+ },
+ {
+  "text": "asıl",
+  "startMs": 17290,
+  "endMs": 17530
+ },
+ {
+  "text": "değerli",
+  "startMs": 17530,
+  "endMs": 17960
+ },
+ {
+  "text": "olan",
+  "startMs": 17960,
+  "endMs": 18200
+ },
+ {
+  "text": "yapay",
+  "startMs": 18200,
+  "endMs": 18560
+ },
+ {
+  "text": "zekânın",
+  "startMs": 18560,
+  "endMs": 18980
+ },
+ {
+  "text": "ürettiği",
+  "startMs": 18980,
+  "endMs": 19400
+ },
+ {
+  "text": "tokenleri",
+  "startMs": 19400,
+  "endMs": 19950
+ },
+ {
+  "text": "paraya",
+  "startMs": 19950,
+  "endMs": 20310
+ },
+ {
+  "text": "çevirebilmek.",
+  "startMs": 20310,
+  "endMs": 21340
+ },
+ {
+  "text": "Yazılım",
+  "startMs": 21520,
+  "endMs": 21690
+ },
+ {
+  "text": "dışında",
+  "startMs": 21690,
+  "endMs": 22050
+ },
+ {
+  "text": "bir",
+  "startMs": 22050,
+  "endMs": 22200
+ },
+ {
+  "text": "sektör",
+  "startMs": 22200,
+  "endMs": 22500
+ },
+ {
+  "text": "düşün.",
+  "startMs": 22500,
+  "endMs": 22980
+ },
+ {
+  "text": "Mesela",
+  "startMs": 23220,
+  "endMs": 23430
+ },
+ {
+  "text": "sağlık,",
+  "startMs": 23430,
+  "endMs": 24030
+ },
+ {
+  "text": "hukuk,",
+  "startMs": 24030,
+  "endMs": 24550
+ },
+ {
+  "text": "eğitim",
+  "startMs": 24550,
+  "endMs": 25040
+ },
+ {
+  "text": "veya",
+  "startMs": 25040,
+  "endMs": 25300
+ },
+ {
+  "text": "fitness.",
+  "startMs": 25300,
+  "endMs": 26120
+ },
+ {
+  "text": "Eğer",
+  "startMs": 26190,
+  "endMs": 26380
+ },
+ {
+  "text": "o",
+  "startMs": 26380,
+  "endMs": 26450
+ },
+ {
+  "text": "sektör",
+  "startMs": 26450,
+  "endMs": 26830
+ },
+ {
+  "text": "hakkında",
+  "startMs": 26830,
+  "endMs": 27350
+ },
+ {
+  "text": "gerçekten",
+  "startMs": 27350,
+  "endMs": 27970
+ },
+ {
+  "text": "bilgi",
+  "startMs": 27970,
+  "endMs": 28280
+ },
+ {
+  "text": "sahibisen",
+  "startMs": 28280,
+  "endMs": 28870
+ },
+ {
+  "text": "ve",
+  "startMs": 28870,
+  "endMs": 29000
+ },
+ {
+  "text": "yapay",
+  "startMs": 29000,
+  "endMs": 29330
+ },
+ {
+  "text": "zekayı",
+  "startMs": 29330,
+  "endMs": 29720
+ },
+ {
+  "text": "kullanarak",
+  "startMs": 29720,
+  "endMs": 30380
+ },
+ {
+  "text": "o",
+  "startMs": 30380,
+  "endMs": 30490
+ },
+ {
+  "text": "sektördeki",
+  "startMs": 30490,
+  "endMs": 31090
+ },
+ {
+  "text": "bir",
+  "startMs": 31090,
+  "endMs": 31530
+ },
+ {
+  "text": "problemi",
+  "startMs": 31530,
+  "endMs": 31810
+ },
+ {
+  "text": "çözebiliyorsan,",
+  "startMs": 31810,
+  "endMs": 32920
+ },
+ {
+  "text": "işte",
+  "startMs": 33100,
+  "endMs": 33180
+ },
+ {
+  "text": "o",
+  "startMs": 33180,
+  "endMs": 33250
+ },
+ {
+  "text": "zaman",
+  "startMs": 33250,
+  "endMs": 33560
+ },
+ {
+  "text": "ciddi",
+  "startMs": 33560,
+  "endMs": 33880
+ },
+ {
+  "text": "bir",
+  "startMs": 33880,
+  "endMs": 34070
+ },
+ {
+  "text": "avantajım",
+  "startMs": 34070,
+  "endMs": 34650
+ },
+ {
+  "text": "var.",
+  "startMs": 34650,
+  "endMs": 35080
+ },
+ {
+  "text": "Çünkü",
+  "startMs": 35140,
+  "endMs": 35370
+ },
+ {
+  "text": "artık",
+  "startMs": 35370,
+  "endMs": 35660
+ },
+ {
+  "text": "mesele",
+  "startMs": 35660,
+  "endMs": 36000
+ },
+ {
+  "text": "sadece",
+  "startMs": 36000,
+  "endMs": 36330
+ },
+ {
+  "text": "yazılım",
+  "startMs": 36330,
+  "endMs": 36730
+ },
+ {
+  "text": "geliştirmek",
+  "startMs": 36730,
+  "endMs": 37360
+ },
+ {
+  "text": "değil,",
+  "startMs": 37360,
+  "endMs": 37820
+ },
+ {
+  "text": "insanların",
+  "startMs": 37820,
+  "endMs": 38490
+ },
+ {
+  "text": "para",
+  "startMs": 38490,
+  "endMs": 38690
+ },
+ {
+  "text": "ödemeye",
+  "startMs": 38690,
+  "endMs": 39110
+ },
+ {
+  "text": "hazır",
+  "startMs": 39110,
+  "endMs": 39380
+ },
+ {
+  "text": "olduğu",
+  "startMs": 39380,
+  "endMs": 39740
+ },
+ {
+  "text": "bir",
+  "startMs": 39740,
+  "endMs": 39920
+ },
+ {
+  "text": "problemi",
+  "startMs": 39920,
+  "endMs": 40460
+ },
+ {
+  "text": "çözmek.",
+  "startMs": 40460,
+  "endMs": 40960
+ },
+ {
+  "text": "Bu",
+  "startMs": 40980,
+  "endMs": 41080
+ },
+ {
+  "text": "yüzden",
+  "startMs": 41080,
+  "endMs": 41420
+ },
+ {
+  "text": "bence",
+  "startMs": 41420,
+  "endMs": 41720
+ },
+ {
+  "text": "90",
+  "startMs": 41720,
+  "endMs": 42100
+ },
+ {
+  "text": "günde",
+  "startMs": 42100,
+  "endMs": 42370
+ },
+ {
+  "text": "Python",
+  "startMs": 42370,
+  "endMs": 42710
+ },
+ {
+  "text": "öğrenip",
+  "startMs": 42710,
+  "endMs": 43110
+ },
+ {
+  "text": "sertifika",
+  "startMs": 43110,
+  "endMs": 43620
+ },
+ {
+  "text": "almaya",
+  "startMs": 43620,
+  "endMs": 43980
+ },
+ {
+  "text": "çalışmak",
+  "startMs": 43980,
+  "endMs": 44420
+ },
+ {
+  "text": "yerine",
+  "startMs": 44420,
+  "endMs": 44760
+ },
+ {
+  "text": "kendinize",
+  "startMs": 44760,
+  "endMs": 45270
+ },
+ {
+  "text": "şu",
+  "startMs": 45270,
+  "endMs": 45390
+ },
+ {
+  "text": "soruyu",
+  "startMs": 45390,
+  "endMs": 45730
+ },
+ {
+  "text": "sormalısınız.",
+  "startMs": 45730,
+  "endMs": 46820
+ },
+ {
+  "text": "Ben",
+  "startMs": 47100,
+  "endMs": 47170
+ },
+ {
+  "text": "yazılım",
+  "startMs": 47170,
+  "endMs": 47480
+ },
+ {
+  "text": "dışında",
+  "startMs": 47480,
+  "endMs": 47960
+ },
+ {
+  "text": "hangi",
+  "startMs": 47960,
+  "endMs": 48280
+ },
+ {
+  "text": "sektörde,",
+  "startMs": 48280,
+  "endMs": 48950
+ },
+ {
+  "text": "hangi",
+  "startMs": 48950,
+  "endMs": 49260
+ },
+ {
+  "text": "problemi",
+  "startMs": 49260,
+  "endMs": 49790
+ },
+ {
+  "text": "herkesten",
+  "startMs": 49790,
+  "endMs": 50450
+ },
+ {
+  "text": "daha",
+  "startMs": 50450,
+  "endMs": 50650
+ },
+ {
+  "text": "iyi",
+  "startMs": 50650,
+  "endMs": 50850
+ },
+ {
+  "text": "anlayabilirim.",
+  "startMs": 50850,
+  "endMs": 52040
+ },
+ {
+  "text": "Çünkü",
+  "startMs": 52110,
+  "endMs": 52370
+ },
+ {
+  "text": "gelecekte",
+  "startMs": 52370,
+  "endMs": 52900
+ },
+ {
+  "text": "sadece",
+  "startMs": 52900,
+  "endMs": 53240
+ },
+ {
+  "text": "iyi",
+  "startMs": 53240,
+  "endMs": 53430
+ },
+ {
+  "text": "kod",
+  "startMs": 53430,
+  "endMs": 53650
+ },
+ {
+  "text": "yazanlar",
+  "startMs": 53650,
+  "endMs": 54100
+ },
+ {
+  "text": "değil,",
+  "startMs": 54100,
+  "endMs": 54540
+ },
+ {
+  "text": "yapay",
+  "startMs": 54540,
+  "endMs": 54820
+ },
+ {
+  "text": "zekayı",
+  "startMs": 54820,
+  "endMs": 55150
+ },
+ {
+  "text": "kullanarak",
+  "startMs": 55150,
+  "endMs": 55730
+ },
+ {
+  "text": "gerçek",
+  "startMs": 55730,
+  "endMs": 56080
+ },
+ {
+  "text": "problemleri",
+  "startMs": 56080,
+  "endMs": 56720
+ },
+ {
+  "text": "çözenler",
+  "startMs": 56720,
+  "endMs": 57150
+ },
+ {
+  "text": "kazanacak.",
+  "startMs": 57150,
+  "endMs": 58000
+ },
+ {
+  "text": "Sizce",
+  "startMs": 58300,
+  "endMs": 58370
+ },
+ {
+  "text": "yazılımcılığın",
+  "startMs": 58370,
+  "endMs": 59250
+ },
+ {
+  "text": "geleceği",
+  "startMs": 59250,
+  "endMs": 59780
+ },
+ {
+  "text": "kod",
+  "startMs": 59780,
+  "endMs": 59970
+ },
+ {
+  "text": "yazmak",
+  "startMs": 59970,
+  "endMs": 60370
+ },
+ {
+  "text": "mı,",
+  "startMs": 60370,
+  "endMs": 60700
+ },
+ {
+  "text": "problem",
+  "startMs": 60700,
+  "endMs": 61100
+ },
+ {
+  "text": "çözmek",
+  "startMs": 61100,
+  "endMs": 61490
+ },
+ {
+  "text": "mi?",
+  "startMs": 61490,
+  "endMs": 61940
+ },
+ {
+  "text": "Yorumlara",
+  "startMs": 62160,
+  "endMs": 62430
+ },
+ {
+  "text": "yaz!",
+  "startMs": 62430,
+  "endMs": 62800
+ }
+]

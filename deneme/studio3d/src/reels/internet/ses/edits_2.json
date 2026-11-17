@@ -1,0 +1,114 @@
+[
+ {
+  "at": 5.9,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 7.0,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 7.1,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 15.05,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 20.9,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 23.3,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 35.4,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 46.8,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 49.66,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 53.4,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 60.0,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 63.3,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 69.1,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 71.6,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 72.25,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 78.9,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 79.1,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 83.0,
+  "set": {
+   "highpass": 140
+  }
+ },
+ {
+  "at": 63.4,
+  "drop": true
+ }
+]

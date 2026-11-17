@@ -1,0 +1,131 @@
+[
+ {
+  "at": 0.12,
+  "label": "whoosh x0.45",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 0.56,
+  "label": "thump x0.50",
+  "set": {
+   "pitch": -5,
+   "lowpass": 1800,
+   "gain_db": -2
+  }
+ },
+ {
+  "at": 1.36,
+  "label": "whoosh x0.35",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 4.4,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 5.0,
+  "label": "thump x0.30",
+  "set": {
+   "pitch": -5,
+   "lowpass": 1800,
+   "gain_db": -2
+  }
+ },
+ {
+  "at": 13.65,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 26.45,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 40.8,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 47.62,
+  "label": "whoosh x0.35",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 50.75,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 54.04,
+  "label": "thump x0.50",
+  "set": {
+   "pitch": -5,
+   "lowpass": 1800,
+   "gain_db": -2
+  }
+ },
+ {
+  "at": 57.19,
+  "label": "whoosh x0.30",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 58.97,
+  "label": "hit x0.50",
+  "set": {
+   "highpass": 170,
+   "gain_db": -8,
+   "max_dur": 0.9
+  }
+ },
+ {
+  "at": 65.48,
+  "label": "whoosh x0.30",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 68.55,
+  "label": "wipe x0.50",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 77.1,
+  "label": "whoosh x0.45",
+  "set": {
+   "lowpass": 5500
+  }
+ },
+ {
+  "at": 77.72,
+  "label": "thump x0.45",
+  "set": {
+   "pitch": -5,
+   "lowpass": 1800,
+   "gain_db": -2
+  }
+ }
+]

@@ -1,0 +1,102 @@
+[
+ {
+  "at": 4.4,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -9,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 13.65,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -11,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 26.45,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -5,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 40.8,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -6,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 50.75,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -14,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 68.55,
+  "label": "wipe x0.50",
+  "set": {
+   "gain_db": -5,
+   "max_dur": 0.7
+  }
+ },
+ {
+  "at": 5.0,
+  "label": "thump x0.30",
+  "set": {
+   "gain_db": -10
+  }
+ },
+ {
+  "at": 0.65,
+  "label": "pop x0.45",
+  "set": {
+   "id": 42
+  }
+ },
+ {
+  "at": 8.74,
+  "label": "pop x0.60",
+  "set": {
+   "id": 45
+  }
+ },
+ {
+  "at": 14.95,
+  "label": "pop x0.40",
+  "set": {
+   "id": 28
+  }
+ },
+ {
+  "at": 51.2,
+  "label": "pop x0.45",
+  "set": {
+   "id": 42,
+   "pitch": -2
+  }
+ },
+ {
+  "at": 69.2,
+  "label": "pop x0.50",
+  "set": {
+   "id": 45,
+   "pitch": 2
+  }
+ },
+ {
+  "at": 73.28,
+  "label": "pop x0.40",
+  "set": {
+   "id": 28,
+   "pitch": 2
+  }
+ }
+]

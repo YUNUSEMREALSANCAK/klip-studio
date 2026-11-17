@@ -1,0 +1,374 @@
+[
+ {
+  "t": 0.14,
+  "type": "whoosh",
+  "len": 0.4,
+  "g": 0.45,
+  "notes": "Fiti alttan zıplar"
+ },
+ {
+  "t": 0.42,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "başlık 2. satır + kod rozeti"
+ },
+ {
+  "t": 0.67,
+  "type": "thump",
+  "g": 0.5,
+  "notes": "Fiti yere iner"
+ },
+ {
+  "t": 2.92,
+  "type": "coin",
+  "g": 0.45,
+  "notes": "paralar kavanoza düşer"
+ },
+ {
+  "t": 3.69,
+  "type": "whoosh",
+  "len": 0.35,
+  "g": 0.35,
+  "notes": "limon işaretleyici: yeterli olmayabilir"
+ },
+ {
+  "t": 4.23,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "kavanozda ? rozeti"
+ },
+ {
+  "t": 5.18,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "değişim sahnesi kayar"
+ },
+ {
+  "t": 5.67,
+  "type": "typing",
+  "len": 1.55,
+  "n": 14,
+  "g": 0.45,
+  "notes": "AI kodu kendi yazar"
+ },
+ {
+  "t": 10.24,
+  "type": "paper",
+  "g": 0.5,
+  "notes": "for döngüsü not kâğıdı"
+ },
+ {
+  "t": 12.09,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "notta ? rozeti"
+ },
+ {
+  "t": 12.75,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "yeni değer sahnesi"
+ },
+ {
+  "t": 13.13,
+  "type": "pop",
+  "g": 0.4,
+  "notes": "kefe: kod yazmak"
+ },
+ {
+  "t": 14.39,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "kefe: ampul"
+ },
+ {
+  "t": 14.86,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "terazi fikir tarafına ağır basar"
+ },
+ {
+  "t": 15.39,
+  "type": "chime",
+  "g": 0.45,
+  "notes": "ampul parlar, değerli"
+ },
+ {
+  "t": 16.64,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "token sahnesi (koyu)"
+ },
+ {
+  "t": 18.13,
+  "type": "click",
+  "g": 0.7,
+  "notes": "token huniye düşer"
+ },
+ {
+  "t": 18.76,
+  "type": "click",
+  "g": 0.65,
+  "notes": "token huniye düşer"
+ },
+ {
+  "t": 19.36,
+  "type": "data",
+  "len": 0.9,
+  "g": 0.35,
+  "notes": "makine çalışır"
+ },
+ {
+  "t": 19.95,
+  "type": "coin",
+  "g": 0.5,
+  "notes": "para çıkar"
+ },
+ {
+  "t": 20.66,
+  "type": "coin",
+  "g": 0.4,
+  "notes": "paralar dizilir"
+ },
+ {
+  "t": 21.26,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "sektör sahnesi"
+ },
+ {
+  "t": 23.48,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "kart: sağlık"
+ },
+ {
+  "t": 24.31,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "kart: hukuk"
+ },
+ {
+  "t": 24.81,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "kart: eğitim"
+ },
+ {
+  "t": 25.47,
+  "type": "success",
+  "g": 0.45,
+  "notes": "kart: fitness (vurgulu)"
+ },
+ {
+  "t": 26.0,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "avantaj sahnesi"
+ },
+ {
+  "t": 28.05,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "daire: sektör bilgisi"
+ },
+ {
+  "t": 29.06,
+  "type": "ui",
+  "g": 0.5,
+  "notes": "daire: yapay zekâ"
+ },
+ {
+  "t": 31.76,
+  "type": "whoosh",
+  "len": 0.8,
+  "g": 0.35,
+  "notes": "daireler kesişir"
+ },
+ {
+  "t": 34.0,
+  "type": "success",
+  "g": 0.55,
+  "notes": "AVANTAJ yıldızı"
+ },
+ {
+  "t": 34.88,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "asıl mesele sahnesi"
+ },
+ {
+  "t": 36.11,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "kart: yazılım geliştirmek"
+ },
+ {
+  "t": 37.57,
+  "type": "whoosh",
+  "len": 0.3,
+  "g": 0.3,
+  "notes": "üstü çizilir"
+ },
+ {
+  "t": 38.19,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "PROBLEM kartı + insanlar"
+ },
+ {
+  "t": 38.54,
+  "type": "coin",
+  "g": 0.4,
+  "notes": "insanların elinde para"
+ },
+ {
+  "t": 38.96,
+  "type": "paper",
+  "g": 0.4,
+  "notes": "fiyat etiketi sallanır"
+ },
+ {
+  "t": 40.75,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "sertifika sahnesi"
+ },
+ {
+  "t": 41.56,
+  "type": "data",
+  "len": 0.7,
+  "g": 0.35,
+  "notes": "90 gün sayacı"
+ },
+ {
+  "t": 42.23,
+  "type": "click",
+  "g": 0.45,
+  "notes": "Python yazısı"
+ },
+ {
+  "t": 43.05,
+  "type": "hit",
+  "g": 0.45,
+  "notes": "mühür basılır"
+ },
+ {
+  "t": 44.4,
+  "type": "whoosh",
+  "len": 0.5,
+  "g": 0.35,
+  "notes": "sertifika kenara kayar"
+ },
+ {
+  "t": 45.2,
+  "type": "click",
+  "g": 0.55,
+  "notes": "? tuşu"
+ },
+ {
+  "t": 46.82,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "kendine sor sahnesi (koyu)"
+ },
+ {
+  "t": 47.43,
+  "type": "ui",
+  "g": 0.4,
+  "notes": "sektör ikonları"
+ },
+ {
+  "t": 47.93,
+  "type": "whoosh",
+  "len": 1.4,
+  "g": 0.25,
+  "notes": "büyüteç tarar"
+ },
+ {
+  "t": 49.79,
+  "type": "chime",
+  "g": 0.5,
+  "notes": "büyüteç bulur"
+ },
+ {
+  "t": 51.83,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "gelecek sahnesi"
+ },
+ {
+  "t": 53.2,
+  "type": "ui",
+  "g": 0.4,
+  "notes": "kısa sütun: sadece kod"
+ },
+ {
+  "t": 55.67,
+  "type": "riser",
+  "len": 0.8,
+  "g": 0.35,
+  "notes": "uzun sütun büyür"
+ },
+ {
+  "t": 57.4,
+  "type": "success",
+  "g": 0.55,
+  "notes": "kupa sütuna iner"
+ },
+ {
+  "t": 58.0,
+  "type": "wipe",
+  "g": 0.5,
+  "notes": "anket sahnesi"
+ },
+ {
+  "t": 59.59,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "seçenek: kod yazmak"
+ },
+ {
+  "t": 60.88,
+  "type": "ui",
+  "g": 0.45,
+  "notes": "seçenek: problem çözmek"
+ },
+ {
+  "t": 62.15,
+  "type": "pop",
+  "g": 0.55,
+  "notes": "yorum balonu"
+ },
+ {
+  "t": 63.09,
+  "type": "whoosh",
+  "len": 0.4,
+  "g": 0.45,
+  "notes": "kapanış girer"
+ },
+ {
+  "t": 63.72,
+  "type": "thump",
+  "g": 0.45,
+  "notes": "Fiti iner"
+ },
+ {
+  "t": 63.9,
+  "type": "pop",
+  "g": 0.45,
+  "notes": "logo harfleri"
+ },
+ {
+  "t": 64.4,
+  "type": "pop",
+  "g": 0.5,
+  "notes": "Takip et düğmesi"
+ },
+ {
+  "t": 65.0,
+  "type": "click",
+  "g": 1.0,
+  "notes": "düğmeye basılır"
+ }
+]

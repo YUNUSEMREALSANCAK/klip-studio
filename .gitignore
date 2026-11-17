@@ -3,3 +3,6 @@ dist
 public/mediapipe-wasm
 test-results
 playwright-report
+deneme/projeler
+deneme/public/mediapipe-wasm
+.DS_Store
